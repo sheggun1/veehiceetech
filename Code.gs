@@ -213,6 +213,7 @@ function doPost(e) {
       case "customerLoyalty": result = customerLoyalty_(input); break;
       case "customerSaveAbandonedCart": lock.waitLock(15000); result = customerSaveAbandonedCart_(input); break;
       case "adminSendAbandonedCartReminder": result = adminSendAbandonedCartReminder_(input); break;
+      case "adminListAbandonedCarts": result = adminListAbandonedCarts_(input); break;
       case "adminSendLowStockAlert": result = adminSendLowStockAlert_(input); break;
       default: throw new Error("Unsupported action: " + action);
     }
@@ -841,4 +842,10 @@ function adminCreateBackup_(x) {
   sheet_("Backups").appendRow([Utilities.getUuid(),copy.getId(),copy.getName(),url,new Date(),email]);
   log_(email,"CREATE_BACKUP",copy.getName());
   return {message:"Database backup created.",fileName:copy.getName(),fileUrl:url};
+}
+
+function adminListAbandonedCarts_(x) {
+  requireAdmin_(x.token);
+  const d=sheet_("AbandonedCarts").getDataRange().getValues();
+  return {carts:d.slice(1).filter(r=>r[0]&&r[4]==="Open").reverse().map(r=>({id:r[0],email:r[2],items:r[3],updatedAt:r[5],reminderSentAt:r[6]}))};
 }
