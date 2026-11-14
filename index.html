@@ -685,6 +685,8 @@ async function resetServiceImages(){
  catch(e){$("serviceImageStatus").textContent=e.message}
 }
 
+loadPublicSettings();
+
 /* ───────── MARKETPLACE ───────── */
 const SAMPLE=[["Phone accessories","Cases, cables and screen protection","📱"],["Charging essentials","Chargers and fast-charge cables","🔌"],["Audio","Earphones and speakers","🎧"],["Power banks","Stay powered through the day","🔋"]];
 let productsCache=[], cart=[], customerToken=sessionStorage.getItem("veehiceeCustomerToken")||"";
