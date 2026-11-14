@@ -8,11 +8,27 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#06101c;--panel:#0e1c2e;--ink:#f2f6fb;--muted:#9fb0c4;--line:#223750;--accent:#5df0c8;--accent2:#7aa8ff;--on:#04211b;--r:20px}
+[data-theme=royal]{--bg:#0d0a24;--panel:#1a1442;--ink:#f5f3ff;--muted:#b4acd9;--line:#342b70;--accent:#ffc83d;--accent2:#9b7bff;--on:#231a00}
+[data-theme=forest]{--bg:#07140f;--panel:#0f2419;--ink:#eef8f1;--muted:#9bb8a6;--line:#1f4130;--accent:#b6f25b;--accent2:#35d49a;--on:#14230a}
+[data-theme=ocean]{--bg:#f3f7ff;--panel:#fff;--ink:#0b1b3a;--muted:#55688a;--line:#d5e0f5;--accent:#1457ff;--accent2:#00c2ff;--on:#fff}
+[data-theme=berry]{--bg:#17081a;--panel:#261029;--ink:#fdf1fb;--muted:#c9a5c8;--line:#4a2150;--accent:#ff4fa3;--accent2:#ffa24f;--on:#2a0418}
 [data-theme=sunrise]{--bg:#fff7f2;--panel:#fff;--ink:#231815;--muted:#6e5d57;--line:#efd9ce;--accent:#ff5b37;--accent2:#ffb020;--on:#fff}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "DM Sans",sans-serif}h1,h2,h3,.brand{font-family:"Bricolage Grotesque",sans-serif}a{color:inherit;text-decoration:none}.wrap{width:min(1160px,calc(100% - 36px));margin:auto}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "DM Sans",sans-serif}
+body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.14}
+[data-pattern=dots] body:before{background-image:radial-gradient(var(--accent) 1px,transparent 1px);background-size:22px 22px}
+[data-pattern=grid] body:before{background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:34px 34px}
+[data-pattern=diagonal] body:before{background-image:repeating-linear-gradient(135deg,transparent 0 18px,var(--line) 19px 20px)}
+[data-pattern=glow] body:before{background:radial-gradient(ellipse at 15% 12%,var(--accent) 0,transparent 45%),radial-gradient(ellipse at 90% 70%,var(--accent2) 0,transparent 40%);opacity:.1}h1,h2,h3,.brand{font-family:"Bricolage Grotesque",sans-serif}a{color:inherit;text-decoration:none}.wrap{width:min(1160px,calc(100% - 36px));margin:auto}
 header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}.nav{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{font-size:1.45rem;font-weight:800}.brand i{color:var(--accent);font-style:normal}.navlinks{display:flex;gap:22px;color:var(--muted)}.btn,.ghost{border:0;border-radius:999px;padding:12px 18px;font:700 .95rem "DM Sans";cursor:pointer;display:inline-flex;align-items:center;justify-content:center}.btn{background:var(--accent);color:var(--on)}.ghost{border:1px solid var(--line);background:transparent;color:var(--ink)}button:disabled{opacity:.45;cursor:not-allowed}
 .hero{padding:66px 0 40px}.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem}.hero h1{font-size:clamp(2.8rem,7vw,5.3rem);line-height:.98;letter-spacing:-.05em;margin:14px 0}.hero p{max-width:650px;color:var(--muted);font-size:1.08rem}
 .toolbar{display:flex;gap:12px;flex-wrap:wrap;margin:26px 0}.toolbar input,.toolbar select,input,textarea,select{background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:13px 14px;border-radius:12px;font:inherit}.toolbar input{flex:1;min-width:220px}.toolbar select{min-width:180px}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:30px;align-items:center}
+.hero-photo{height:310px;border-radius:24px;overflow:hidden;border:1px solid var(--line);box-shadow:0 20px 50px rgba(0,0,0,.18)}
+.hero-photo img{width:100%;height:100%;object-fit:cover}
+.sortbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:.9rem}
+.product .body .sku{font-size:.78rem;color:var(--muted)}
+.product .photo{background:#e9edf3}
+@media(max-width:700px){.hero-grid{grid-template-columns:1fr}.hero-photo{height:210px}}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}.product{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--panel);display:flex;flex-direction:column}.photo{height:190px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--on);font-size:4rem}.photo img{width:100%;height:100%;object-fit:cover}.body{padding:17px;display:flex;flex-direction:column;gap:7px;flex:1}.body h3{margin:0;font-size:1.13rem}.muted{color:var(--muted);font-size:.9rem}.price{color:var(--accent);font:800 1.35rem "Bricolage Grotesque"}.body button{margin-top:auto}.note{margin:24px 0;padding:14px 16px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);font-size:.9rem}
 .cart{margin:54px 0;padding:24px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}.cartrow{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}.cartrow button{padding:6px 12px}.total{font:800 1.4rem "Bricolage Grotesque";color:var(--accent)}form{max-width:680px}label{display:block;color:var(--muted);font-size:.88rem;margin-top:12px}form input,form textarea,form select{width:100%;margin-top:5px}form button{margin-top:18px}.status{color:var(--accent);min-height:24px}footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-size:.9rem}
 @media(max-width:700px){.navlinks{display:none}.hero{padding-top:46px}.photo{height:165px}}
@@ -20,11 +36,11 @@ header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 90
 <body>
 <header><div class="wrap nav"><a class="brand" href="index.html">vee<i>h</i>icee.</a><nav class="navlinks"><a href="index.html#services">Services</a><a href="index.html#portfolio">Our work</a><a href="index.html#about">About</a></nav><a class="ghost" href="index.html">← Main website</a></div></header>
 <main class="wrap">
-<section class="hero"><div class="eyebrow">Veehicee online store</div><h1>Tech essentials.<br><span style="color:var(--accent)">Made simple.</span></h1><p>Browse useful phone accessories, charging essentials, audio devices and power products. We serve Ado-Ekiti and nearby towns.</p><a class="btn" href="#catalogue">Browse products ↓</a></section>
+<section class="hero"><div class="hero-grid"><div><div class="eyebrow">Veehicee online store · Ado-Ekiti</div><h1>Find your next<br><span style="color:var(--accent)">favourite gadget.</span></h1><p>Discover everyday phone essentials, smart accessories, charging gear and audio picks. Compare products, add your choices to the cart and check out with your delivery details — all in one place.</p><a class="btn" href="#catalogue">Shop the collection ↓</a></div><div class="hero-photo"><img src="https://images.pexels.com/photos/33061130/pexels-photo-33061130.jpeg?cs=srgb&dl=pexels-zeleboba-33061130.jpg&fm=jpg" alt="Phone case, charger and cable accessories" fetchpriority="high"></div></div></section>
 <section id="catalogue"><h2>Shop the collection</h2><p class="muted">Product availability and prices are subject to confirmation.</p>
-<div class="toolbar"><input id="search" type="search" placeholder="Search products…"><select id="category"><option value="">All categories</option></select></div>
+<div class="toolbar"><input id="search" type="search" placeholder="Search products, brands or accessories…"><select id="category"><option value="">All categories</option></select><select id="sort"><option value="featured">Sort: Featured</option><option value="low">Price: Low to high</option><option value="high">Price: High to low</option><option value="name">Name: A to Z</option></select></div><div class="sortbar"><span id="resultCount">Loading products…</span><span>Secure checkout · Stock checked at order time</span></div>
 <div class="grid" id="products"><p class="muted">Loading products…</p></div>
-<div class="note" id="sampleNote" hidden>These are sample display items and guide prices. Replace them with your actual stock and prices in the website Admin area. Sample items cannot be checked out until they are added to the product database.</div>
+<div class="note" id="sampleNote" hidden>Starter catalogue previews are shown here for design only. Sign in to the website Admin dashboard and select “Add starter products” to save them to your product database. You can edit every price, stock quantity, image and description before taking real orders.</div>
 </section>
 <section class="cart" id="cart"><h2>Your shopping cart <span class="muted" id="cartCount">0 items</span></h2><div id="cartItems" class="muted">Your cart is empty.</div><p class="total">Subtotal: <span id="subtotal">₦0</span></p><button class="btn" id="checkout" disabled>Continue to checkout</button>
 <form id="checkoutForm" hidden><h3>Delivery details</h3><label>Full name</label><input id="buyerName" required maxlength="150"><label>Email address</label><input id="buyerEmail" type="email"><label>Phone number</label><input id="buyerPhone" required maxlength="40"><label>Delivery town</label><select id="buyerTown" required><option value="">Loading delivery areas…</option></select><label>Full delivery address</label><textarea id="buyerAddress" rows="3" required maxlength="500"></textarea><label>Payment method</label><select id="buyerPayment" required><option value="bank_transfer">Bank transfer (manual confirmation)</option><option value="paystack">Paystack</option><option value="flutterwave">Flutterwave</option></select><button class="btn" type="submit">Place order</button><p class="status" id="checkoutStatus" role="status" aria-live="polite"></p></form></section>
@@ -32,27 +48,30 @@ header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 90
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbzyeow3JObPd0ROHHMfT6l23Yd50IYFekhyte3jazbfnLmqHvD7MUuphjCZrXvmBKa47g/exec";
 const $=id=>document.getElementById(id);$("year").textContent=new Date().getFullYear();
+async function loadPublishedDesign(){try{const r=await api("publicSettings");const s=r.settings||{};const allowedThemes=["midnight","sunrise","royal","forest","ocean","berry"],layouts=["split","center","bold","editorial","showcase"],patterns=["none","dots","grid","diagonal","glow"];document.documentElement.dataset.theme=allowedThemes.includes(s.siteTheme)?s.siteTheme:"midnight";document.documentElement.dataset.layout=layouts.includes(s.siteLayout)?s.siteLayout:"split";document.documentElement.dataset.pattern=patterns.includes(s.sitePattern)?s.sitePattern:"none"}catch(e){console.warn("Published design settings unavailable",e.message)}}
 async function api(action,data={}){const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,...data})});const j=await r.json();if(!j.ok)throw new Error(j.error||"Request failed");return j}
 const samples=[
-{name:"Fast-Charge USB Cable",category:"Charging",description:"Everyday charging and data cable. Confirm connector type before purchase.",price:3500,icon:"🔌"},
-{name:"Universal Phone Charger",category:"Charging",description:"Compact wall charger. Confirm wattage and compatibility.",price:6500,icon:"⚡"},
-{name:"Wireless Earbuds",category:"Audio",description:"Portable wireless audio. Sample listing; confirm model and features.",price:12500,icon:"🎧"},
-{name:"Protective Phone Case",category:"Phone accessories",description:"Protective phone case. Select your phone model when enquiring.",price:4500,icon:"📱"},
-{name:"Power Bank",category:"Power",description:"Portable backup power. Confirm capacity and availability.",price:18000,icon:"🔋"},
-{name:"Tempered Glass Screen Protector",category:"Phone accessories",description:"Screen protection for selected phone models.",price:3000,icon:"🛡️"},
-{name:"Bluetooth Speaker",category:"Audio",description:"Portable speaker for everyday listening.",price:15000,icon:"🔊"},
-{name:"Phone Stand",category:"Accessories",description:"Desk and viewing stand for compatible devices.",price:5000,icon:"📲"}
-];
+{name:"Tecno 45W Charger & Cable",category:"Charging",description:"Sample listing — confirm exact model and compatibility.",price:8500,imageUrl:"https://images.pexels.com/photos/33061128/pexels-photo-33061128.jpeg?cs=srgb&dl=pexels-zeleboba-33061128.jpg&fm=jpg"},
+{name:"Phone Case & Charging Set",category:"Phone accessories",description:"Sample listing — confirm phone model and connector type.",price:6500,imageUrl:"https://images.pexels.com/photos/33061130/pexels-photo-33061130.jpeg?cs=srgb&dl=pexels-zeleboba-33061130.jpg&fm=jpg"},
+{name:"Wireless Earbuds",category:"Audio",description:"Sample listing — confirm exact model and availability.",price:12500,imageUrl:"https://images.pexels.com/photos/17688850/pexels-photo-17688850.jpeg?cs=srgb&dl=pexels-mesut-berkant-yigit-656240210-17688850.jpg&fm=jpg"},
+{name:"Portable Power Bank",category:"Power",description:"Sample listing — confirm capacity and connector details.",price:18000,imageUrl:"https://images.pexels.com/photos/10104285/pexels-photo-10104285.jpeg?cs=srgb&dl=pexels-zion-10104285.jpg&fm=jpg"},
+{name:"USB Wall Charger",category:"Charging",description:"Sample listing — confirm output rating.",price:5500,imageUrl:"https://images.pexels.com/photos/3921717/pexels-photo-3921717.jpeg?cs=srgb&dl=pexels-readymade-3921717.jpg&fm=jpg"},
+{name:"Phone & Earbuds Bundle",category:"Audio",description:"Sample photo only — replace with your actual stock.",price:15000,imageUrl:"https://images.pexels.com/photos/17688850/pexels-photo-17688850.jpeg?cs=srgb&dl=pexels-mesut-berkant-yigit-656240210-17688850.jpg&fm=jpg"},
+{name:"Smartphone Power Pack",category:"Power",description:"Sample photo only — confirm exact capacity.",price:16000,imageUrl:"https://images.pexels.com/photos/10104285/pexels-photo-10104285.jpeg?cs=srgb&dl=pexels-zion-10104285.jpg&fm=jpg"},
+{name:"Phone Protection & Cable Kit",category:"Phone accessories",description:"Sample listing — select compatible phone model.",price:5000,imageUrl:"https://images.pexels.com/photos/33061128/pexels-photo-33061128.jpeg?cs=srgb&dl=pexels-zeleboba-33061128.jpg&fm=jpg"}
+
 let products=[],cart=[];
 const money=n=>"₦"+Number(n||0).toLocaleString("en-NG");
 function render(){
  const q=$("search").value.toLowerCase(),cat=$("category").value,box=$("products");box.innerHTML="";
- const filtered=products.filter(p=>(!cat||p.category===cat)&&(!q||[p.name,p.description,p.category].join(" ").toLowerCase().includes(q)));
+ let filtered=products.filter(p=>(!cat||p.category===cat)&&(!q||[p.name,p.description,p.category].join(" ").toLowerCase().includes(q)));
+ const sort=$("sort").value;if(sort==="low")filtered.sort((a,b)=>Number(a.price)-Number(b.price));if(sort==="high")filtered.sort((a,b)=>Number(b.price)-Number(a.price));if(sort==="name")filtered.sort((a,b)=>a.name.localeCompare(b.name));
+ $("resultCount").textContent=filtered.length+" product"+(filtered.length===1?"":"s")+" found";
  if(!filtered.length){box.textContent="No matching products found.";return}
  filtered.forEach(p=>{const card=document.createElement("article");card.className="product";const photo=document.createElement("div");photo.className="photo";
  if(p.imageUrl&&/^https?:\/\//i.test(p.imageUrl)){const img=document.createElement("img");img.src=p.imageUrl;img.alt=p.name;img.loading="lazy";img.onerror=()=>{img.remove();photo.textContent=p.icon||"🛍️"};photo.append(img)}else photo.textContent=p.icon||"🛍️";
  const body=document.createElement("div");body.className="body";const h=document.createElement("h3");h.textContent=p.name;const desc=document.createElement("div");desc.className="muted";desc.textContent=p.description||p.category||"";const price=document.createElement("div");price.className="price";price.textContent=money(p.price);const btn=document.createElement("button");btn.className="btn";
- if(p.id){btn.textContent=Number(p.stock)>0?"Add to cart":"Out of stock";btn.disabled=Number(p.stock)<=0;btn.onclick=()=>add(p)}else{btn.textContent="Enquire about this";btn.className="ghost";btn.onclick=()=>{location.href="index.html#contact"}}
+ if(p.id){btn.textContent=Number(p.stock)>0?"Add to cart":"Out of stock";btn.disabled=Number(p.stock)<=0;btn.onclick=()=>add(p)}else{btn.textContent="Preview only — add via Admin";btn.className="ghost";btn.disabled=true}
  body.append(h,desc,price,btn);card.append(photo,body);box.append(card)});
 }
 function add(p){const found=cart.find(x=>x.id===p.id);if(found){if(found.quantity<Number(p.stock))found.quantity++}else cart.push({id:p.id,name:p.name,price:Number(p.price),quantity:1,stock:Number(p.stock)});renderCart()}
@@ -60,10 +79,10 @@ function renderCart(){$("cartCount").textContent=cart.reduce((n,x)=>n+x.quantity
 async function init(){try{const r=await api("publicProducts");products=(r.products||[]);if(!products.length){products=samples;$("sampleNote").hidden=false}
  const cats=[...new Set(products.map(p=>p.category).filter(Boolean))];cats.forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;$("category").append(o)});render()
  }catch(e){products=samples;$("sampleNote").hidden=false;render()}}
-$("search").addEventListener("input",render);$("category").addEventListener("change",render);$("checkout").onclick=()=>{$("checkoutForm").hidden=false;$("checkoutForm").scrollIntoView({behavior:"smooth"})};
+$("search").addEventListener("input",render);$("category").addEventListener("change",render);$("sort").addEventListener("change",render);$("checkout").onclick=()=>{$("checkoutForm").hidden=false;$("checkoutForm").scrollIntoView({behavior:"smooth"})};
 (async()=>{try{const r=await api("publicShippingZones");$("buyerTown").innerHTML='<option value="">Select your town</option>';(r.zones||[]).forEach(z=>{const o=document.createElement("option");o.value=z.town;o.textContent=z.town+" — delivery "+money(z.deliveryFee);$("buyerTown").append(o)})}catch(e){$("buyerTown").innerHTML='<option value="">Delivery areas unavailable</option>'}})();
 $("checkoutForm").addEventListener("submit",async e=>{e.preventDefault();$("checkoutStatus").textContent="Placing your order…";try{const r=await api("createOrder",{customerName:$("buyerName").value,email:$("buyerEmail").value,phone:$("buyerPhone").value,town:$("buyerTown").value,address:$("buyerAddress").value,paymentMethod:$("buyerPayment").value,items:cart.map(x=>({id:x.id,quantity:x.quantity}))});$("checkoutStatus").textContent="Order "+r.orderId+" created. Total: "+money(r.total)+".";
  if(r.payment&&r.payment.authorizationUrl){const a=document.createElement("a");a.href=r.payment.authorizationUrl;a.target="_blank";a.rel="noopener";a.className="btn";a.textContent="Proceed to secure payment";$("checkoutStatus").append(document.createTextNode(" "),a)}else $("checkoutStatus").append(document.createTextNode(" Please follow the bank-transfer instructions shown by Veehicee or contact the business with your order number."));
  cart=[];renderCart();await init()}catch(err){$("checkoutStatus").textContent=err.message}});
-init();renderCart();
+loadPublishedDesign();init();renderCart();
 </script></body></html>
