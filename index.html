@@ -205,7 +205,7 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
 <div id="accountPhoneWrap"><label for="accountPhone">Phone</label><input id="accountPhone">
 </div><label for="accountPassword">Password (minimum 12 characters)</label><input id="accountPassword" type="password" minlength="12">
 <button class="ghost" id="accountSubmit" type="button">Create account</button>
-<button class="ghost" id="myOrdersBtn" type="button">My orders</button> <button class="ghost" id="myLoyaltyBtn" type="button">My loyalty points</button><p id="loyaltyStatus" class="status"></p>
+<button class="ghost" id="myOrdersBtn" type="button">My orders</button> <button class="ghost" id="myLoyaltyBtn" type="button">My loyalty points</button> <button class="ghost" id="customerLogoutBtn" type="button">Sign out</button><p id="loyaltyStatus" class="status"></p>
 <div id="myOrdersList"></div>
 <p class="status" id="accountStatus" role="status" aria-live="polite"></p>
 </div>
@@ -378,7 +378,7 @@ loadPublicSettings();
 
 /* ───────── MARKETPLACE ───────── */
 const SAMPLE=[["Phone accessories","Cases, cables and screen protection","📱"],["Charging essentials","Chargers and fast-charge cables","🔌"],["Audio","Earphones and speakers","🎧"],["Power banks","Stay powered through the day","🔋"]];
-let productsCache=[], cart=[], customerToken="";
+let productsCache=[], cart=[], customerToken=sessionStorage.getItem("veehiceeCustomerToken")||"";
 const money=n=>"₦"+Number(n||0).toLocaleString("en-NG");
 function updateCart(){
   $("cartCount").textContent=cart.reduce((s,x)=>s+x.quantity,0)+" items";
@@ -477,6 +477,7 @@ function printCustomerInvoice(o){
  w.document.close();
 }
 function escapeInvoice(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+$("customerLogoutBtn").onclick=async()=>{try{if(customerToken)await api("customerLogout",{token:customerToken})}catch(e){}customerToken="";sessionStorage.removeItem("veehiceeCustomerToken");$("accountStatus").textContent="You have signed out."};
 $("myLoyaltyBtn").onclick=async()=>{
  if(!customerToken){$("loyaltyStatus").textContent="Please sign in first.";return}
  try{const r=await api("customerLoyalty",{token:customerToken});$("loyaltyStatus").textContent="Your available balance: "+r.points+" points (1 point = ₦1)."}
@@ -487,7 +488,7 @@ $("accountSubmit").onclick=async()=>{
   const mode=$("accountMode").value;$("accountStatus").textContent="Please wait…";
   try{
     const data=mode==="register"?{name:$("accountName").value,email:$("accountEmail").value,phone:$("accountPhone").value,password:$("accountPassword").value}:{email:$("accountEmail").value,password:$("accountPassword").value};
-    const r=await api(mode==="register"?"customerRegister":"customerLogin",data);customerToken=r.token;
+    const r=await api(mode==="register"?"customerRegister":"customerLogin",data);customerToken=r.token;sessionStorage.setItem("veehiceeCustomerToken",customerToken);
     $("accountStatus").textContent="Signed in as "+r.customer.name+". Your future orders can be linked to this account.";
     $("buyerName").value=r.customer.name;$("buyerEmail").value=r.customer.email;$("buyerPhone").value=r.customer.phone;
   }catch(err){$("accountStatus").textContent=err.message}
@@ -749,6 +750,15 @@ async function saveCategory(){
   try{await api("adminSaveCategory",{token:adminToken,name:$("categoryName").value,active:true});$("adminStatus").textContent="Category saved.";$("categoryName").value=""}
   catch(e){$("adminStatus").textContent=e.message}
 }
+
+function printAdminInvoice(o){
+ const w=window.open("","_blank");if(!w){$("adminStatus").textContent="Allow pop-ups to print invoices.";return}
+ let items=[];try{items=JSON.parse(o.itemsJson||"[]")}catch(e){}
+ const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+ const rows=items.map(it=>"<tr><td>"+esc(it.name)+"</td><td>"+Number(it.quantity)+"</td><td>₦"+Number(it.unitPrice).toLocaleString("en-NG")+"</td><td>₦"+Number(it.lineTotal).toLocaleString("en-NG")+"</td></tr>").join("");
+ w.document.write("<!doctype html><html><head><title>Invoice "+esc(o.id)+"</title><style>body{font:14px Arial;margin:40px;color:#172033}h1{color:#087e69}table{width:100%;border-collapse:collapse;margin-top:24px}td,th{border-bottom:1px solid #ddd;padding:10px;text-align:left}.total{text-align:right;font-size:18px;font-weight:bold;margin-top:24px}</style></head><body><h1>Veehicee Telecommunications and Services</h1><p>CAC Registration No. 4714550</p><h2>Sales invoice</h2><p>Order: "+esc(o.id)+"<br>Customer: "+esc(o.customerName)+"<br>Phone: "+esc(o.phone)+"<br>Delivery: "+esc(o.town)+"<br>Payment: "+esc(o.paymentStatus)+"</p><table><thead><tr><th>Product</th><th>Qty</th><th>Unit price</th><th>Total</th></tr></thead><tbody>"+rows+"</tbody></table><p class='total'>Subtotal: ₦"+Number(o.subtotal).toLocaleString("en-NG")+"<br>Delivery: ₦"+Number(o.deliveryFee).toLocaleString("en-NG")+"<br>Total: ₦"+Number(o.total).toLocaleString("en-NG")+"</p><p>Thank you for your patronage.</p><script>window.onload=()=>window.print()<\\/script></body></html>");w.document.close();
+}
+
 async function loadOrders(){
   try{
     const r=await api("adminListOrders",{token:adminToken});orderCache=r.orders||[];$("ordersList").innerHTML="";
@@ -761,6 +771,8 @@ async function loadOrders(){
       const tracking=document.createElement("input");tracking.placeholder="Tracking code";tracking.value=o.trackingCode||"";tracking.style.maxWidth="140px";
       const update=document.createElement("button");update.className="ghost";update.textContent="Update";update.onclick=async()=>{try{await api("adminUpdateOrder",{token:adminToken,id:o.id,orderStatus:status.value,deliveryStatus:delivery.value,trackingCode:tracking.value});await loadOrders()}catch(err){$("adminStatus").textContent=err.message}};
       el.append(status,delivery,tracking,update);
+      const invoice=document.createElement("button");invoice.className="ghost";invoice.textContent="Print invoice";invoice.onclick=()=>printAdminInvoice(o);el.append(invoice);
+      const wa=document.createElement("button");wa.className="ghost";wa.textContent="WhatsApp customer";wa.onclick=()=>{const phone=String(o.phone||"").replace(/[^0-9]/g,"");if(phone)window.open("https://wa.me/"+phone+"?text="+encodeURIComponent("Hello "+o.customerName+", this is Veehicee regarding order "+o.id+". Your current order status is "+o.orderStatus+"."),"_blank","noopener");};el.append(wa);
       if(o.paymentMethod==="bank_transfer" && !["Paid","Confirmed"].includes(o.paymentStatus)){
         const b=document.createElement("button");b.className="ghost";b.textContent="Confirm transfer";b.onclick=async()=>{if(!confirm("Confirm that this bank transfer has actually been received?"))return;try{await api("adminConfirmBankTransfer",{token:adminToken,orderId:o.id});await loadOrders();$("adminStatus").textContent="Bank transfer confirmed."}catch(err){$("adminStatus").textContent=err.message}};el.append(b);
       }
