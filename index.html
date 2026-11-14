@@ -123,8 +123,8 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <div><h2>Built around people.<br>Driven by what's possible.</h2>
 <p class="intro">Veehicee Telecommunications and Services makes digital progress practical and accessible for businesses, schools and communities.</p>
 <div class="chips"><span>Software</span><span>Schools</span><span>Websites</span><span>ICT</span><span>Graphic design</span></div></div>
-<div><div class="value"><strong>Our mission</strong><p>Make useful technology accessible through solutions that are dependable and built for real needs.</p></div>
-<div class="value"><strong>Our vision</strong><p>Be the technology partner people trust for meaningful innovation and excellent digital experiences.</p></div>
+<div><div class="value"><strong>Our mission</strong><p id="missionText">Make useful technology accessible through solutions that are dependable and built for real needs.</p></div>
+<div class="value"><strong>Our vision</strong><p id="visionText">Be the technology partner people trust for meaningful innovation and excellent digital experiences.</p></div>
 <div class="value"><strong>Our approach</strong><p>Listen carefully, build intentionally, and keep improving with the people who use what we make.</p></div></div>
 </div></section>
 
@@ -217,6 +217,19 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <button class="btn" onclick="saveProduct()">Save product</button><div id="productsAdminList"></div></div>
 <div><h3>Orders and delivery</h3><button class="ghost" onclick="loadOrders()">Refresh orders</button><div id="ordersList"></div>
 <h3>Inventory and sales report</h3><button class="ghost" onclick="loadInventoryReport()">Refresh report</button><p id="inventoryReport" class="status"></p>
+<h3>Business information and SEO</h3>
+<label for="settingPhone">Business phone</label><input id="settingPhone">
+<label for="settingWhatsapp">WhatsApp number (international format)</label><input id="settingWhatsapp">
+<label for="settingEmail">Business email</label><input id="settingEmail" type="email">
+<label for="settingAddress">Business address</label><input id="settingAddress">
+<label for="settingMission">Mission</label><textarea id="settingMission" rows="2"></textarea>
+<label for="settingVision">Vision</label><textarea id="settingVision" rows="2"></textarea>
+<label for="settingSeoTitle">SEO title</label><input id="settingSeoTitle">
+<label for="settingSeoDescription">SEO description</label><textarea id="settingSeoDescription" rows="2"></textarea>
+<label for="settingBankName">Bank name</label><input id="settingBankName">
+<label for="settingBankAccountName">Bank account name</label><input id="settingBankAccountName">
+<label for="settingBankAccountNumber">Bank account number</label><input id="settingBankAccountNumber">
+<button class="btn" onclick="saveBusinessSettings()">Save business information</button>
 <h3>Portfolio project</h3><input id="workEditingId" type="hidden"><input id="workExistingImages" type="hidden">
 <label for="workTitle">Project title</label><input id="workTitle">
 <label for="workCategory">Category</label><input id="workCategory">
@@ -266,6 +279,16 @@ THEMES.forEach(([v,n,c])=>{const b=document.createElement("button");b.className=
 LAYOUTS.forEach(([v,n,d])=>{const b=document.createElement("button");b.className="ghost";b.dataset.v=v;b.innerHTML="<span><b>"+n+"</b><br><small>"+d+"</small></span>";b.onclick=()=>{store("vee-layout",v);apply()};$("lays").append(b)});
 $("fab").onclick=()=>{const o=$("studio").classList.toggle("open");$("fab").setAttribute("aria-expanded",o)};
 apply();
+async function loadPublicSettings(){
+  try{
+    const s=(await api("publicSettings")).settings||{};
+    if(s.mission)$("missionText").textContent=s.mission;
+    if(s.vision)$("visionText").textContent=s.vision;
+    if(s.seoTitle)document.title=s.seoTitle;
+    if(s.seoDescription){const m=document.querySelector('meta[name="description"]');if(m)m.content=s.seoDescription}
+  }catch(e){console.warn("Business settings unavailable",e.message)}
+}
+loadPublicSettings();
 
 /* ───────── MARKETPLACE ───────── */
 const SAMPLE=[["Phone accessories","Cases, cables and screen protection","📱"],["Charging essentials","Chargers and fast-charge cables","🔌"],["Audio","Earphones and speakers","🎧"],["Power banks","Stay powered through the day","🔋"]];
@@ -404,6 +427,7 @@ async function adminLogin(){
     await loadPortfolioAdmin();
     await loadProductsAdmin();
     await loadInventoryReport();
+    await loadBusinessSettings();
   }catch(e){
     $("adminPassword").value="";
     $("loginStatus").textContent=e.message;
@@ -480,6 +504,23 @@ async function saveProduct(){
   }catch(e){$("adminStatus").textContent=e.message}
 }
 
+async function loadBusinessSettings(){
+  try{
+    const s=(await api("publicSettings")).settings||{};
+    const map={businessPhone:"settingPhone",whatsapp:"settingWhatsapp",businessEmail:"settingEmail",businessAddress:"settingAddress",mission:"settingMission",vision:"settingVision",seoTitle:"settingSeoTitle",seoDescription:"settingSeoDescription",bankName:"settingBankName",bankAccountName:"settingBankAccountName",bankAccountNumber:"settingBankAccountNumber"};
+    Object.keys(map).forEach(k=>$(map[k]).value=s[k]||"");
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+async function saveBusinessSettings(){
+  const pairs=[
+    ["businessPhone","settingPhone"],["whatsapp","settingWhatsapp"],["businessEmail","settingEmail"],["businessAddress","settingAddress"],
+    ["mission","settingMission"],["vision","settingVision"],["seoTitle","settingSeoTitle"],["seoDescription","settingSeoDescription"],
+    ["bankName","settingBankName"],["bankAccountName","settingBankAccountName"],["bankAccountNumber","settingBankAccountNumber"]
+  ];
+  try{for(const [key,id] of pairs)await api("adminSaveSetting",{token:adminToken,key:key,value:$(id).value});
+    $("adminStatus").textContent="Business information saved.";loadPublicSettings();
+  }catch(e){$("adminStatus").textContent=e.message}
+}
 async function loadProductsAdmin(){
   try{
     const r=await api("adminListProducts",{token:adminToken});$("productsAdminList").innerHTML="";
