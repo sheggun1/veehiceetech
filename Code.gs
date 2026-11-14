@@ -40,6 +40,7 @@ const APP = {
     News: ["id","title","slug","excerpt","body","imageUrl","published","createdAt","updatedAt"],
     Newsletter: ["id","email","status","createdAt"],
     Media: ["id","fileName","mimeType","fileUrl","folder","createdAt"],
+    Backups: ["id","fileId","fileName","fileUrl","createdAt","createdBy"],
     Coupons: ["code","type","value","minimumOrder","active","expiresAt","usageLimit","usedCount"]
   }
 };
@@ -177,6 +178,7 @@ function doPost(e) {
       case "adminSaveSetting": lock.waitLock(15000); result = adminSaveSetting_(input); break;
       case "publicSettings": result = publicSettings_(); break;
       case "adminInventoryReport": result = adminInventoryReport_(input); break;
+      case "adminCreateBackup": result = adminCreateBackup_(input); break;
       default: throw new Error("Unsupported action: " + action);
     }
     return json_(Object.assign({ok:true},result || {}));
@@ -755,4 +757,18 @@ function adminChangePassword_(x) {
   sessions.appendRow([hashToken_(token),email,new Date(Date.now()+6*60*60*1000),new Date()]);
   log_(email,"CHANGE_PASSWORD","Administrator password changed");
   return {message:"Password changed. Other sessions have been signed out.",token:token};
+}
+
+function adminCreateBackup_(x) {
+  const email=requireAdmin_(x.token);
+  const sheetId=PropertiesService.getScriptProperties().getProperty("VEEHICEE_SHEET_ID");
+  const folderId=PropertiesService.getScriptProperties().getProperty("VEEHICEE_DRIVE_FOLDER_ID");
+  if(!sheetId || !folderId) throw new Error("Database setup is incomplete.");
+  const stamp=Utilities.formatDate(new Date(),Session.getScriptTimeZone(),"yyyyMMdd-HHmmss");
+  const source=DriveApp.getFileById(sheetId), folder=DriveApp.getFolderById(folderId);
+  const copy=source.makeCopy("Veehicee-Database-Backup-"+stamp,folder);
+  const url=copy.getUrl();
+  sheet_("Backups").appendRow([Utilities.getUuid(),copy.getId(),copy.getName(),url,new Date(),email]);
+  log_(email,"CREATE_BACKUP",copy.getName());
+  return {message:"Database backup created.",fileName:copy.getName(),fileUrl:url};
 }
