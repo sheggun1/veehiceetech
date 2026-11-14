@@ -205,7 +205,7 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
 <div id="accountPhoneWrap"><label for="accountPhone">Phone</label><input id="accountPhone">
 </div><label for="accountPassword">Password (minimum 12 characters)</label><input id="accountPassword" type="password" minlength="12">
 <button class="ghost" id="accountSubmit" type="button">Create account</button>
-<button class="ghost" id="myOrdersBtn" type="button">My orders</button>
+<button class="ghost" id="myOrdersBtn" type="button">My orders</button> <button class="ghost" id="myLoyaltyBtn" type="button">My loyalty points</button><p id="loyaltyStatus" class="status"></p>
 <div id="myOrdersList"></div>
 <p class="status" id="accountStatus" role="status" aria-live="polite"></p>
 </div>
@@ -463,10 +463,25 @@ $("accountMode").onchange=()=>{$("accountNameWrap").hidden=$("accountMode").valu
 $("myOrdersBtn").onclick=async()=>{
   if(!customerToken){$("accountStatus").textContent="Please sign in first.";return}
   try{const r=await api("customerOrders",{token:customerToken});$("myOrdersList").innerHTML="";
-    (r.orders||[]).forEach(o=>{const p=document.createElement("p");p.textContent=o.id+" · "+money(o.total)+" · "+o.paymentStatus+" · "+o.deliveryStatus;$("myOrdersList").append(p)});
+    (r.orders||[]).forEach(o=>{const row=document.createElement("div");row.className="aitem";const p=document.createElement("span");p.textContent=o.id+" · "+money(o.total)+" · "+o.paymentStatus+" · "+o.deliveryStatus;const b=document.createElement("button");b.className="ghost";b.textContent="Print invoice";b.onclick=()=>printCustomerInvoice(o);row.append(p,b);$("myOrdersList").append(row)});
     if(!(r.orders||[]).length)$("myOrdersList").textContent="No orders yet.";
   }catch(err){$("accountStatus").textContent=err.message}
 };
+
+function printCustomerInvoice(o){
+ const w=window.open("","_blank");if(!w){$("accountStatus").textContent="Allow pop-ups to print your invoice.";return}
+ const name=$("buyerName").value||$("accountName").value||"Customer";
+ const rows=(o.items||[]).map(it=>"<tr><td>"+escapeInvoice(it.name)+"</td><td>"+Number(it.quantity)+"</td><td>₦"+Number(it.unitPrice).toLocaleString("en-NG")+"</td><td>₦"+Number(it.lineTotal).toLocaleString("en-NG")+"</td></tr>").join("");
+ w.document.write("<!doctype html><html><head><title>Invoice "+escapeInvoice(o.id)+"</title><style>body{font:14px Arial;margin:40px;color:#172033}h1{color:#087e69}table{width:100%;border-collapse:collapse;margin-top:24px}td,th{border-bottom:1px solid #ddd;padding:10px;text-align:left}.total{text-align:right;font-size:18px;font-weight:bold;margin-top:24px}</style></head><body><h1>Veehicee Telecommunications and Services</h1><p>CAC Registration No. 4714550</p><h2>Order invoice</h2><p>Order: "+escapeInvoice(o.id)+"<br>Customer: "+escapeInvoice(name)+"<br>Date: "+escapeInvoice(new Date(o.createdAt).toLocaleString())+"<br>Payment: "+escapeInvoice(o.paymentStatus)+"<br>Delivery: "+escapeInvoice(o.deliveryStatus)+"</p><table><thead><tr><th>Item</th><th>Qty</th><th>Unit price</th><th>Total</th></tr></thead><tbody>"+rows+"</tbody></table><p class='total'>Subtotal: ₦"+Number(o.subtotal).toLocaleString("en-NG")+"<br>Delivery: ₦"+Number(o.deliveryFee).toLocaleString("en-NG")+"<br>Total: ₦"+Number(o.total).toLocaleString("en-NG")+"</p><p>Thank you for shopping with Veehicee.</p><script>window.onload=()=>window.print()<\\/script></body></html>");
+ w.document.close();
+}
+function escapeInvoice(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+$("myLoyaltyBtn").onclick=async()=>{
+ if(!customerToken){$("loyaltyStatus").textContent="Please sign in first.";return}
+ try{const r=await api("customerLoyalty",{token:customerToken});$("loyaltyStatus").textContent="Your available balance: "+r.points+" points (1 point = ₦1)."}
+ catch(e){$("loyaltyStatus").textContent=e.message}
+};
+
 $("accountSubmit").onclick=async()=>{
   const mode=$("accountMode").value;$("accountStatus").textContent="Please wait…";
   try{
