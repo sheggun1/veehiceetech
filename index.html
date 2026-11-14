@@ -289,7 +289,7 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
 <label for="couponExpiry">Expiry date (optional)</label><input id="couponExpiry" type="date">
 <button class="ghost" onclick="saveCoupon()">Save coupon</button><p id="couponStatus" class="status"></p><div id="couponList"></div>
 <h3>Customer product reviews</h3><button class="ghost" onclick="loadReviews()">Refresh reviews</button><div id="reviewsAdminList"></div>
-<h3>Abandoned shopping carts</h3><button class="ghost" onclick="loadAbandonedCarts()">Refresh saved carts</button><div id="abandonedCartsList"></div>
+<h3>Abandoned shopping carts</h3><button class="ghost" onclick="loadAbandonedCarts()">Refresh saved carts</button><div id="abandonedCartsList"></div><p class="muted">To turn on automatic daily reminders, first update Code.gs in Apps Script, then run <code>setupVeehiceeCartReminderTrigger()</code> once in the Apps Script editor and approve the permissions. Customers must sign in and select “Save my cart”.</p>
 <h3>Stock alert</h3><button class="ghost" onclick="sendLowStockAlert()">Email low-stock report to administrator</button><p id="stockAlertStatus" class="status"></p>
 <h3>Database backup</h3><button class="ghost" onclick="createDatabaseBackup()">Create Google Drive backup</button><p id="backupStatus" class="status"></p>
 <h3>Business information and SEO</h3>
@@ -687,7 +687,7 @@ async function createDatabaseBackup(){
 let businessReportCache=null, expenseCache=[], customerCache=[], orderCache=[];
 async function loadBusinessReport(){
  try{const r=await api("adminBusinessReport",{token:adminToken});businessReportCache=r;$("businessReport").textContent="Paid orders: "+r.paidOrders+" · Revenue: "+money(r.revenue)+" · Product cost: "+money(r.costOfGoods)+" · Expenses: "+money(r.expenses)+" · Estimated profit: "+money(r.estimatedProfit)+". "+r.profitNote;
- const box=$("monthlyRevenueList");box.innerHTML="";Object.keys(r.monthlyRevenue||{}).sort().reverse().slice(0,12).forEach(month=>{const p=document.createElement("p");p.textContent=month+" — "+money(r.monthlyRevenue[month]);box.append(p)});
+ const box=$("monthlyRevenueList");box.innerHTML="";const months=Object.keys(r.monthlyRevenue||{}).sort().reverse().slice(0,12),max=Math.max(1,...months.map(k=>Number(r.monthlyRevenue[k])||0));months.forEach(month=>{const row=document.createElement("div");row.style.margin="10px 0";const label=document.createElement("div");label.textContent=month+" — "+money(r.monthlyRevenue[month]);const track=document.createElement("div");track.style.cssText="height:9px;background:var(--line);border-radius:9px;overflow:hidden;margin-top:5px";const bar=document.createElement("div");bar.style.cssText="height:100%;background:var(--accent);width:"+Math.max(2,(Number(r.monthlyRevenue[month])||0)/max*100)+"%;border-radius:9px";track.append(bar);row.append(label,track);box.append(row)});
  }catch(e){$("businessReport").textContent=e.message}
 }
 async function loadExpenses(){
@@ -713,7 +713,7 @@ async function exportOrdersCsv(){
 function exportCustomersCsv(){csvDownload("veehicee-customers.csv",[["Name","Email","Phone","Account","Orders","Paid orders","Total paid","Last order"],...customerCache.map(c=>[c.name,c.email,c.phone,c.hasAccount?"Yes":"No",c.orderCount,c.paidOrderCount,c.totalPaid,c.lastOrderAt])])}
 function exportExpensesCsv(){csvDownload("veehicee-expenses.csv",[["Date","Category","Description","Amount"],...expenseCache.map(e=>[e.expenseDate,e.category,e.description,e.amount])])}
 async function saveExpense(){
- try{await api("adminSaveExpense",{token:adminToken,category:$("expenseCategory").value,description:$("expenseDescription").value,amount:$("expenseAmount").value,expenseDate:$("expenseDate").value});$("expenseStatus").textContent="Expense recorded.";["expenseCategory","expenseDescription","expenseAmount","expenseDate"].forEach(id=>$(id).value="");loadBusinessReport()}
+ try{await api("adminSaveExpense",{token:adminToken,category:$("expenseCategory").value,description:$("expenseDescription").value,amount:$("expenseAmount").value,expenseDate:$("expenseDate").value});$("expenseStatus").textContent="Expense recorded.";["expenseCategory","expenseDescription","expenseAmount","expenseDate"].forEach(id=>$(id).value="");loadBusinessReport();loadExpenses()}
  catch(e){$("expenseStatus").textContent=e.message}
 }
 async function saveCoupon(){
