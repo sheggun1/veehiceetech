@@ -270,15 +270,16 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
 <button class="ghost" onclick="saveDeliveryZone()">Save delivery area</button>
 <label for="categoryName">Product category</label><input id="categoryName" placeholder="Phone cases">
 <button class="ghost" onclick="saveCategory()">Save category</button>
-<h3>Orders and delivery</h3><button class="ghost" onclick="loadOrders()">Refresh orders</button><div id="ordersList"></div>
+<h3>Orders and delivery</h3><button class="ghost" onclick="loadOrders()">Refresh orders</button> <button class="ghost" onclick="exportOrdersCsv()">Export orders CSV</button><div id="ordersList"></div>
+<h3>Customer database</h3><button class="ghost" onclick="loadCustomers()">Refresh customers</button> <button class="ghost" onclick="exportCustomersCsv()">Export customers CSV</button><div id="customersList"></div>
 <h3>Inventory and sales report</h3><button class="ghost" onclick="loadInventoryReport()">Refresh report</button><p id="inventoryReport" class="status"></p>
-<h3>Business performance and profit</h3><button class="ghost" onclick="loadBusinessReport()">Refresh financial report</button><p id="businessReport" class="status"></p>
+<h3>Business performance and profit</h3><button class="ghost" onclick="loadBusinessReport()">Refresh financial report</button> <button class="ghost" onclick="exportExpensesCsv()">Export expenses CSV</button><p id="businessReport" class="status"></p><div id="monthlyRevenueList"></div>
 <h3>Record business expense</h3>
 <label for="expenseCategory">Expense category</label><input id="expenseCategory" placeholder="Transport, rent, data, delivery">
 <label for="expenseDescription">Description</label><input id="expenseDescription" placeholder="What was the expense for?">
 <label for="expenseAmount">Amount (₦)</label><input id="expenseAmount" type="number" min="1">
 <label for="expenseDate">Date</label><input id="expenseDate" type="date">
-<button class="ghost" onclick="saveExpense()">Save expense</button><p id="expenseStatus" class="status"></p>
+<button class="ghost" onclick="saveExpense()">Save expense</button><p id="expenseStatus" class="status"></p><button class="ghost" onclick="loadExpenses()">View recorded expenses</button><div id="expensesList"></div>
 <h3>Discount coupons</h3>
 <label for="couponCode">Coupon code</label><input id="couponCode" placeholder="WELCOME10">
 <label for="couponType">Discount type</label><select id="couponType"><option value="percent">Percentage</option><option value="fixed">Fixed amount (₦)</option></select>
@@ -543,6 +544,8 @@ async function adminLogin(){
     await loadCoupons();
     await loadReviews();
     await loadAbandonedCarts();
+    await loadCustomers();
+    await loadExpenses();
     const ds=(await api("publicSettings")).settings||{};applyDesign({theme:ds.siteTheme||"midnight",layout:ds.siteLayout||"split",pattern:ds.sitePattern||"none"});
   }catch(e){
     $("adminPassword").value="";
@@ -680,10 +683,34 @@ async function createDatabaseBackup(){
   catch(e){$("backupStatus").textContent=e.message}
 }
 
+let businessReportCache=null, expenseCache=[], customerCache=[], orderCache=[];
 async function loadBusinessReport(){
- try{const r=await api("adminBusinessReport",{token:adminToken});$("businessReport").textContent="Paid orders: "+r.paidOrders+" · Revenue: "+money(r.revenue)+" · Product cost: "+money(r.costOfGoods)+" · Expenses: "+money(r.expenses)+" · Estimated profit: "+money(r.estimatedProfit)+". "+r.profitNote}
- catch(e){$("businessReport").textContent=e.message}
+ try{const r=await api("adminBusinessReport",{token:adminToken});businessReportCache=r;$("businessReport").textContent="Paid orders: "+r.paidOrders+" · Revenue: "+money(r.revenue)+" · Product cost: "+money(r.costOfGoods)+" · Expenses: "+money(r.expenses)+" · Estimated profit: "+money(r.estimatedProfit)+". "+r.profitNote;
+ const box=$("monthlyRevenueList");box.innerHTML="";Object.keys(r.monthlyRevenue||{}).sort().reverse().slice(0,12).forEach(month=>{const p=document.createElement("p");p.textContent=month+" — "+money(r.monthlyRevenue[month]);box.append(p)});
+ }catch(e){$("businessReport").textContent=e.message}
 }
+async function loadExpenses(){
+ try{const r=await api("adminListExpenses",{token:adminToken});expenseCache=r.expenses||[];$("expensesList").innerHTML="";
+ expenseCache.slice(0,30).forEach(e=>{const p=document.createElement("p");p.textContent=new Date(e.expenseDate).toLocaleDateString()+" · "+e.category+" · "+e.description+" · "+money(e.amount);$("expensesList").append(p)});
+ }catch(e){$("expenseStatus").textContent=e.message}
+}
+async function loadCustomers(){
+ try{const r=await api("adminListCustomers",{token:adminToken});customerCache=r.customers||[];$("customersList").innerHTML="";
+ customerCache.slice(0,50).forEach(c=>{const p=document.createElement("p");p.textContent=c.name+" · "+c.phone+" · "+c.email+" · "+c.orderCount+" orders · Paid: "+money(c.totalPaid)+(c.hasAccount?" · Account":"");$("customersList").append(p)});
+ }catch(e){$("adminStatus").textContent=e.message}
+}
+function csvDownload(name,rows){
+ const quote=v=>'"'+String(v===null||v===undefined?"":v).replace(/"/g,'""')+'"';
+ const csv=rows.map(row=>row.map(quote).join(",")).join("\r\n");
+ const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download=name;document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+async function exportOrdersCsv(){
+ try{const r=await api("adminListOrders",{token:adminToken});const rows=[["Order ID","Customer","Phone","Town","Address","Items","Subtotal","Delivery fee","Total","Payment method","Payment status","Order status","Delivery status","Tracking code","Date"],...(r.orders||[]).map(o=>[o.id,o.customerName,o.phone,o.town,o.address,o.itemsJson,o.subtotal,o.deliveryFee,o.total,o.paymentMethod,o.paymentStatus,o.orderStatus,o.deliveryStatus,o.trackingCode,o.createdAt])];csvDownload("veehicee-orders.csv",rows)}
+ catch(e){$("adminStatus").textContent=e.message}
+}
+function exportCustomersCsv(){csvDownload("veehicee-customers.csv",[["Name","Email","Phone","Account","Orders","Paid orders","Total paid","Last order"],...customerCache.map(c=>[c.name,c.email,c.phone,c.hasAccount?"Yes":"No",c.orderCount,c.paidOrderCount,c.totalPaid,c.lastOrderAt])])}
+function exportExpensesCsv(){csvDownload("veehicee-expenses.csv",[["Date","Category","Description","Amount"],...expenseCache.map(e=>[e.expenseDate,e.category,e.description,e.amount])])}
 async function saveExpense(){
  try{await api("adminSaveExpense",{token:adminToken,category:$("expenseCategory").value,description:$("expenseDescription").value,amount:$("expenseAmount").value,expenseDate:$("expenseDate").value});$("expenseStatus").textContent="Expense recorded.";["expenseCategory","expenseDescription","expenseAmount","expenseDate"].forEach(id=>$(id).value="");loadBusinessReport()}
  catch(e){$("expenseStatus").textContent=e.message}
@@ -724,7 +751,7 @@ async function saveCategory(){
 }
 async function loadOrders(){
   try{
-    const r=await api("adminListOrders",{token:adminToken});$("ordersList").innerHTML="";
+    const r=await api("adminListOrders",{token:adminToken});orderCache=r.orders||[];$("ordersList").innerHTML="";
     (r.orders||[]).slice(0,30).forEach(o=>{
       const el=document.createElement("div");el.className="aitem";
       const info=document.createElement("span");info.textContent=o.id+" · "+o.customerName+" · "+money(o.total)+" · "+o.paymentStatus+" · "+o.orderStatus;
