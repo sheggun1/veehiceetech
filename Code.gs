@@ -29,7 +29,7 @@ const APP = {
     Customers: ["id","name","email","phone","createdAt"],
     CustomerAccounts: ["id","name","email","phone","salt","passwordHash","active","createdAt"],
     CustomerSessions: ["tokenHash","customerId","email","expiresAt","createdAt"],
-    Orders: ["id","customerId","customerName","phone","town","address","itemsJson","subtotal","deliveryFee","total","paymentMethod","paymentStatus","orderStatus","createdAt","deliveryStatus","trackingCode","stockReserved","updatedAt","couponCode","discountAmount","loyaltyPointsEarned"],
+    Orders: ["id","customerId","customerName","phone","town","address","itemsJson","subtotal","deliveryFee","total","paymentMethod","paymentStatus","orderStatus","createdAt","deliveryStatus","trackingCode","stockReserved","updatedAt","couponCode","discountAmount","loyaltyPointsEarned","loyaltyPointsRedeemed"],
     Payments: ["id","orderId","reference","amount","status","verifiedAt","createdAt"],
     ShippingZones: ["town","active","deliveryFee"],
     SiteSettings: ["key","value","updatedAt"],
@@ -47,7 +47,8 @@ const APP = {
     ProductReviews: ["id","productId","customerId","customerName","rating","review","approved","createdAt"],
     Wishlists: ["customerId","productId","createdAt"],
     LoyaltyLedger: ["id","customerId","orderId","points","amount","reason","createdAt"],
-    AbandonedCarts: ["id","customerId","email","cartJson","status","updatedAt","reminderSentAt"]
+    AbandonedCarts: ["id","customerId","email","cartJson","status","updatedAt","reminderSentAt"],
+    CouponRedemptions: ["id","code","orderId","customerId","createdAt"]
   }
 };
 
@@ -503,10 +504,9 @@ function createOrder_(x) {
     sheet_("InventoryMovements").appendRow([Utilities.getUuid(),line.productId,line.name,-line.quantity,"Reserved for order",orderId,new Date()]);
   });
   const earnedPoints=Math.floor(Math.max(0,total)/1000);
-  sheet_("Orders").appendRow([orderId,customerId,customerName,phone,town,address,JSON.stringify(lines),subtotal,deliveryFee,total,method,method==="bank_transfer"?"Awaiting verification":"Pending","Pending",new Date(),"Pending","",true,new Date(),couponCode,discountAmount,earnedPoints]);
+  sheet_("Orders").appendRow([orderId,customerId,customerName,phone,town,address,JSON.stringify(lines),subtotal,deliveryFee,total,method,method==="bank_transfer"?"Awaiting verification":"Pending","Pending",new Date(),"Pending","",true,new Date(),couponCode,discountAmount,earnedPoints,loyaltyPointsToRedeem]);
   const oi=sheet_("OrderItems"); lines.forEach(line=>oi.appendRow([Utilities.getUuid(),orderId,line.productId,line.name,line.quantity,line.unitPrice,line.lineTotal,line.costPrice||0]));
-  if(couponCode) recordCouponUse_(couponCode,orderId,customerId);
-  if(loyaltyPointsToRedeem) sheet_("LoyaltyLedger").appendRow([Utilities.getUuid(),customerId,orderId,-loyaltyPointsToRedeem,-loyaltyDiscount,"Redeemed on order",new Date()]);
+  
   let payment={method:method,status:method==="bank_transfer"?"Awaiting verification":"Pending"};
   try {
     if(method==="paystack") payment=initializePaystack_(orderId,total,email);
@@ -603,11 +603,17 @@ function finalizePaidOrder_(orderId,reference,providerId) {
   }
   const refreshed=orders.getDataRange().getValues(), paidRow=refreshed.find((r,i)=>i>0 && String(r[0])===orderId);
   if(paidRow && paidRow[1]) {
+    const ledger=sheet_("LoyaltyLedger").getDataRange().getValues();
     const earned=Math.max(0,Math.floor(Number(paidRow[20])||0));
-    if(earned>0) {
-      const ledger=sheet_("LoyaltyLedger").getDataRange().getValues();
-      const exists=ledger.slice(1).some(r=>String(r[2])===orderId && String(r[5])==="Earned on paid order");
-      if(!exists) sheet_("LoyaltyLedger").appendRow([Utilities.getUuid(),paidRow[1],orderId,earned,Number(paidRow[9])||0,"Earned on paid order",new Date()]);
+    const earnedExists=ledger.slice(1).some(r=>String(r[2])===orderId && String(r[5])==="Earned on paid order");
+    if(earned>0 && !earnedExists) sheet_("LoyaltyLedger").appendRow([Utilities.getUuid(),paidRow[1],orderId,earned,Number(paidRow[9])||0,"Earned on paid order",new Date()]);
+    const redeemed=Math.max(0,Math.floor(Number(paidRow[21])||0));
+    const redeemedExists=ledger.slice(1).some(r=>String(r[2])===orderId && String(r[5])==="Redeemed on paid order");
+    if(redeemed>0 && !redeemedExists) sheet_("LoyaltyLedger").appendRow([Utilities.getUuid(),paidRow[1],orderId,-redeemed,-redeemed,"Redeemed on paid order",new Date()]);
+    const coupon=String(paidRow[18]||"");
+    if(coupon) {
+      const redemptions=sheet_("CouponRedemptions").getDataRange().getValues();
+      if(!redemptions.slice(1).some(r=>String(r[2])===orderId)) recordCouponUse_(coupon,orderId,paidRow[1]);
     }
   }
   log_("system","PAYMENT_VERIFIED",orderId+" provider transaction "+providerId);
