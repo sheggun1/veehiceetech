@@ -90,7 +90,7 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 
 /* Admin-controlled background patterns */
 body{position:relative}
-body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.16}
+body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.16}body>*{position:relative;z-index:1}
 [data-pattern=dots] body:before{background-image:radial-gradient(var(--accent) 1px,transparent 1px);background-size:22px 22px}
 [data-pattern=grid] body:before{background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:34px 34px}
 [data-pattern=diagonal] body:before{background-image:repeating-linear-gradient(135deg,transparent 0 18px,var(--line) 19px 20px)}
@@ -322,8 +322,7 @@ async function api(action,data={}){
   return j;
 }
 
-/* ───────── THEMES + LAYOUTS ───────── */
-const root=document.documentElement;
+/* ───────── ADMIN DESIGN STUDIO ───────── */
 const THEMES=[["midnight","Midnight","#5df0c8"],["sunrise","Sunrise","#ff5b37"],["royal","Royal","#ffc83d"],["forest","Forest","#b6f25b"],["ocean","Ocean","#1457ff"],["berry","Berry","#ff4fa3"]];
 const LAYOUTS=[["split","Split","Balanced two-column hero"],["center","Centered","Centered headline and content"],["bold","Bold","Oversized typography and strong cards"],["editorial","Editorial","Magazine-inspired composition"],["showcase","Showcase","Wide hero with layered visual"]];
 const PATTERNS=[["none","No pattern"],["dots","Soft dots"],["grid","Technical grid"],["diagonal","Diagonal lines"],["glow","Ambient glow"]];
