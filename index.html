@@ -139,17 +139,47 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <div class="products" id="portfolioItems"></div>
 </div></section>
 
-<section class="section" id="marketplace"><div class="wrap split" style="align-items:center">
-<div><span class="tag"><b></b>Veehicee Marketplace</span><h2>Everyday tech,<br>made easier.</h2>
-<p class="intro">Explore phone accessories, charging essentials, audio devices and power banks in our dedicated online store. Browse products, compare prices and place an order.</p>
-<div class="actions"><a class="btn" href="marketplace.html">Explore the marketplace →</a><a class="ghost" href="#contact">Ask about a product</a></div>
-<p class="intro" style="margin-top:16px;font-size:.9rem">Serving Ado-Ekiti and nearby towns. Product prices and availability can be updated by the Veehicee team.</p></div>
-<div class="card" style="padding:22px"><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
-<div class="prod"><div class="img">📱</div><div class="body"><b>Phone accessories</b><small>Cases and protection</small></div></div>
-<div class="prod"><div class="img">🔌</div><div class="body"><b>Charging</b><small>Chargers and cables</small></div></div>
-<div class="prod"><div class="img">🎧</div><div class="body"><b>Audio</b><small>Earphones and speakers</small></div></div>
-<div class="prod"><div class="img">🔋</div><div class="body"><b>Power</b><small>Power banks and more</small></div></div>
-</div></div></div></section>
+<section class="section" id="marketplace"><div class="wrap">
+<h2>Everyday tech,<br>made easier.</h2>
+<p class="intro">Phone accessories, charging essentials, audio and power banks. Delivery covers Ado-Ekiti and nearby towns.</p><div class="actions"><a class="btn" href="marketplace.html">Open the full marketplace →</a></div>
+<div class="products" id="products"></div>
+<div class="card cartbox">
+<h3>Shopping cart <span id="cartCount">0 items</span></h3>
+<div id="cartItems"><p class="intro">Your cart is empty.</p></div>
+<p class="price">Subtotal: <span id="cartSubtotal">₦0</span></p>
+<button class="btn" id="checkoutBtn" type="button" disabled>Continue to checkout</button>
+<form id="checkoutForm" hidden>
+<h3>Delivery details</h3>
+<label for="buyerName">Full name</label><input id="buyerName" required maxlength="150">
+<label for="buyerEmail">Email (for order updates)</label><input id="buyerEmail" type="email">
+<label for="buyerPhone">Phone number</label><input id="buyerPhone" required maxlength="40">
+<label for="buyerTown">Delivery town</label><select id="buyerTown" required><option value="">Loading delivery areas…</option></select>
+<label for="buyerAddress">Full delivery address</label><textarea id="buyerAddress" rows="3" required maxlength="500"></textarea>
+<label for="buyerPayment">Payment method</label><select id="buyerPayment" required>
+<option value="bank_transfer">Bank transfer (manual confirmation)</option>
+<option value="paystack">Paystack</option><option value="flutterwave">Flutterwave</option></select>
+<button class="btn" type="submit">Place order</button>
+<p class="status" id="checkoutStatus" role="status" aria-live="polite"></p>
+</form>
+</div>
+<div class="card cartbox" style="margin-top:18px">
+<h3>Track your order</h3><form id="trackOrderForm">
+<label for="trackOrderId">Order number</label><input id="trackOrderId" required>
+<label for="trackPhone">Phone number used for the order</label><input id="trackPhone" required>
+<button class="ghost" type="submit">Check order status</button><p class="status" id="trackStatus" role="status" aria-live="polite"></p>
+</form>
+<hr><h3>Customer account (optional)</h3>
+<label for="accountMode">Account action</label><select id="accountMode"><option value="register">Create account</option><option value="login">Sign in</option></select>
+<div id="accountNameWrap"><label for="accountName">Full name</label><input id="accountName"></div>
+<label for="accountEmail">Email</label><input id="accountEmail" type="email">
+<div id="accountPhoneWrap"><label for="accountPhone">Phone</label><input id="accountPhone">
+</div><label for="accountPassword">Password (minimum 12 characters)</label><input id="accountPassword" type="password" minlength="12">
+<button class="ghost" id="accountSubmit" type="button">Create account</button>
+<button class="ghost" id="myOrdersBtn" type="button">My orders</button>
+<div id="myOrdersList"></div>
+<p class="status" id="accountStatus" role="status" aria-live="polite"></p>
+</div>
+</div></section>
 
 <section class="section" id="contact"><div class="wrap contact">
 <div><h2>Got an idea?<br>Let's make it real.</h2><p class="intro">Tell us what you are working towards. We reply to every enquiry.</p></div>
