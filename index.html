@@ -239,7 +239,11 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <label><input id="workPublished" type="checkbox" style="width:auto" checked> Publish project</label>
 <button class="btn" onclick="savePortfolio()">Save project</button><div id="portfolioAdminList"></div>
 </div>
-</div><p style="margin-top:18px"><button class="ghost" onclick="adminLogout()">Sign out</button></p></div>
+</div><div class="card" style="margin-top:18px"><h3>Change administrator password</h3>
+<label for="currentAdminPassword">Current password</label><input id="currentAdminPassword" type="password">
+<label for="newAdminPassword">New password (minimum 12 characters)</label><input id="newAdminPassword" type="password" minlength="12">
+<button class="ghost" onclick="changeAdminPassword()">Update password</button></div>
+<p style="margin-top:18px"><button class="ghost" onclick="adminLogout()">Sign out</button></p></div>
 </div></div>
 
 <script>
@@ -576,6 +580,14 @@ async function loadPortfolioAdmin(){
       const toggle=document.createElement("button");toggle.className="ghost";toggle.textContent=p.published?"Hide":"Publish";toggle.onclick=async()=>{await api("adminSetPortfolioStatus",{token:adminToken,id:p.id,published:!p.published});loadPortfolioAdmin();loadPortfolio()};
       el.append(name,edit,toggle);$("portfolioAdminList").append(el);
     });
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+
+async function changeAdminPassword(){
+  try{
+    const r=await api("adminChangePassword",{token:adminToken,currentPassword:$("currentAdminPassword").value,newPassword:$("newAdminPassword").value});
+    adminToken=r.token;$("currentAdminPassword").value="";$("newAdminPassword").value="";
+    $("adminStatus").textContent=r.message;
   }catch(e){$("adminStatus").textContent=e.message}
 }
 
