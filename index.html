@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Veehicee Telecommunications and Services builds software, education technology, websites and ICT solutions in Ado-Ekiti.">
-<title>Veehicee | Technology with purpose</title>
+<meta name="description" content="Veehicee Telecommunications and Services builds software, education technology, websites and ICT solutions in Ado-Ekiti."><meta name="robots" content="index,follow"><meta property="og:type" content="website"><meta property="og:title" content="Veehicee Telecommunications and Services"><meta property="og:description" content="Technology services, digital products and practical ICT solutions from Veehicee."><meta property="og:url" content="https://sheggun1.github.io/veehiceetech/"><meta name="twitter:card" content="summary">
+<title>Veehicee | Technology with purpose</title><link rel="canonical" href="https://sheggun1.github.io/veehiceetech/"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Veehicee Telecommunications and Services","url":"https://sheggun1.github.io/veehiceetech/","identifier":"CAC 4714550"}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -205,7 +205,7 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
 <div id="accountPhoneWrap"><label for="accountPhone">Phone</label><input id="accountPhone">
 </div><label for="accountPassword">Password (minimum 12 characters)</label><input id="accountPassword" type="password" minlength="12">
 <button class="ghost" id="accountSubmit" type="button">Create account</button>
-<button class="ghost" id="myOrdersBtn" type="button">My orders</button>
+<button class="ghost" id="myOrdersBtn" type="button">My orders</button> <button class="ghost" id="myLoyaltyBtn" type="button">My loyalty points</button> <button class="ghost" id="customerLogoutBtn" type="button">Sign out</button><p id="loyaltyStatus" class="status"></p>
 <div id="myOrdersList"></div>
 <p class="status" id="accountStatus" role="status" aria-live="polite"></p>
 </div>
@@ -255,6 +255,8 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
 <label for="pCat">Category</label><input id="pCat" placeholder="Charging">
 <label for="pPrice">Price (₦)</label><input id="pPrice" type="number" min="0">
 <label for="pStock">Stock</label><input id="pStock" type="number" min="0">
+<label for="pCost">Cost price per unit (₦)</label><input id="pCost" type="number" min="0" value="0">
+<label for="pWholesale">Wholesale price (₦, applies to 5+ units)</label><input id="pWholesale" type="number" min="0" value="0">
 <label for="pImg">Image URL (optional)</label><input id="pImg" type="url">
 <label for="pFile">Or upload product image (max 5 MB)</label><input id="pFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
 <label for="pDesc">Description</label><input id="pDesc">
@@ -268,8 +270,27 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
 <button class="ghost" onclick="saveDeliveryZone()">Save delivery area</button>
 <label for="categoryName">Product category</label><input id="categoryName" placeholder="Phone cases">
 <button class="ghost" onclick="saveCategory()">Save category</button>
-<h3>Orders and delivery</h3><button class="ghost" onclick="loadOrders()">Refresh orders</button><div id="ordersList"></div>
+<h3>Orders and delivery</h3><button class="ghost" onclick="loadOrders()">Refresh orders</button> <button class="ghost" onclick="exportOrdersCsv()">Export orders CSV</button><div id="ordersList"></div>
+<h3>Customer database</h3><button class="ghost" onclick="loadCustomers()">Refresh customers</button> <button class="ghost" onclick="exportCustomersCsv()">Export customers CSV</button><div id="customersList"></div>
 <h3>Inventory and sales report</h3><button class="ghost" onclick="loadInventoryReport()">Refresh report</button><p id="inventoryReport" class="status"></p>
+<h3>Business performance and profit</h3><button class="ghost" onclick="loadBusinessReport()">Refresh financial report</button> <button class="ghost" onclick="exportExpensesCsv()">Export expenses CSV</button><p id="businessReport" class="status"></p><div id="monthlyRevenueList"></div>
+<h3>Record business expense</h3>
+<label for="expenseCategory">Expense category</label><input id="expenseCategory" placeholder="Transport, rent, data, delivery">
+<label for="expenseDescription">Description</label><input id="expenseDescription" placeholder="What was the expense for?">
+<label for="expenseAmount">Amount (₦)</label><input id="expenseAmount" type="number" min="1">
+<label for="expenseDate">Date</label><input id="expenseDate" type="date">
+<button class="ghost" onclick="saveExpense()">Save expense</button><p id="expenseStatus" class="status"></p><button class="ghost" onclick="loadExpenses()">View recorded expenses</button><div id="expensesList"></div>
+<h3>Discount coupons</h3>
+<label for="couponCode">Coupon code</label><input id="couponCode" placeholder="WELCOME10">
+<label for="couponType">Discount type</label><select id="couponType"><option value="percent">Percentage</option><option value="fixed">Fixed amount (₦)</option></select>
+<label for="couponValue">Discount value</label><input id="couponValue" type="number" min="1">
+<label for="couponMinimum">Minimum order (₦)</label><input id="couponMinimum" type="number" min="0" value="0">
+<label for="couponLimit">Usage limit (0 = unlimited)</label><input id="couponLimit" type="number" min="0" value="0">
+<label for="couponExpiry">Expiry date (optional)</label><input id="couponExpiry" type="date">
+<button class="ghost" onclick="saveCoupon()">Save coupon</button><p id="couponStatus" class="status"></p><div id="couponList"></div>
+<h3>Customer product reviews</h3><button class="ghost" onclick="loadReviews()">Refresh reviews</button><div id="reviewsAdminList"></div>
+<h3>Abandoned shopping carts</h3><button class="ghost" onclick="loadAbandonedCarts()">Refresh saved carts</button><div id="abandonedCartsList"></div><p class="muted">To turn on automatic daily reminders, first update Code.gs in Apps Script, then run <code>setupVeehiceeCartReminderTrigger()</code> once in the Apps Script editor and approve the permissions. Customers must sign in and select “Save my cart”.</p>
+<h3>Stock alert</h3><button class="ghost" onclick="sendLowStockAlert()">Email low-stock report to administrator</button><p id="stockAlertStatus" class="status"></p>
 <h3>Database backup</h3><button class="ghost" onclick="createDatabaseBackup()">Create Google Drive backup</button><p id="backupStatus" class="status"></p>
 <h3>Business information and SEO</h3>
 <label for="settingPhone">Business phone</label><input id="settingPhone">
@@ -357,7 +378,7 @@ loadPublicSettings();
 
 /* ───────── MARKETPLACE ───────── */
 const SAMPLE=[["Phone accessories","Cases, cables and screen protection","📱"],["Charging essentials","Chargers and fast-charge cables","🔌"],["Audio","Earphones and speakers","🎧"],["Power banks","Stay powered through the day","🔋"]];
-let productsCache=[], cart=[], customerToken="";
+let productsCache=[], cart=[], customerToken=sessionStorage.getItem("veehiceeCustomerToken")||"";
 const money=n=>"₦"+Number(n||0).toLocaleString("en-NG");
 function updateCart(){
   $("cartCount").textContent=cart.reduce((s,x)=>s+x.quantity,0)+" items";
@@ -443,15 +464,31 @@ $("accountMode").onchange=()=>{$("accountNameWrap").hidden=$("accountMode").valu
 $("myOrdersBtn").onclick=async()=>{
   if(!customerToken){$("accountStatus").textContent="Please sign in first.";return}
   try{const r=await api("customerOrders",{token:customerToken});$("myOrdersList").innerHTML="";
-    (r.orders||[]).forEach(o=>{const p=document.createElement("p");p.textContent=o.id+" · "+money(o.total)+" · "+o.paymentStatus+" · "+o.deliveryStatus;$("myOrdersList").append(p)});
+    (r.orders||[]).forEach(o=>{const row=document.createElement("div");row.className="aitem";const p=document.createElement("span");p.textContent=o.id+" · "+money(o.total)+" · "+o.paymentStatus+" · "+o.deliveryStatus;const b=document.createElement("button");b.className="ghost";b.textContent="Print invoice";b.onclick=()=>printCustomerInvoice(o);row.append(p,b);$("myOrdersList").append(row)});
     if(!(r.orders||[]).length)$("myOrdersList").textContent="No orders yet.";
   }catch(err){$("accountStatus").textContent=err.message}
 };
+
+function printCustomerInvoice(o){
+ const w=window.open("","_blank");if(!w){$("accountStatus").textContent="Allow pop-ups to print your invoice.";return}
+ const name=$("buyerName").value||$("accountName").value||"Customer";
+ const rows=(o.items||[]).map(it=>"<tr><td>"+escapeInvoice(it.name)+"</td><td>"+Number(it.quantity)+"</td><td>₦"+Number(it.unitPrice).toLocaleString("en-NG")+"</td><td>₦"+Number(it.lineTotal).toLocaleString("en-NG")+"</td></tr>").join("");
+ w.document.write("<!doctype html><html><head><title>Invoice "+escapeInvoice(o.id)+"</title><style>body{font:14px Arial;margin:40px;color:#172033}h1{color:#087e69}table{width:100%;border-collapse:collapse;margin-top:24px}td,th{border-bottom:1px solid #ddd;padding:10px;text-align:left}.total{text-align:right;font-size:18px;font-weight:bold;margin-top:24px}</style></head><body><h1>Veehicee Telecommunications and Services</h1><p>CAC Registration No. 4714550</p><h2>Order invoice</h2><p>Order: "+escapeInvoice(o.id)+"<br>Customer: "+escapeInvoice(name)+"<br>Date: "+escapeInvoice(new Date(o.createdAt).toLocaleString())+"<br>Payment: "+escapeInvoice(o.paymentStatus)+"<br>Delivery: "+escapeInvoice(o.deliveryStatus)+"</p><table><thead><tr><th>Item</th><th>Qty</th><th>Unit price</th><th>Total</th></tr></thead><tbody>"+rows+"</tbody></table><p class='total'>Subtotal: ₦"+Number(o.subtotal).toLocaleString("en-NG")+"<br>Delivery: ₦"+Number(o.deliveryFee).toLocaleString("en-NG")+"<br>Total: ₦"+Number(o.total).toLocaleString("en-NG")+"</p><p>Thank you for shopping with Veehicee.</p><script>window.onload=()=>window.print()<\\/script></body></html>");
+ w.document.close();
+}
+function escapeInvoice(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+$("customerLogoutBtn").onclick=async()=>{try{if(customerToken)await api("customerLogout",{token:customerToken})}catch(e){}customerToken="";sessionStorage.removeItem("veehiceeCustomerToken");$("accountStatus").textContent="You have signed out."};
+$("myLoyaltyBtn").onclick=async()=>{
+ if(!customerToken){$("loyaltyStatus").textContent="Please sign in first.";return}
+ try{const r=await api("customerLoyalty",{token:customerToken});$("loyaltyStatus").textContent="Your available balance: "+r.points+" points (1 point = ₦1)."}
+ catch(e){$("loyaltyStatus").textContent=e.message}
+};
+
 $("accountSubmit").onclick=async()=>{
   const mode=$("accountMode").value;$("accountStatus").textContent="Please wait…";
   try{
     const data=mode==="register"?{name:$("accountName").value,email:$("accountEmail").value,phone:$("accountPhone").value,password:$("accountPassword").value}:{email:$("accountEmail").value,password:$("accountPassword").value};
-    const r=await api(mode==="register"?"customerRegister":"customerLogin",data);customerToken=r.token;
+    const r=await api(mode==="register"?"customerRegister":"customerLogin",data);customerToken=r.token;sessionStorage.setItem("veehiceeCustomerToken",customerToken);
     $("accountStatus").textContent="Signed in as "+r.customer.name+". Your future orders can be linked to this account.";
     $("buyerName").value=r.customer.name;$("buyerEmail").value=r.customer.email;$("buyerPhone").value=r.customer.phone;
   }catch(err){$("accountStatus").textContent=err.message}
@@ -504,6 +541,12 @@ async function adminLogin(){
     await loadProductsAdmin();
     await loadInventoryReport();
     await loadBusinessSettings();
+    await loadBusinessReport();
+    await loadCoupons();
+    await loadReviews();
+    await loadAbandonedCarts();
+    await loadCustomers();
+    await loadExpenses();
     const ds=(await api("publicSettings")).settings||{};applyDesign({theme:ds.siteTheme||"midnight",layout:ds.siteLayout||"split",pattern:ds.sitePattern||"none"});
   }catch(e){
     $("adminPassword").value="";
@@ -568,12 +611,14 @@ async function saveProduct(){
       category:$("pCat").value,
       price:$("pPrice").value,
       stock:$("pStock").value,
+      costPrice:$("pCost").value,
+      wholesalePrice:$("pWholesale").value,
       imageUrl:imageUrl,
       description:$("pDesc").value,
       active:true
     });
     $("adminStatus").textContent="Product saved.";
-    ["pName","pCat","pPrice","pStock","pImg","pDesc","pFile","pEditingId"].forEach(i=>$(i).value="");
+    ["pName","pCat","pPrice","pStock","pCost","pWholesale","pImg","pDesc","pFile","pEditingId"].forEach(i=>$(i).value="");
     loadProducts();loadProductsAdmin();
   }catch(e){$("adminStatus").textContent=e.message}
 }
@@ -625,7 +670,7 @@ async function loadProductsAdmin(){
       const el=document.createElement("div");el.className="aitem";
       const info=document.createElement("span");info.textContent=p.name+" · "+money(p.price)+" · stock "+p.stock+(p.active?"":" · hidden");
       const edit=document.createElement("button");edit.className="ghost";edit.textContent="Edit";edit.onclick=()=>{
-        $("pEditingId").value=p.id;$("pName").value=p.name;$("pCat").value=p.category;$("pPrice").value=p.price;$("pStock").value=p.stock;$("pImg").value=p.imageUrl||"";$("pDesc").value=p.description||"";
+        $("pEditingId").value=p.id;$("pName").value=p.name;$("pCat").value=p.category;$("pPrice").value=p.price;$("pStock").value=p.stock;$("pCost").value=p.costPrice||0;$("pWholesale").value=p.wholesalePrice||0;$("pImg").value=p.imageUrl||"";$("pDesc").value=p.description||"";
         $("adminStatus").textContent="Editing "+p.name;
       };
       const toggle=document.createElement("button");toggle.className="ghost";toggle.textContent=p.active?"Hide":"Publish";toggle.onclick=async()=>{await api("adminSetProductStatus",{token:adminToken,id:p.id,active:!p.active});loadProductsAdmin();loadProducts()};
@@ -638,6 +683,61 @@ async function createDatabaseBackup(){
   try{const r=await api("adminCreateBackup",{token:adminToken});$("backupStatus").textContent=r.message+" "+r.fileName;const a=document.createElement("a");a.href=r.fileUrl;a.target="_blank";a.rel="noopener";a.textContent="Open backup";$("backupStatus").append(document.createTextNode(" "),a)}
   catch(e){$("backupStatus").textContent=e.message}
 }
+
+let businessReportCache=null, expenseCache=[], customerCache=[], orderCache=[];
+async function loadBusinessReport(){
+ try{const r=await api("adminBusinessReport",{token:adminToken});businessReportCache=r;$("businessReport").textContent="Paid orders: "+r.paidOrders+" · Revenue: "+money(r.revenue)+" · Product cost: "+money(r.costOfGoods)+" · Expenses: "+money(r.expenses)+" · Estimated profit: "+money(r.estimatedProfit)+". "+r.profitNote;
+ const box=$("monthlyRevenueList");box.innerHTML="";const months=Object.keys(r.monthlyRevenue||{}).sort().reverse().slice(0,12),max=Math.max(1,...months.map(k=>Number(r.monthlyRevenue[k])||0));months.forEach(month=>{const row=document.createElement("div");row.style.margin="10px 0";const label=document.createElement("div");label.textContent=month+" — "+money(r.monthlyRevenue[month]);const track=document.createElement("div");track.style.cssText="height:9px;background:var(--line);border-radius:9px;overflow:hidden;margin-top:5px";const bar=document.createElement("div");bar.style.cssText="height:100%;background:var(--accent);width:"+Math.max(2,(Number(r.monthlyRevenue[month])||0)/max*100)+"%;border-radius:9px";track.append(bar);row.append(label,track);box.append(row)});
+ }catch(e){$("businessReport").textContent=e.message}
+}
+async function loadExpenses(){
+ try{const r=await api("adminListExpenses",{token:adminToken});expenseCache=r.expenses||[];$("expensesList").innerHTML="";
+ expenseCache.slice(0,30).forEach(e=>{const p=document.createElement("p");p.textContent=new Date(e.expenseDate).toLocaleDateString()+" · "+e.category+" · "+e.description+" · "+money(e.amount);$("expensesList").append(p)});
+ }catch(e){$("expenseStatus").textContent=e.message}
+}
+async function loadCustomers(){
+ try{const r=await api("adminListCustomers",{token:adminToken});customerCache=r.customers||[];$("customersList").innerHTML="";
+ customerCache.slice(0,50).forEach(c=>{const p=document.createElement("p");p.textContent=c.name+" · "+c.phone+" · "+c.email+" · "+c.orderCount+" orders · Paid: "+money(c.totalPaid)+(c.hasAccount?" · Account":"");$("customersList").append(p)});
+ }catch(e){$("adminStatus").textContent=e.message}
+}
+function csvDownload(name,rows){
+ const quote=v=>'"'+String(v===null||v===undefined?"":v).replace(/"/g,'""')+'"';
+ const csv=rows.map(row=>row.map(quote).join(",")).join("\r\n");
+ const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download=name;document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+async function exportOrdersCsv(){
+ try{const r=await api("adminListOrders",{token:adminToken});const rows=[["Order ID","Customer","Phone","Town","Address","Items","Subtotal","Delivery fee","Total","Payment method","Payment status","Order status","Delivery status","Tracking code","Date"],...(r.orders||[]).map(o=>[o.id,o.customerName,o.phone,o.town,o.address,o.itemsJson,o.subtotal,o.deliveryFee,o.total,o.paymentMethod,o.paymentStatus,o.orderStatus,o.deliveryStatus,o.trackingCode,o.createdAt])];csvDownload("veehicee-orders.csv",rows)}
+ catch(e){$("adminStatus").textContent=e.message}
+}
+function exportCustomersCsv(){csvDownload("veehicee-customers.csv",[["Name","Email","Phone","Account","Orders","Paid orders","Total paid","Last order"],...customerCache.map(c=>[c.name,c.email,c.phone,c.hasAccount?"Yes":"No",c.orderCount,c.paidOrderCount,c.totalPaid,c.lastOrderAt])])}
+function exportExpensesCsv(){csvDownload("veehicee-expenses.csv",[["Date","Category","Description","Amount"],...expenseCache.map(e=>[e.expenseDate,e.category,e.description,e.amount])])}
+async function saveExpense(){
+ try{await api("adminSaveExpense",{token:adminToken,category:$("expenseCategory").value,description:$("expenseDescription").value,amount:$("expenseAmount").value,expenseDate:$("expenseDate").value});$("expenseStatus").textContent="Expense recorded.";["expenseCategory","expenseDescription","expenseAmount","expenseDate"].forEach(id=>$(id).value="");loadBusinessReport();loadExpenses()}
+ catch(e){$("expenseStatus").textContent=e.message}
+}
+async function saveCoupon(){
+ try{await api("adminSaveCoupon",{token:adminToken,code:$("couponCode").value,type:$("couponType").value,value:$("couponValue").value,minimumOrder:$("couponMinimum").value,usageLimit:$("couponLimit").value,expiresAt:$("couponExpiry").value,active:true});$("couponStatus").textContent="Coupon saved.";loadCoupons()}
+ catch(e){$("couponStatus").textContent=e.message}
+}
+async function loadCoupons(){
+ try{const r=await api("adminListCoupons",{token:adminToken});$("couponList").innerHTML="";(r.coupons||[]).forEach(c=>{const p=document.createElement("p");p.textContent=c.code+" · "+(c.type==="percent"?c.value+"%":money(c.value))+" · used "+c.usedCount+(c.usageLimit?" / "+c.usageLimit:"")+" · "+(c.active?"Active":"Inactive");$("couponList").append(p)})}
+ catch(e){$("couponStatus").textContent=e.message}
+}
+async function loadReviews(){
+ try{const r=await api("adminListReviews",{token:adminToken});$("reviewsAdminList").innerHTML="";(r.reviews||[]).forEach(v=>{const el=document.createElement("div");el.className="aitem";const info=document.createElement("span");info.textContent=v.productName+" · "+v.customerName+" · "+v.rating+"/5 — "+v.review;const btn=document.createElement("button");btn.className="ghost";btn.textContent=v.approved?"Hide":"Approve";btn.onclick=async()=>{await api("adminSetReviewStatus",{token:adminToken,id:v.id,approved:!v.approved});loadReviews()};el.append(info,btn);$("reviewsAdminList").append(el)})}
+ catch(e){$("adminStatus").textContent=e.message}
+}
+async function loadAbandonedCarts(){
+ try{const r=await api("adminListAbandonedCarts",{token:adminToken});$("abandonedCartsList").innerHTML="";(r.carts||[]).forEach(c=>{const el=document.createElement("div");el.className="aitem";const info=document.createElement("span");info.textContent=c.email+" · "+c.items;const btn=document.createElement("button");btn.className="ghost";btn.textContent="Send reminder";btn.onclick=async()=>{try{await api("adminSendAbandonedCartReminder",{token:adminToken,id:c.id});btn.textContent="Reminder sent";btn.disabled=true}catch(e){$("adminStatus").textContent=e.message}};el.append(info,btn);$("abandonedCartsList").append(el)})}
+ catch(e){$("adminStatus").textContent=e.message}
+}
+async function sendLowStockAlert(){
+ $("stockAlertStatus").textContent="Sending report…";
+ try{const r=await api("adminSendLowStockAlert",{token:adminToken,threshold:5});$("stockAlertStatus").textContent=r.message+" Items: "+r.count}
+ catch(e){$("stockAlertStatus").textContent=e.message}
+}
+
 async function loadInventoryReport(){
   try{const r=await api("adminInventoryReport",{token:adminToken});$("inventoryReport").textContent="Products: "+r.totalProducts+" · Orders: "+r.totalOrders+" · Paid orders: "+r.paidOrders+" · Paid revenue: "+money(r.revenue)+" · Stock value: "+money(r.stockValue)+" · Low stock: "+r.lowStock.length+(r.lowStock.length?" ("+r.lowStock.map(p=>p.name+" ["+p.stock+"]").join(", ")+")":"")}
   catch(e){$("inventoryReport").textContent=e.message}
@@ -650,9 +750,18 @@ async function saveCategory(){
   try{await api("adminSaveCategory",{token:adminToken,name:$("categoryName").value,active:true});$("adminStatus").textContent="Category saved.";$("categoryName").value=""}
   catch(e){$("adminStatus").textContent=e.message}
 }
+
+function printAdminInvoice(o){
+ const w=window.open("","_blank");if(!w){$("adminStatus").textContent="Allow pop-ups to print invoices.";return}
+ let items=[];try{items=JSON.parse(o.itemsJson||"[]")}catch(e){}
+ const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+ const rows=items.map(it=>"<tr><td>"+esc(it.name)+"</td><td>"+Number(it.quantity)+"</td><td>₦"+Number(it.unitPrice).toLocaleString("en-NG")+"</td><td>₦"+Number(it.lineTotal).toLocaleString("en-NG")+"</td></tr>").join("");
+ w.document.write("<!doctype html><html><head><title>Invoice "+esc(o.id)+"</title><style>body{font:14px Arial;margin:40px;color:#172033}h1{color:#087e69}table{width:100%;border-collapse:collapse;margin-top:24px}td,th{border-bottom:1px solid #ddd;padding:10px;text-align:left}.total{text-align:right;font-size:18px;font-weight:bold;margin-top:24px}</style></head><body><h1>Veehicee Telecommunications and Services</h1><p>CAC Registration No. 4714550</p><h2>Sales invoice</h2><p>Order: "+esc(o.id)+"<br>Customer: "+esc(o.customerName)+"<br>Phone: "+esc(o.phone)+"<br>Delivery: "+esc(o.town)+"<br>Payment: "+esc(o.paymentStatus)+"</p><table><thead><tr><th>Product</th><th>Qty</th><th>Unit price</th><th>Total</th></tr></thead><tbody>"+rows+"</tbody></table><p class='total'>Subtotal: ₦"+Number(o.subtotal).toLocaleString("en-NG")+"<br>Delivery: ₦"+Number(o.deliveryFee).toLocaleString("en-NG")+"<br>Total: ₦"+Number(o.total).toLocaleString("en-NG")+"</p><p>Thank you for your patronage.</p><script>window.onload=()=>window.print()<\\/script></body></html>");w.document.close();
+}
+
 async function loadOrders(){
   try{
-    const r=await api("adminListOrders",{token:adminToken});$("ordersList").innerHTML="";
+    const r=await api("adminListOrders",{token:adminToken});orderCache=r.orders||[];$("ordersList").innerHTML="";
     (r.orders||[]).slice(0,30).forEach(o=>{
       const el=document.createElement("div");el.className="aitem";
       const info=document.createElement("span");info.textContent=o.id+" · "+o.customerName+" · "+money(o.total)+" · "+o.paymentStatus+" · "+o.orderStatus;
@@ -662,6 +771,8 @@ async function loadOrders(){
       const tracking=document.createElement("input");tracking.placeholder="Tracking code";tracking.value=o.trackingCode||"";tracking.style.maxWidth="140px";
       const update=document.createElement("button");update.className="ghost";update.textContent="Update";update.onclick=async()=>{try{await api("adminUpdateOrder",{token:adminToken,id:o.id,orderStatus:status.value,deliveryStatus:delivery.value,trackingCode:tracking.value});await loadOrders()}catch(err){$("adminStatus").textContent=err.message}};
       el.append(status,delivery,tracking,update);
+      const invoice=document.createElement("button");invoice.className="ghost";invoice.textContent="Print invoice";invoice.onclick=()=>printAdminInvoice(o);el.append(invoice);
+      const wa=document.createElement("button");wa.className="ghost";wa.textContent="WhatsApp customer";wa.onclick=()=>{const phone=String(o.phone||"").replace(/[^0-9]/g,"");if(phone)window.open("https://wa.me/"+phone+"?text="+encodeURIComponent("Hello "+o.customerName+", this is Veehicee regarding order "+o.id+". Your current order status is "+o.orderStatus+"."),"_blank","noopener");};el.append(wa);
       if(o.paymentMethod==="bank_transfer" && !["Paid","Confirmed"].includes(o.paymentStatus)){
         const b=document.createElement("button");b.className="ghost";b.textContent="Confirm transfer";b.onclick=async()=>{if(!confirm("Confirm that this bank transfer has actually been received?"))return;try{await api("adminConfirmBankTransfer",{token:adminToken,orderId:o.id});await loadOrders();$("adminStatus").textContent="Bank transfer confirmed."}catch(err){$("adminStatus").textContent=err.message}};el.append(b);
       }

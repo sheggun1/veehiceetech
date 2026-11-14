@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://sheggun1.github.io/veehiceetech/sitemap.xml
