@@ -250,6 +250,10 @@ function submitEnquiry_(x) {
   const name=String(x.name||"").trim(), contact=String(x.contact||"").trim(), message=String(x.message||"").trim();
   if(!name || !contact || !message) throw new Error("Complete all enquiry fields.");
   if(name.length>120 || contact.length>160 || message.length>5000) throw new Error("One or more fields are too long.");
+  const spamKey="enquiry_"+hashToken_(contact.toLowerCase());
+  const cache=CacheService.getScriptCache();
+  if(cache.get(spamKey)) throw new Error("Please wait a little before sending another enquiry.");
+  cache.put(spamKey,"1",60);
   sheet_("Enquiries").appendRow([Utilities.getUuid(),name,contact,message,"New",new Date()]);
   return {message:"Enquiry received."};
 }
@@ -276,8 +280,9 @@ function adminSaveProduct_(x) {
   }
   const sh=sheet_("Products"), id=String(x.id||Utilities.getUuid()), d=sh.getDataRange().getValues();
   const vals=[id,name,String(x.category||"General"),String(x.description||""),price,stock,String(x.imageUrl||""),x.active!==false,new Date(),new Date()];
-  let row=-1; for(let i=1;i<d.length;i++) if(String(d[i][0])===id){row=i+1;break;}
+  let row=-1, oldStock=0; for(let i=1;i<d.length;i++) if(String(d[i][0])===id){row=i+1;oldStock=Number(d[i][5])||0;break;}
   if(row>0) sh.getRange(row,1,1,vals.length).setValues([vals]); else sh.appendRow(vals);
+  if(row>0 && oldStock!==stock) sheet_("InventoryMovements").appendRow([Utilities.getUuid(),id,name,stock-oldStock,"Admin stock adjustment","",new Date()]);
   log_(email,"SAVE_PRODUCT",name); return {message:"Product saved.",id:id};
 }
 function adminUpdateOrder_(x) {
@@ -612,11 +617,15 @@ function customerRegister_(x) {
 function customerLogin_(x) {
   const email=String(x.email||"").trim().toLowerCase(), password=String(x.password||"");
   if(!email || !password || email.length>254 || password.length>256) throw new Error("Enter your email and password.");
+  const cache=CacheService.getScriptCache(), key="customer_login_"+hashToken_(email), attempts=Number(cache.get(key)||0);
+  if(attempts>=5) throw new Error("Too many unsuccessful attempts. Please wait 15 minutes.");
   const d=sheet_("CustomerAccounts").getDataRange().getValues();
   for(let i=1;i<d.length;i++) if(String(d[i][2]).toLowerCase()===email && d[i][6]===true && strongPasswordHash_(password,String(d[i][4]))===String(d[i][5])) {
+    cache.remove(key);
     const token=issueCustomerSession_(d[i][0],email);
     return {token:token,customer:{id:d[i][0],name:d[i][1],email:d[i][2],phone:d[i][3]}};
   }
+  cache.put(key,String(attempts+1),900);
   throw new Error("Invalid email or password.");
 }
 function issueCustomerSession_(id,email) {
@@ -681,8 +690,9 @@ function adminSaveSetting_(x) {
   log_(email,"SAVE_SETTING",key); return {message:"Setting saved."};
 }
 function publicSettings_() {
+  const allowed=["companyName","businessPhone","whatsapp","businessEmail","businessAddress","mission","vision","seoTitle","seoDescription","instagram","facebook","openingHours","bankName","bankAccountName","bankAccountNumber"];
   const d=sheet_("SiteSettings").getDataRange().getValues(), settings={};
-  d.slice(1).forEach(r=>{if(r[0]) settings[String(r[0])]=String(r[1]||"");});
+  d.slice(1).forEach(r=>{if(allowed.indexOf(String(r[0]))>=0) settings[String(r[0])]=String(r[1]||"");});
   return {settings:settings};
 }
 function adminInventoryReport_(x) {
