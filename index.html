@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en" data-theme="midnight" data-layout="split">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Veehicee Telecommunications and Services builds software, education technology, websites and ICT solutions in Ado-Ekiti.">
+<title>Veehicee | Technology with purpose</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#06101c;--panel:#0e1c2e;--ink:#f2f6fb;--muted:#9fb0c4;--line:#223750;--accent:#5df0c8;--accent2:#7aa8ff;--on:#04211b;--glow:rgba(93,240,200,.22);--r:20px}
+[data-theme=sunrise]{--bg:#fff7f2;--panel:#fff;--ink:#231815;--muted:#6e5d57;--line:#efd9ce;--accent:#ff5b37;--accent2:#ffb020;--on:#fff;--glow:rgba(255,91,55,.2)}
+[data-theme=royal]{--bg:#0d0a24;--panel:#1a1442;--ink:#f5f3ff;--muted:#b4acd9;--line:#342b70;--accent:#ffc83d;--accent2:#9b7bff;--on:#231a00;--glow:rgba(155,123,255,.28)}
+[data-theme=forest]{--bg:#07140f;--panel:#0f2419;--ink:#eef8f1;--muted:#9bb8a6;--line:#1f4130;--accent:#b6f25b;--accent2:#35d49a;--on:#14230a;--glow:rgba(182,242,91,.2)}
+[data-theme=ocean]{--bg:#f3f7ff;--panel:#fff;--ink:#0b1b3a;--muted:#55688a;--line:#d5e0f5;--accent:#1457ff;--accent2:#00c2ff;--on:#fff;--glow:rgba(20,87,255,.18)}
+[data-theme=berry]{--bg:#17081a;--panel:#261029;--ink:#fdf1fb;--muted:#c9a5c8;--line:#4a2150;--accent:#ff4fa3;--accent2:#ffa24f;--on:#2a0418;--glow:rgba(255,79,163,.24)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "DM Sans",system-ui,sans-serif;transition:background .3s,color .3s}
+h1,h2,h3,.brand{font-family:"Bricolage Grotesque","DM Sans",system-ui,sans-serif}
+a{color:inherit;text-decoration:none}:focus-visible{outline:3px solid var(--accent2);outline-offset:3px}
+.wrap{width:min(1160px,calc(100% - 40px));margin:auto}
+.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{font-weight:800;font-size:1.5rem;letter-spacing:-.05em}.brand i{font-style:normal;color:var(--accent)}
+.links{display:flex;gap:28px;color:var(--muted);font-size:.95rem}.links a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 22px;border-radius:999px;background:var(--accent);color:var(--on);font:700 .95rem "DM Sans",sans-serif;border:0;cursor:pointer;transition:transform .15s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px var(--glow)}
+.ghost{display:inline-flex;padding:12px 20px;border:1px solid var(--line);border-radius:999px;background:none;color:var(--ink);font:500 .95rem "DM Sans",sans-serif;cursor:pointer}.ghost:hover{border-color:var(--accent)}
+/* hero */
+.hero{position:relative;display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;padding:96px 0 88px;overflow:hidden}
+.tag{display:inline-flex;align-items:center;gap:10px;padding:7px 14px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.88rem;background:var(--panel)}
+.tag b{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--glow)}
+.hero h1{font-size:clamp(3.1rem,8vw,6.6rem);line-height:.95;letter-spacing:-.06em;margin:24px 0 22px;font-weight:800}
+.grad{background:linear-gradient(100deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:1.18rem;color:var(--muted);max-width:560px}.actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:32px}
+.signal{position:relative;aspect-ratio:1;width:100%;max-width:460px;justify-self:center}
+.signal svg{width:100%;height:100%;overflow:visible}
+.ring{fill:none;stroke:var(--accent);stroke-width:1.4;transform-origin:230px 230px;animation:ping 5s ease-out infinite;opacity:0}
+.ring:nth-child(2){animation-delay:1s;stroke:var(--accent2)}.ring:nth-child(3){animation-delay:2s}.ring:nth-child(4){animation-delay:3s;stroke:var(--accent2)}.ring:nth-child(5){animation-delay:4s}
+@keyframes ping{0%{transform:scale(.12);opacity:.9}100%{transform:scale(1);opacity:0}}
+.signal .chip{position:absolute;left:50%;bottom:4%;transform:translateX(-50%);white-space:nowrap;padding:12px 18px;border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:0 18px 40px var(--glow);font-size:.9rem}
+.signal .chip b{color:var(--accent)}
+/* sections */
+.section{padding:84px 0;border-top:1px solid var(--line)}
+.section h2{font-size:clamp(2.1rem,4.6vw,3.5rem);line-height:1.04;letter-spacing:-.045em;margin:0 0 16px;font-weight:800}
+.intro{color:var(--muted);max-width:640px;margin:0}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+.card{padding:28px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel);transition:border-color .2s,transform .2s}
+.card:hover{border-color:var(--accent);transform:translateY(-3px)}
+.ico{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--on);font-size:1.3rem}
+.card h3{font-size:1.25rem;margin:18px 0 8px;letter-spacing:-.02em}.card p{margin:0;color:var(--muted)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:64px}
+.value{padding:20px 0;border-bottom:1px solid var(--line)}.value:first-child{padding-top:0}.value strong{font-family:"Bricolage Grotesque",sans-serif;font-size:1.2rem}.value p{margin:4px 0 0;color:var(--muted)}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}.chips span{padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-size:.92rem}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;margin-top:36px}
+.prod{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);overflow:hidden;display:flex;flex-direction:column}
+.prod .img{aspect-ratio:4/3;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:2.4rem;color:var(--on)}
+.prod .img img{width:100%;height:100%;object-fit:cover}.prod .body{padding:18px;display:flex;flex-direction:column;gap:6px;flex:1}
+.prod h3{margin:0;font-size:1.1rem}.prod small{color:var(--muted)}.price{font:800 1.2rem "Bricolage Grotesque",sans-serif;color:var(--accent)}.prod .btn{margin-top:auto;padding:10px 16px}
+.contact{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px}
+footer{padding:30px 0;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}.foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.admin-link{background:none;border:0;color:var(--muted);cursor:pointer;font:inherit;text-decoration:underline}
+input,textarea,select{width:100%;padding:13px 14px;margin:6px 0 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);border-color:transparent}
+label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height:24px;margin:10px 0 0}
+.modal{display:none;position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.65);align-items:center;justify-content:center;padding:16px}.modal.open{display:flex}
+.modal-box{width:min(820px,100%);max-height:92vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:26px}
+.mh{display:flex;justify-content:space-between;align-items:center;gap:12px}.mh h2{margin:0;font-size:1.6rem}
+.agrid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.aitem{border:1px solid var(--line);padding:12px 14px;border-radius:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+/* style studio */
+.fab{position:fixed;right:18px;bottom:18px;z-index:20;padding:13px 20px;box-shadow:0 12px 32px var(--glow)}
+.studio{position:fixed;right:18px;bottom:76px;z-index:20;width:min(330px,calc(100% - 36px));background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 24px 60px rgba(0,0,0,.35);display:none}.studio.open{display:block}
+.studio h4{margin:0 0 10px;font:700 .95rem "DM Sans",sans-serif}.swatches{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.sw{border:2px solid var(--line);border-radius:12px;padding:8px;background:var(--bg);color:var(--ink);cursor:pointer;font:500 .8rem "DM Sans",sans-serif;text-align:left}.sw i{display:block;height:22px;border-radius:7px;margin-bottom:6px}
+.sw[aria-pressed=true]{border-color:var(--accent)}
+.lays{display:grid;gap:8px}.lays .ghost{justify-content:flex-start;text-align:left}.lays .ghost[aria-pressed=true]{border-color:var(--accent);background:var(--glow)}
+/* layout templates */
+[data-layout=center] .hero{grid-template-columns:1fr;text-align:center;padding:110px 0 100px}
+[data-layout=center] .lead{margin-inline:auto}[data-layout=center] .actions{justify-content:center}
+[data-layout=center] .signal{position:absolute;inset:0;margin:auto;max-width:760px;opacity:.28;z-index:-1;pointer-events:none}[data-layout=center] .chip{display:none}
+[data-layout=bold] .hero{grid-template-columns:1fr}[data-layout=bold] .hero h1{font-size:clamp(3.6rem,13vw,10rem);line-height:.88}
+[data-layout=bold] .signal{position:absolute;right:-6%;top:6%;width:min(520px,70%);opacity:.35;z-index:-1;pointer-events:none}[data-layout=bold] .chip{display:none}
+[data-layout=bold] .cards{grid-template-columns:1fr}[data-layout=bold] .card{display:grid;grid-template-columns:60px 1fr 1.4fr;gap:20px;align-items:center}[data-layout=bold] .card h3,[data-layout=bold] .card .ico{margin:0}
+[data-layout=bold]{--r:6px}
+@media(max-width:820px){.links{display:none}.hero,.split,.contact,.agrid{grid-template-columns:1fr}.hero{padding:64px 0}.cards{grid-template-columns:1fr}[data-layout=bold] .card{grid-template-columns:1fr}.signal{max-width:320px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.ring{opacity:.4;transform:scale(1)}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap nav"><a class="brand" href="#">vee<i>h</i>icee.</a>
+<nav class="links"><a href="#services">Services</a><a href="#about">About</a><a href="#marketplace">Marketplace</a><a href="#contact">Contact</a></nav>
+<a class="btn" href="#contact">Start a project</a></div></header>
+
+<main>
+<section class="wrap hero">
+<div>
+<span class="tag"><b></b>Ado-Ekiti, Nigeria</span>
+<h1>Ideas into <span class="grad">impact.</span></h1>
+<p class="lead">We build software, school systems, websites and ICT solutions that work for real people and growing organisations.</p>
+<div class="actions"><a class="btn" href="#contact">Tell us your idea</a><a class="ghost" href="#services">See what we build</a></div>
+</div>
+<div class="signal" aria-hidden="true">
+<svg viewBox="0 0 460 460"><circle class="ring" cx="230" cy="230" r="220"/><circle class="ring" cx="230" cy="230" r="220"/><circle class="ring" cx="230" cy="230" r="220"/><circle class="ring" cx="230" cy="230" r="220"/><circle class="ring" cx="230" cy="230" r="220"/>
+<circle cx="230" cy="230" r="46" fill="url(#g)"/><text x="230" y="244" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="40" fill="var(--on)">v</text>
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent2)"/></linearGradient></defs></svg>
+<div class="chip"><b>Connected.</b> Web, apps and ICT for your team.</div>
+</div>
+</section>
+
+<section class="section" id="services"><div class="wrap">
+<h2>Everything your next<br>digital chapter needs.</h2>
+<p class="intro">Strategy, design and engineering under one roof, so your idea gets from sketch to working product without handoffs.</p>
+<div class="cards">
+<article class="card"><div class="ico">&lt;/&gt;</div><h3>Software and apps</h3><p>Web and desktop applications built around how your organisation actually works.</p></article>
+<article class="card"><div class="ico">✎</div><h3>Education technology</h3><p>Result systems, CBT, lesson trackers and school tools that save staff hours.</p></article>
+<article class="card"><div class="ico">◐</div><h3>Websites and design</h3><p>Distinctive websites, flyers and brand visuals that make you easy to remember.</p></article>
+<article class="card"><div class="ico">⌁</div><h3>Telecom and ICT</h3><p>Setup, networking and ICT support so your team stays online and productive.</p></article>
+<article class="card"><div class="ico">✦</div><h3>Consulting</h3><p>Plain advice on which digital tools to choose, and how to adopt them.</p></article>
+<article class="card"><div class="ico">⚙</div><h3>Support</h3><p>Help through launch, training and every improvement after it.</p></article>
+</div></div></section>
+
+<section class="section" id="about"><div class="wrap split">
+<div><h2>Built around people.<br>Driven by what's possible.</h2>
+<p class="intro">Veehicee Telecommunications and Services makes digital progress practical and accessible for businesses, schools and communities.</p>
+<div class="chips"><span>Software</span><span>Schools</span><span>Websites</span><span>ICT</span><span>Graphic design</span></div></div>
+<div><div class="value"><strong>Our mission</strong><p>Make useful technology accessible through solutions that are dependable and built for real needs.</p></div>
+<div class="value"><strong>Our vision</strong><p>Be the technology partner people trust for meaningful innovation and excellent digital experiences.</p></div>
+<div class="value"><strong>Our approach</strong><p>Listen carefully, build intentionally, and keep improving with the people who use what we make.</p></div></div>
+</div></section>
+
+<section class="section" id="marketplace"><div class="wrap">
+<h2>Everyday tech,<br>made easier.</h2>
+<p class="intro">Phone accessories, charging essentials, audio and power banks. Delivery covers Ado-Ekiti and nearby towns.</p>
+<div class="products" id="products"></div>
+</div></section>
+
+<section class="section" id="contact"><div class="wrap contact">
+<div><h2>Got an idea?<br>Let's make it real.</h2><p class="intro">Tell us what you are working towards. We reply to every enquiry.</p></div>
+<div class="card"><h3 style="margin-top:0">Send an enquiry</h3>
+<form id="contactForm">
+<label for="n">Your name</label><input id="n" name="name" required>
+<label for="c">Email or phone</label><input id="c" name="contact" required>
+<label for="m">How can we help?</label><textarea id="m" name="message" rows="4" required></textarea>
+<!-- honeypot: bots fill this, humans don't see it -->
+<input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;height:0;width:0;opacity:0">
+<button class="btn" type="submit">Send enquiry</button><p class="status" id="contactStatus" role="status" aria-live="polite"></p></form></div>
+</div></section>
+</main>
+
+<footer><div class="wrap foot"><span>© <span id="year"></span> Veehicee Telecommunications and Services.</span><span>Technology with purpose. <button class="admin-link" onclick="openAdmin()">Admin</button></span></div></footer>
+
+<button class="btn fab" id="fab" aria-expanded="false" aria-controls="studio">🎨 Style this site</button>
+<div class="studio" id="studio"><h4>Theme</h4><div class="swatches" id="swatches"></div><h4>Template</h4><div class="lays" id="lays"></div></div>
+
+<div class="modal" id="adminModal"><div class="modal-box">
+<div class="mh"><h2>Veehicee admin</h2><button class="ghost" onclick="closeAdmin()">Close</button></div>
+<div id="loginPanel"><p class="intro">Sign in to manage your website.</p>
+<label for="adminEmail">Admin email</label><input id="adminEmail" type="email" autocomplete="username">
+<label for="adminPassword">Password</label><input id="adminPassword" type="password" autocomplete="current-password">
+<button class="btn" onclick="adminLogin()">Sign in</button><p class="status" id="loginStatus" role="status" aria-live="polite"></p></div>
+<div id="dashboard" hidden><p class="status" id="adminStatus" role="status" aria-live="polite">Signed in.</p>
+<div class="agrid">
+<div><h3>Page content</h3>
+<label for="pageTitle">Page or section title</label><input id="pageTitle" placeholder="About us">
+<label for="pageBody">Content</label><textarea id="pageBody" rows="4"></textarea>
+<label for="pagePublished">Status</label><select id="pagePublished"><option value="true">Published</option><option value="false">Draft</option></select>
+<button class="btn" onclick="savePage()">Save content</button>
+<div id="pagesList" style="margin-top:14px"></div></div>
+<div><h3>Add marketplace product</h3>
+<label for="pName">Name</label><input id="pName">
+<label for="pCat">Category</label><input id="pCat" placeholder="Charging">
+<label for="pPrice">Price (₦)</label><input id="pPrice" type="number" min="0">
+<label for="pStock">Stock</label><input id="pStock" type="number" min="0">
+<label for="pImg">Image URL (optional)</label><input id="pImg" type="url">
+<label for="pDesc">Description</label><input id="pDesc">
+<button class="btn" onclick="saveProduct()">Save product</button></div>
+</div><p style="margin-top:18px"><button class="ghost" onclick="adminLogout()">Sign out</button></p></div>
+</div></div>
+
+<script>
+/* ───────── CONFIG ───────── */
+const API_URL = "https://script.google.com/macros/s/AKfycbyOZOCPk8UOk1JtwnMosi9pnCY685lXhSiUFrIUSMKM2R68CpikDiXgsn3cx_K1q-H2_g/exec";
+
+let adminToken = "";
+const $ = id => document.getElementById(id);
+const root = document.documentElement;
+$("year").textContent = new Date().getFullYear();
+function openAdmin(){$("adminModal").classList.add("open")}
+function closeAdmin(){$("adminModal").classList.remove("open")}
+
+async function api(action,data={}){
+  const r = await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify({action,...data})
+  });
+  const j = await r.json();
+  if(!j.ok) throw new Error(j.error||"Request failed");
+  return j;
+}
+
+/* ───────── THEMES + LAYOUTS ───────── */
+const THEMES=[["midnight","Midnight","#5df0c8"],["sunrise","Sunrise","#ff5b37"],["royal","Royal","#ffc83d"],["forest","Forest","#b6f25b"],["ocean","Ocean","#1457ff"],["berry","Berry","#ff4fa3"]];
+const LAYOUTS=[["split","Split","Text left, signal right"],["center","Centered","Everything on the middle line"],["bold","Bold","Giant type, list-style services"]];
+function store(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function read(k,d){try{return localStorage.getItem(k)||d}catch(e){return d}}
+function apply(){
+  const t=read("vee-theme","midnight"),l=read("vee-layout","split");
+  root.dataset.theme=t;root.dataset.layout=l;
+  document.querySelectorAll(".sw").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===t));
+  document.querySelectorAll("#lays .ghost").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===l));
+}
+THEMES.forEach(([v,n,c])=>{const b=document.createElement("button");b.className="sw";b.dataset.v=v;b.innerHTML='<i style="background:'+c+'"></i>'+n;b.onclick=()=>{store("vee-theme",v);apply()};$("swatches").append(b)});
+LAYOUTS.forEach(([v,n,d])=>{const b=document.createElement("button");b.className="ghost";b.dataset.v=v;b.innerHTML="<span><b>"+n+"</b><br><small>"+d+"</small></span>";b.onclick=()=>{store("vee-layout",v);apply()};$("lays").append(b)});
+$("fab").onclick=()=>{const o=$("studio").classList.toggle("open");$("fab").setAttribute("aria-expanded",o)};
+apply();
+
+/* ───────── MARKETPLACE ───────── */
+const SAMPLE=[["Phone accessories","Cases, cables and screen protection","📱"],["Charging essentials","Chargers and fast-charge cables","🔌"],["Audio","Earphones and speakers","🎧"],["Power banks","Stay powered through the day","🔋"]];
+function enquire(name){$("m").value="Hello, I'm interested in: "+name;location.hash="#contact";$("n").focus({preventScroll:true})}
+async function loadProducts(){
+  const box=$("products");let list=[];
+  try{list=(await api("publicProducts")).products||[]}
+  catch(e){console.warn("publicProducts failed, showing sample:",e.message)}
+  box.innerHTML="";
+  if(!list.length){SAMPLE.forEach(([n,d,i])=>list.push({name:n,description:d,icon:i}))}
+  list.forEach(p=>{
+    const el=document.createElement("article");el.className="prod";
+    const img=document.createElement("div");img.className="img";
+    if(p.imageUrl && /^https?:\/\//i.test(p.imageUrl)){
+      const im=document.createElement("img");im.src=p.imageUrl;im.alt=p.name;im.loading="lazy";
+      im.onerror=()=>{im.remove();img.textContent="🛍"};img.append(im);
+    } else img.textContent=p.icon||"🛍";
+    const b=document.createElement("div");b.className="body";
+    const h=document.createElement("h3");h.textContent=p.name;
+    const s=document.createElement("small");s.textContent=p.description||p.category||"";
+    b.append(h,s);
+    if(p.price!==undefined){const pr=document.createElement("div");pr.className="price";pr.textContent="₦"+Number(p.price).toLocaleString();b.append(pr)}
+    const btn=document.createElement("button");btn.className="btn";btn.textContent=p.price!==undefined?"Order enquiry":"Ask about this";btn.onclick=()=>enquire(p.name);b.append(btn);
+    el.append(img,b);box.append(el);
+  });
+}
+loadProducts();
+
+/* ───────── CONTACT ───────── */
+$("contactForm").addEventListener("submit",async e=>{
+  e.preventDefault();$("contactStatus").textContent="Sending…";const f=new FormData(e.target);
+  try{
+    await api("submitEnquiry",{
+      name:f.get("name"),
+      contact:f.get("contact"),
+      message:f.get("message"),
+      website:f.get("website")||""
+    });
+    $("contactStatus").textContent="Thank you. We have received your enquiry.";
+    e.target.reset();
+  }catch(err){$("contactStatus").textContent=err.message}
+});
+
+/* ───────── ADMIN: LOGIN ───────── */
+async function adminLogin(){
+  $("loginStatus").textContent="Signing in…";
+  try{
+    const r=await api("adminLogin",{email:$("adminEmail").value,password:$("adminPassword").value});
+    adminToken=r.token;
+    $("loginPanel").hidden=true;$("dashboard").hidden=false;
+    $("adminStatus").textContent="Signed in as "+r.email;
+    await loadPages();
+  }catch(e){
+    $("adminPassword").value="";
+    $("loginStatus").textContent=e.message;
+  }
+}
+$("adminPassword").addEventListener("keydown",e=>{if(e.key==="Enter")adminLogin()});
+
+/* ───────── ADMIN: PAGES ───────── */
+async function loadPages(){
+  try{
+    const r=await api("adminListPages",{token:adminToken});
+    $("pagesList").innerHTML="";
+    (r.pages||[]).forEach(p=>{
+      const el=document.createElement("div");el.className="aitem";
+      const s=document.createElement("span");s.textContent=p.title+(p.published?"":" (draft)");
+      const b=document.createElement("button");b.className="ghost";b.textContent="Edit";
+      b.onclick=()=>{
+        $("pageTitle").value=p.title;
+        $("pageBody").value=p.body;
+        $("pagePublished").value=String(p.published);
+        $("pageTitle").dataset.editingId=p.id;   /* ← remember id for savePage */
+      };
+      el.append(s,b);$("pagesList").append(el);
+    });
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+async function savePage(){
+  try{
+    const id=$("pageTitle").dataset.editingId||"";
+    await api("adminSavePage",{
+      token:adminToken,
+      id:id,
+      title:$("pageTitle").value,
+      body:$("pageBody").value,
+      published:$("pagePublished").value==="true"
+    });
+    delete $("pageTitle").dataset.editingId;
+    $("adminStatus").textContent="Content saved.";
+    $("pageTitle").value="";$("pageBody").value="";
+    await loadPages();
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+
+/* ───────── ADMIN: PRODUCTS ───────── */
+async function saveProduct(){
+  const imageUrl=$("pImg").value.trim();
+  if(imageUrl && !/^https?:\/\//i.test(imageUrl)){
+    $("adminStatus").textContent="Image URL must start with http:// or https://";
+    return;
+  }
+  try{
+    await api("adminSaveProduct",{
+      token:adminToken,
+      name:$("pName").value,
+      category:$("pCat").value,
+      price:$("pPrice").value,
+      stock:$("pStock").value,
+      imageUrl:imageUrl,
+      description:$("pDesc").value,
+      active:true
+    });
+    $("adminStatus").textContent="Product saved.";
+    ["pName","pCat","pPrice","pStock","pImg","pDesc"].forEach(i=>$(i).value="");
+    loadProducts();
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+
+/* ───────── ADMIN: LOGOUT ───────── */
+async function adminLogout(){
+  try{await api("adminLogout",{token:adminToken})}catch(e){}
+  adminToken="";
+  $("dashboard").hidden=true;$("loginPanel").hidden=false;
+  $("loginStatus").textContent="";
+  $("adminEmail").value="";$("adminPassword").value="";
+}
+</script>
+</body>
+                                                                                                                                                                 </html>
