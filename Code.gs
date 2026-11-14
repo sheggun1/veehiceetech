@@ -25,7 +25,9 @@ const APP = {
     Categories: ["id","name","active","createdAt"],
     Products: ["id","name","category","description","price","stock","imageUrl","active","createdAt","updatedAt"],
     Customers: ["id","name","email","phone","createdAt"],
-    Orders: ["id","customerId","customerName","phone","town","address","itemsJson","subtotal","deliveryFee","total","paymentMethod","paymentStatus","orderStatus","createdAt"],
+    CustomerAccounts: ["id","name","email","phone","salt","passwordHash","active","createdAt"],
+    CustomerSessions: ["tokenHash","customerId","email","expiresAt","createdAt"],
+    Orders: ["id","customerId","customerName","phone","town","address","itemsJson","subtotal","deliveryFee","total","paymentMethod","paymentStatus","orderStatus","createdAt","deliveryStatus","trackingCode","stockReserved","updatedAt"],
     Payments: ["id","orderId","reference","amount","status","verifiedAt","createdAt"],
     ShippingZones: ["town","active","deliveryFee"],
     SiteSettings: ["key","value","updatedAt"],
@@ -148,6 +150,10 @@ function doPost(e) {
       case "adminSaveNews": lock.waitLock(15000); result = adminSaveNews_(input); break;
       case "publicNews": result = publicNews_(); break;
       case "newsletterSubscribe": lock.waitLock(15000); result = newsletterSubscribe_(input); break;
+      case "customerRegister": lock.waitLock(15000); result = customerRegister_(input); break;
+      case "customerLogin": result = customerLogin_(input); break;
+      case "customerLogout": result = customerLogout_(input); break;
+      case "customerOrders": result = customerOrders_(input); break;
       default: throw new Error("Unsupported action: " + action);
     }
     return json_(Object.assign({ok:true},result || {}));
@@ -261,8 +267,22 @@ function adminUpdateOrder_(x) {
   if(x.paymentStatus && !allowedPaymentStatuses.includes(String(x.paymentStatus))) throw new Error("Invalid payment status.");
   if(!id || id.length>120) throw new Error("A valid order ID is required.");
   for(let i=1;i<d.length;i++) if(String(d[i][0])===id) {
-    if(x.orderStatus) sh.getRange(i+1,13).setValue(String(x.orderStatus));
+    if(x.paymentStatus && ["Paid","Confirmed"].includes(String(x.paymentStatus))) {
+      throw new Error("Do not manually mark an order as paid here. Use the bank-transfer confirmation action or payment verification.");
+    }
+    if(x.orderStatus) {
+      const previous=String(d[i][12]), next=String(x.orderStatus);
+      if(next==="Cancelled" && previous!=="Cancelled" && d[i][16]===true) restoreReservedStock_(id,d[i]);
+      sh.getRange(i+1,13).setValue(next);
+    }
     if(x.paymentStatus) sh.getRange(i+1,12).setValue(String(x.paymentStatus));
+    if(x.deliveryStatus) {
+      const allowedDelivery=["Pending","Processing","Ready for dispatch","Dispatched","Delivered","Cancelled"];
+      if(!allowedDelivery.includes(String(x.deliveryStatus))) throw new Error("Invalid delivery status.");
+      sh.getRange(i+1,15).setValue(String(x.deliveryStatus));
+    }
+    if(x.trackingCode!==undefined) sh.getRange(i+1,16).setValue(String(x.trackingCode).slice(0,120));
+    sh.getRange(i+1,18).setValue(new Date());
     log_(email,"UPDATE_ORDER",id); return {message:"Order updated."};
   }
   throw new Error("Order not found.");
@@ -377,7 +397,13 @@ function createOrder_(x) {
   if(existing) customerId=String(existing[0]);
   else {customerId=Utilities.getUuid();customers.appendRow([customerId,customerName,email,phone,new Date()]);}
   sheet_("Addresses").appendRow([Utilities.getUuid(),customerId,customerName,phone,town,address,new Date()]);
-  sheet_("Orders").appendRow([orderId,customerId,customerName,phone,town,address,JSON.stringify(lines),subtotal,deliveryFee,total,method,method==="bank_transfer"?"Awaiting verification":"Pending","Pending",new Date(),"Pending",""]);
+  // Reserve stock atomically so two customers cannot buy the same final unit.
+  lines.forEach(line=>{
+    const pidx=productRows.findIndex((r,i)=>i>0 && String(r[0])===line.productId);
+    products.getRange(pidx+1,6).setValue(Number(productRows[pidx][5])-line.quantity);
+    sheet_("InventoryMovements").appendRow([Utilities.getUuid(),line.productId,line.name,-line.quantity,"Reserved for order",orderId,new Date()]);
+  });
+  sheet_("Orders").appendRow([orderId,customerId,customerName,phone,town,address,JSON.stringify(lines),subtotal,deliveryFee,total,method,method==="bank_transfer"?"Awaiting verification":"Pending","Pending",new Date(),"Pending","",true,new Date()]);
   const oi=sheet_("OrderItems"); lines.forEach(line=>oi.appendRow([Utilities.getUuid(),orderId,line.productId,line.name,line.quantity,line.unitPrice,line.lineTotal]));
   let payment={method:method,status:method==="bank_transfer"?"Awaiting verification":"Pending"};
   if(method==="paystack") payment=initializePaystack_(orderId,total,email);
@@ -440,17 +466,21 @@ function finalizePaidOrder_(orderId,reference,providerId) {
   const orders=sheet_("Orders"), d=orders.getDataRange().getValues(), idx=d.findIndex((r,i)=>i>0 && String(r[0])===orderId);
   if(idx<1) throw new Error("Order not found.");
   if(String(d[idx][11])==="Paid" || String(d[idx][11])==="Confirmed") return;
-  const lines=JSON.parse(String(d[idx][6]||"[]")), products=sheet_("Products"), pd=products.getDataRange().getValues();
-  lines.forEach(line=>{
-    const pidx=pd.findIndex((r,i)=>i>0 && String(r[0])===String(line.productId));
-    if(pidx<1 || Number(pd[pidx][5])<Number(line.quantity)) throw new Error("Stock changed before payment confirmation. Contact the store before dispatch.");
-  });
-  lines.forEach(line=>{
-    const pidx=pd.findIndex((r,i)=>i>0 && String(r[0])===String(line.productId));
-    const remaining=Number(pd[pidx][5])-Number(line.quantity);
-    products.getRange(pidx+1,6).setValue(remaining);
-    sheet_("InventoryMovements").appendRow([Utilities.getUuid(),line.productId,line.name,-Number(line.quantity),"Order paid",orderId,new Date()]);
-  });
+  const lines=JSON.parse(String(d[idx][6]||"[]"));
+  // Stock was reserved when the order was created; do not deduct it twice.
+  if(d[idx][16]!==true) {
+    const products=sheet_("Products"), pd=products.getDataRange().getValues();
+    lines.forEach(line=>{
+      const pidx=pd.findIndex((r,i)=>i>0 && String(r[0])===String(line.productId));
+      if(pidx<1 || Number(pd[pidx][5])<Number(line.quantity)) throw new Error("Stock changed before payment confirmation. Contact the store before dispatch.");
+    });
+    lines.forEach(line=>{
+      const pidx=pd.findIndex((r,i)=>i>0 && String(r[0])===String(line.productId));
+      products.getRange(pidx+1,6).setValue(Number(pd[pidx][5])-Number(line.quantity));
+      sheet_("InventoryMovements").appendRow([Utilities.getUuid(),line.productId,line.name,-Number(line.quantity),"Order paid",orderId,new Date()]);
+    });
+    orders.getRange(idx+1,17).setValue(true);
+  }
   orders.getRange(idx+1,12).setValue("Paid");
   orders.getRange(idx+1,13).setValue("Processing");
   const payments=sheet_("Payments"), pay=payments.getDataRange().getValues();
@@ -509,3 +539,73 @@ function newsletterSubscribe_(x) {
   sh.appendRow([Utilities.getUuid(),email,"Subscribed",new Date()]);
   return {message:"Subscription received."};
 }
+
+
+function restoreReservedStock_(orderId,orderRow) {
+  const lines=JSON.parse(String(orderRow[6]||"[]")), products=sheet_("Products"), pd=products.getDataRange().getValues();
+  lines.forEach(line=>{
+    const pidx=pd.findIndex((r,i)=>i>0 && String(r[0])===String(line.productId));
+    if(pidx>0) {
+      products.getRange(pidx+1,6).setValue(Number(pd[pidx][5])+Number(line.quantity));
+      sheet_("InventoryMovements").appendRow([Utilities.getUuid(),line.productId,line.name,Number(line.quantity),"Cancelled order stock release",orderId,new Date()]);
+    }
+  });
+  const orders=sheet_("Orders"), d=orders.getDataRange().getValues(), idx=d.findIndex((r,i)=>i>0 && String(r[0])===orderId);
+  if(idx>0) orders.getRange(idx+1,17).setValue(false);
+}
+function customerRegister_(x) {
+  const name=String(x.name||"").trim(), email=String(x.email||"").trim().toLowerCase(), phone=String(x.phone||"").trim(), password=String(x.password||"");
+  if(!name || name.length>150 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length>254 || !phone || phone.length>40 || password.length<12 || password.length>256) {
+    throw new Error("Enter your name, valid email, phone number and a password of at least 12 characters.");
+  }
+  const sh=sheet_("CustomerAccounts"), d=sh.getDataRange().getValues();
+  if(d.slice(1).some(r=>String(r[2]).toLowerCase()===email)) throw new Error("An account with this email already exists.");
+  const salt=Utilities.getUuid()+Utilities.getUuid(), id=Utilities.getUuid();
+  sh.appendRow([id,name,email,phone,salt,strongPasswordHash_(password,salt),true,new Date()]);
+  const token=issueCustomerSession_(id,email);
+  return {message:"Account created.",token:token,customer:{id:id,name:name,email:email,phone:phone}};
+}
+function customerLogin_(x) {
+  const email=String(x.email||"").trim().toLowerCase(), password=String(x.password||"");
+  if(!email || !password || email.length>254 || password.length>256) throw new Error("Enter your email and password.");
+  const d=sheet_("CustomerAccounts").getDataRange().getValues();
+  for(let i=1;i<d.length;i++) if(String(d[i][2]).toLowerCase()===email && d[i][6]===true && strongPasswordHash_(password,String(d[i][4]))===String(d[i][5])) {
+    const token=issueCustomerSession_(d[i][0],email);
+    return {token:token,customer:{id:d[i][0],name:d[i][1],email:d[i][2],phone:d[i][3]}};
+  }
+  throw new Error("Invalid email or password.");
+}
+function issueCustomerSession_(id,email) {
+  const token=Utilities.getUuid()+Utilities.getUuid();
+  sheet_("CustomerSessions").appendRow([hashToken_(token),id,email,new Date(Date.now()+30*24*60*60*1000),new Date()]);
+  return token;
+}
+function requireCustomer_(token) {
+  if(!token) throw new Error("Please sign in to your customer account.");
+  const h=hashToken_(token), d=sheet_("CustomerSessions").getDataRange().getValues(), now=Date.now();
+  for(let i=1;i<d.length;i++) if(String(d[i][0])===h && new Date(d[i][3]).getTime()>now) {
+    const a=sheet_("CustomerAccounts").getDataRange().getValues().slice(1).find(r=>String(r[0])===String(d[i][1]) && r[6]===true);
+    if(a) return {id:a[0],name:a[1],email:a[2],phone:a[3]};
+  }
+  throw new Error("Your customer session has expired. Sign in again.");
+}
+function customerLogout_(x) {
+  const h=hashToken_(String(x.token||"")), sh=sheet_("CustomerSessions"), d=sh.getDataRange().getValues();
+  for(let i=d.length-1;i>=1;i--) if(String(d[i][0])===h) sh.deleteRow(i+1);
+  return {message:"Signed out."};
+}
+function customerOrders_(x) {
+  const customer=requireCustomer_(x.token), d=sheet_("Orders").getDataRange().getValues();
+  return {orders:d.slice(1).filter(r=>String(r[1])===String(customer.id)).map(r=>({id:r[0],town:r[4],items:JSON.parse(String(r[6]||"[]")),subtotal:Number(r[7]),deliveryFee:Number(r[8]),total:Number(r[9]),paymentMethod:r[10],paymentStatus:r[11],orderStatus:r[12],createdAt:r[13],deliveryStatus:r[14]||r[12],trackingCode:r[15]||""})).reverse()};
+}
+function strongPasswordHash_(password,salt) {
+  // PBKDF2-HMAC-SHA256 with 12,000 iterations; customer passwords are never stored in plain text.
+  const key=Utilities.newBlob(String(password)).getBytes(), saltBytes=Utilities.newBlob(String(salt)+"\u0000\u0000\u0000\u0001").getBytes();
+  let u=Utilities.computeHmacSha256Signature(saltBytes,key), result=u.slice();
+  for(let i=1;i<12000;i++) {
+    u=Utilities.computeHmacSha256Signature(u,key);
+    for(let j=0;j<result.length;j++) result[j]=(result[j]^u[j])&255;
+  }
+  return u8hex_(result);
+}
+function u8hex_(bytes) { return bytes.map(b=>(b+256).toString(16).slice(-2)).join(""); }
