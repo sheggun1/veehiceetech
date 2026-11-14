@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1000" role="img" aria-labelledby="title desc">
+<title id="title">VICORA CBT desktop examination management dashboard displayed on a laptop</title>
+<desc id="desc">A modern dark navy and teal desktop dashboard with navigation sidebar, examination statistics, candidate activity chart, upcoming examinations and a laptop frame.</desc>
+<defs>
+ <linearGradient id="screen" x2="1" y2="1"><stop stop-color="#102b49"/><stop offset="1" stop-color="#071629"/></linearGradient>
+ <linearGradient id="teal" x2="1" y2="1"><stop stop-color="#43e0c6"/><stop offset="1" stop-color="#159b9b"/></linearGradient>
+ <linearGradient id="metal" x2="0" y2="1"><stop stop-color="#d9e1ea"/><stop offset=".35" stop-color="#8d9baa"/><stop offset="1" stop-color="#4c5a69"/></linearGradient>
+ <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feGaussianBlur stdDeviation="22"/></filter>
+ <clipPath id="display"><rect x="174" y="86" width="1092" height="748" rx="22"/></clipPath>
+</defs>
+<ellipse cx="720" cy="914" rx="570" ry="35" fill="#000" opacity=".42" filter="url(#shadow)"/>
+<!-- laptop lid -->
+<rect x="145" y="55" width="1150" height="810" rx="38" fill="#111c29" stroke="#6f8192" stroke-width="5"/>
+<rect x="174" y="86" width="1092" height="748" rx="22" fill="url(#screen)"/>
+<g clip-path="url(#display)" font-family="Arial,Helvetica,sans-serif">
+ <rect x="174" y="86" width="1092" height="748" fill="#081a2d"/>
+ <!-- sidebar -->
+ <rect x="174" y="86" width="224" height="748" fill="#0d2742"/>
+ <rect x="199" y="115" width="39" height="39" rx="12" fill="url(#teal)"/>
+ <path d="M209 135h19m-9-10v20" stroke="#06303a" stroke-width="3" stroke-linecap="round"/>
+ <text x="250" y="133" fill="#fff" font-size="24" font-weight="700">VICORA</text><text x="250" y="151" fill="#7bd9d0" font-size="9" letter-spacing="2">CBT PLATFORM</text>
+ <text x="202" y="204" fill="#6f91ae" font-size="11" font-weight="700" letter-spacing="1.6">WORKSPACE</text>
+ <rect x="190" y="222" width="190" height="46" rx="10" fill="#16445a"/><rect x="190" y="222" width="4" height="46" rx="2" fill="#41dfc7"/>
+ <g fill="#e8f7fa" font-size="14"><text x="232" y="251" font-weight="700">Dashboard</text><text x="232" y="307">Examinations</text><text x="232" y="363">Question Bank</text><text x="232" y="419">Candidates</text><text x="232" y="475">Results &amp; Reports</text><text x="232" y="531">User Management</text></g>
+ <g fill="none" stroke="#86a7bc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="207" y="237" width="12" height="12" rx="2"/><path d="M207 243h12M213 237v12"/>
+  <rect x="207" y="293" width="12" height="12" rx="2"/><path d="M210 297h6m-6 4h6"/>
+  <path d="M207 349h12v12h-12zM210 352h6m-6 4h6"/>
+  <circle cx="213" cy="405" r="6"/><path d="M203 419c2-7 18-7 20 0"/>
+  <path d="M207 461h12v13h-12zM210 465h6m-6 4h6"/>
+  <circle cx="213" cy="517" r="4"/><path d="M205 530c1-6 15-6 16 0"/>
+ </g>
+ <line x1="198" y1="570" x2="374" y2="570" stroke="#24435e"/>
+ <text x="202" y="606" fill="#6f91ae" font-size="11" font-weight="700" letter-spacing="1.6">SYSTEM</text>
+ <text x="232" y="650" fill="#b9ccda" font-size="13">Settings</text><text x="232" y="698" fill="#b9ccda" font-size="13">Help &amp; Support</text>
+ <!-- top bar -->
+ <rect x="398" y="86" width="868" height="68" fill="#0b2037"/>
+ <text x="432" y="127" fill="#f4fbff" font-size="18" font-weight="700">Administration overview</text>
+ <rect x="1055" y="105" width="36" height="34" rx="10" fill="#173951"/><circle cx="1073" cy="122" r="6" fill="none" stroke="#9fc3d5" stroke-width="1.5"/><path d="M1073 112v-3m0 26v-3" stroke="#9fc3d5"/>
+ <circle cx="1130" cy="122" r="18" fill="#1b786f"/><text x="1130" y="127" fill="#fff" font-size="13" text-anchor="middle" font-weight="700">A</text>
+ <text x="1158" y="119" fill="#fff" font-size="12" font-weight="700">Administrator</text><text x="1158" y="135" fill="#8ca9bf" font-size="10">System Admin</text>
+ <!-- greeting -->
+ <text x="432" y="198" fill="#fff" font-size="26" font-weight="700">Good morning, Administrator</text>
+ <text x="432" y="224" fill="#8faec4" font-size="13">Here is what's happening across your examination platform today.</text>
+ <rect x="1088" y="177" width="144" height="39" rx="9" fill="#1cc4ad"/><text x="1160" y="201" fill="#052d35" font-size="12" text-anchor="middle" font-weight="700">＋ Create examination</text>
+ <!-- stat cards -->
+ <g>
+  <rect x="430" y="250" width="184" height="116" rx="13" fill="#102c47" stroke="#21435f"/>
+  <rect x="630" y="250" width="184" height="116" rx="13" fill="#102c47" stroke="#21435f"/>
+  <rect x="830" y="250" width="184" height="116" rx="13" fill="#102c47" stroke="#21435f"/>
+  <rect x="1030" y="250" width="202" height="116" rx="13" fill="#102c47" stroke="#21435f"/>
+  <g fill="#91adc2" font-size="12"><text x="450" y="280">Total candidates</text><text x="650" y="280">Active examinations</text><text x="850" y="280">Question bank</text><text x="1050" y="280">Completed tests</text></g>
+  <g fill="#fff" font-size="31" font-weight="700"><text x="450" y="326">2,480</text><text x="650" y="326">08</text><text x="850" y="326">1,260</text><text x="1050" y="326">146</text></g>
+  <g fill="#43dfc3" font-size="10"><text x="450" y="348">↑ 12% this term</text><text x="650" y="348">● 3 in progress</text><text x="850" y="348">Organised items</text><text x="1050" y="348">This session</text></g>
+ </g>
+ <!-- chart -->
+ <rect x="430" y="388" width="500" height="260" rx="14" fill="#102c47" stroke="#21435f"/>
+ <text x="454" y="422" fill="#fff" font-size="15" font-weight="700">Examination activity</text><text x="454" y="443" fill="#8faec4" font-size="11">Candidate participation · weekly overview</text>
+ <g stroke="#294761" stroke-width="1"><path d="M474 485h425M474 525h425M474 565h425M474 605h425"/></g>
+ <g fill="#7e9cb2" font-size="10"><text x="454" y="489">80</text><text x="454" y="529">60</text><text x="454" y="569">40</text><text x="454" y="609">20</text></g>
+ <path d="M490 580 C530 550 550 565 580 525 S640 540 675 490 S740 520 775 475 S835 490 880 455" fill="none" stroke="#41dfc7" stroke-width="4" stroke-linecap="round"/>
+ <path d="M490 580 C530 550 550 565 580 525 S640 540 675 490 S740 520 775 475 S835 490 880 455 L880 615 L490 615Z" fill="#28c6ad" opacity=".10"/>
+ <g fill="#41dfc7"><circle cx="490" cy="580" r="4"/><circle cx="580" cy="525" r="4"/><circle cx="675" cy="490" r="4"/><circle cx="775" cy="475" r="4"/><circle cx="880" cy="455" r="4"/></g>
+ <g fill="#8faec4" font-size="10"><text x="484" y="632">Mon</text><text x="572" y="632">Tue</text><text x="667" y="632">Wed</text><text x="766" y="632">Thu</text><text x="870" y="632">Fri</text></g>
+ <!-- right panel -->
+ <rect x="948" y="388" width="284" height="260" rx="14" fill="#102c47" stroke="#21435f"/>
+ <text x="972" y="422" fill="#fff" font-size="15" font-weight="700">Upcoming examinations</text>
+ <g font-size="11">
+  <rect x="970" y="444" width="240" height="52" rx="9" fill="#163750"/><circle cx="990" cy="470" r="7" fill="#41dfc7"/><text x="1008" y="465" fill="#e9f4fa" font-weight="700">Mathematics · Senior</text><text x="1008" y="482" fill="#88a9bf">Today · 10:00 AM</text>
+  <rect x="970" y="506" width="240" height="52" rx="9" fill="#163750"/><circle cx="990" cy="532" r="7" fill="#f2c36c"/><text x="1008" y="527" fill="#e9f4fa" font-weight="700">English Language</text><text x="1008" y="544" fill="#88a9bf">Tomorrow · 9:00 AM</text>
+  <rect x="970" y="568" width="240" height="52" rx="9" fill="#163750"/><circle cx="990" cy="594" r="7" fill="#7daaff"/><text x="1008" y="589" fill="#e9f4fa" font-weight="700">Basic Science · Junior</text><text x="1008" y="606" fill="#88a9bf">Friday · 11:30 AM</text>
+ </g>
+ <!-- lower table -->
+ <rect x="430" y="668" width="802" height="140" rx="14" fill="#102c47" stroke="#21435f"/>
+ <text x="454" y="699" fill="#fff" font-size="14" font-weight="700">Recent examination sessions</text>
+ <g fill="#89a8be" font-size="10"><text x="454" y="728">EXAMINATION</text><text x="735" y="728">CANDIDATES</text><text x="865" y="728">STATUS</text><text x="1040" y="728">DATE</text></g>
+ <path d="M452 739h756M452 772h756" stroke="#294761"/>
+ <g fill="#e5f1f7" font-size="11"><text x="454" y="760">First Term Assessment</text><text x="735" y="760">186</text><text x="865" y="760" fill="#43dfc3">● Completed</text><text x="1040" y="760">14 Nov 2026</text><text x="454" y="794">Continuous Assessment</text><text x="735" y="794">94</text><text x="865" y="794" fill="#f2c36c">● Scheduled</text><text x="1040" y="794">17 Nov 2026</text></g>
+</g>
+<!-- camera -->
+<circle cx="720" cy="70" r="4" fill="#536779"/>
+<!-- laptop base -->
+<path d="M95 864h1250l78 62c8 7 1 18-13 18H30c-14 0-21-11-13-18z" fill="url(#metal)" stroke="#aab7c4" stroke-width="2"/>
+<path d="M95 864h1250l-26 18H121z" fill="#e5ebf1" opacity=".7"/>
+<path d="M625 880h190l20 18H605z" fill="#5d6a77" opacity=".65"/>
+<path d="M40 932h1360" stroke="#f0f4f8" stroke-width="2" opacity=".6"/>
+</svg>
