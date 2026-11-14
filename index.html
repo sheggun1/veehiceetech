@@ -259,7 +259,9 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 <label for="pFile">Or upload product image (max 5 MB)</label><input id="pFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
 <label for="pDesc">Description</label><input id="pDesc">
 <input id="pEditingId" type="hidden">
-<button class="btn" onclick="saveProduct()">Save product</button><div id="productsAdminList"></div></div>
+<button class="btn" onclick="saveProduct()">Save product</button>
+<button class="ghost" type="button" onclick="seedStarterProducts()">＋ Add starter products with sample prices</button>
+<p class="intro" style="font-size:.85rem">Adds editable sample listings with stock photos and guide prices. Review prices and stock before publishing orders.</p><div id="seedStatus" class="status"></div><div id="productsAdminList"></div></div>
 <div><h3>Delivery areas and product categories</h3>
 <label for="zoneTown">Delivery town</label><input id="zoneTown" placeholder="Ado-Ekiti">
 <label for="zoneFee">Delivery fee (₦)</label><input id="zoneFee" type="number" min="0" value="0">
@@ -577,6 +579,29 @@ async function saveProduct(){
   }catch(e){$("adminStatus").textContent=e.message}
 }
 
+async function seedStarterProducts(){
+ const items=[
+ {name:"Tecno 45W Charger & Cable",category:"Charging",description:"Illustrative listing for a fast charger and USB cable. Confirm model and compatibility before purchase.",price:8500,stock:10,imageUrl:"https://images.pexels.com/photos/33061128/pexels-photo-33061128.jpeg?cs=srgb&dl=pexels-zeleboba-33061128.jpg&fm=jpg"},
+ {name:"Phone Case & Charging Set",category:"Phone accessories",description:"Protective phone case with charging accessories. Confirm phone model and connector type.",price:6500,stock:10,imageUrl:"https://images.pexels.com/photos/33061130/pexels-photo-33061130.jpeg?cs=srgb&dl=pexels-zeleboba-33061130.jpg&fm=jpg"},
+ {name:"Wireless Earbuds",category:"Audio",description:"Sample wireless earbuds listing. Confirm exact model, battery life and availability.",price:12500,stock:10,imageUrl:"https://images.pexels.com/photos/17688850/pexels-photo-17688850.jpeg?cs=srgb&dl=pexels-mesut-berkant-yigit-656240210-17688850.jpg&fm=jpg"},
+ {name:"Portable Power Bank",category:"Power",description:"Portable phone charging power bank. Confirm capacity and connector details.",price:18000,stock:10,imageUrl:"https://images.pexels.com/photos/10104285/pexels-photo-10104285.jpeg?cs=srgb&dl=pexels-zion-10104285.jpg&fm=jpg"},
+ {name:"USB Wall Charger",category:"Charging",description:"Compact wall charger for compatible devices. Confirm output rating.",price:5500,stock:10,imageUrl:"https://images.pexels.com/photos/3921717/pexels-photo-3921717.jpeg?cs=srgb&dl=pexels-readymade-3921717.jpg&fm=jpg"},
+ {name:"Phone & Earbuds Bundle",category:"Audio",description:"Phone and earbuds product-photo example. Replace with the exact item you stock.",price:15000,stock:10,imageUrl:"https://images.pexels.com/photos/17688850/pexels-photo-17688850.jpeg?cs=srgb&dl=pexels-mesut-berkant-yigit-656240210-17688850.jpg&fm=jpg"},
+ {name:"Smartphone Power Pack",category:"Power",description:"Phone and power bank product-photo example. Confirm exact capacity and model.",price:16000,stock:10,imageUrl:"https://images.pexels.com/photos/10104285/pexels-photo-10104285.jpeg?cs=srgb&dl=pexels-zion-10104285.jpg&fm=jpg"},
+ {name:"Phone Protection & Cable Kit",category:"Phone accessories",description:"Phone case and cable accessory listing. Choose a compatible phone model.",price:5000,stock:10,imageUrl:"https://images.pexels.com/photos/33061128/pexels-photo-33061128.jpeg?cs=srgb&dl=pexels-zeleboba-33061128.jpg&fm=jpg"}
+ ];
+ $("seedStatus").textContent="Checking existing catalogue…";
+ try{
+  const existing=(await api("adminListProducts",{token:adminToken})).products||[];
+  let added=0,skipped=0;
+  for(const p of items){
+   if(existing.some(x=>String(x.name).toLowerCase()===p.name.toLowerCase())){skipped++;continue}
+   await api("adminSaveProduct",{token:adminToken,id:"",...p,active:true});added++;
+  }
+  $("seedStatus").textContent=added+" starter products added. "+skipped+" existing matching products skipped. Edit prices, stock and descriptions before promoting.";
+  await loadProductsAdmin();await loadProducts();await loadInventoryReport();
+ }catch(e){$("seedStatus").textContent=e.message}
+}
 async function loadBusinessSettings(){
   try{
     const s=(await api("publicSettings")).settings||{};
