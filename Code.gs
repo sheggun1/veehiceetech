@@ -111,7 +111,20 @@ function setupVeehicee(adminEmail, adminPassword) {
 // Never place administrator credentials in source code or commit them to GitHub.
 
 function doGet(e) {
-  const action = e && e.parameter ? e.parameter.action : "";
+  const params=e && e.parameter ? e.parameter : {};
+  const action=params.action||"";
+  if(params.reference || params.trxref) {
+    try {
+      const reference=String(params.reference||params.trxref||"");
+      const rows=sheet_("Payments").getDataRange().getValues();
+      const payment=rows.slice(1).find(r=>String(r[2])===reference);
+      if(!payment) throw new Error("Payment reference was not found.");
+      verifyPayment_({orderId:String(payment[1]),reference:reference,transactionId:String(params.transaction_id||"")});
+      return HtmlService.createHtmlOutput("<main style='font:16px Arial;max-width:620px;margin:10vh auto;padding:24px'><h2>Payment confirmed</h2><p>Your Veehicee order payment has been verified successfully.</p><p>Order: "+escapeHtml_(String(payment[1]))+"</p><p>You can close this page and return to the Veehicee website.</p></main>");
+    } catch(callbackError) {
+      return HtmlService.createHtmlOutput("<main style='font:16px Arial;max-width:620px;margin:10vh auto;padding:24px'><h2>Payment verification pending</h2><p>"+escapeHtml_(String(callbackError.message||callbackError))+"</p><p>Please keep your order number and contact Veehicee for assistance.</p></main>");
+    }
+  }
   if (action === "health") return json_({ok:true,service:APP.NAME,version:APP.VERSION});
   return json_({ok:true,service:APP.NAME,version:APP.VERSION,message:"Veehicee API is running. Use POST for application actions."});
 }
@@ -399,6 +412,7 @@ function createOrder_(x) {
   const deliveryFee=Number(zone[2])||0, total=subtotal+deliveryFee;
   const method=String(x.paymentMethod||"").toLowerCase();
   if(["paystack","flutterwave","bank_transfer"].indexOf(method)<0) throw new Error("Choose a supported payment method.");
+  if(["paystack","flutterwave"].includes(method) && !email) throw new Error("Enter your email address for online payment.");
   const orderId="VEE-"+Utilities.getUuid().replace(/-/g,"").slice(0,12).toUpperCase();
   let customerId="";
   const customers=sheet_("Customers"), cd=customers.getDataRange().getValues();
@@ -439,7 +453,7 @@ function initializePaystack_(orderId,amount,email) {
   const secret=PropertiesService.getScriptProperties().getProperty("VEEHICEE_PAYSTACK_SECRET");
   if(!secret) throw new Error("Paystack is not configured yet. Please choose bank transfer or contact the store.");
   const reference="VEE"+Utilities.getUuid().replace(/-/g,"").toUpperCase();
-  const response=UrlFetchApp.fetch("https://api.paystack.co/transaction/initialize",{method:"post",contentType:"application/json",headers:{Authorization:"Bearer "+secret},payload:JSON.stringify({email:email||"orders@veehicee.com",amount:Math.round(amount*100),reference:reference,metadata:{orderId:orderId}}),muteHttpExceptions:true});
+  const response=UrlFetchApp.fetch("https://api.paystack.co/transaction/initialize",{method:"post",contentType:"application/json",headers:{Authorization:"Bearer "+secret},payload:JSON.stringify({email:email,amount:Math.round(amount*100),reference:reference,callback_url:ScriptApp.getService().getUrl(),metadata:{orderId:orderId}}),muteHttpExceptions:true});
   const data=JSON.parse(response.getContentText()||"{}");
   if(response.getResponseCode()<200 || response.getResponseCode()>=300 || !data.status || !data.data || !data.data.authorization_url) throw new Error("Could not initialize Paystack payment. Please retry or choose bank transfer.");
   sheet_("Payments").appendRow([Utilities.getUuid(),orderId,reference,amount,"Pending","",new Date()]);
@@ -696,4 +710,8 @@ function adminSetPortfolioStatus_(x) {
   sh.getRange(idx+1,10).setValue(new Date());
   log_(email,"SET_PORTFOLIO_STATUS",id+" published="+(x.published===true));
   return {message:x.published===true?"Project published.":"Project hidden."};
+}
+
+function escapeHtml_(s) {
+  return String(s).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 }
