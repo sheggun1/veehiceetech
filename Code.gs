@@ -200,11 +200,12 @@ function adminLogin_(x) {
   const sh = sheet_("AdminUsers"), data = sh.getDataRange().getValues();
   for (let i=1;i<data.length;i++) {
     const r=data[i];
+    if(String(r[1]).toLowerCase()!==email || r[5]!==true) continue;
     const storedHash=String(r[3]||""), salt=String(r[2]||"");
     const validPassword=storedHash.indexOf("PBKDF2$")===0
       ? strongPasswordHash_(password,salt)===storedHash.substring(7)
       : hashPassword_(password,salt)===storedHash;
-    if (String(r[1]).toLowerCase()===email && r[5]===true && validPassword) {
+    if (validPassword) {
       // Upgrade older salted SHA-256 credentials to PBKDF2 after a successful sign-in.
       if(storedHash.indexOf("PBKDF2$")!==0) {
         const newSalt=Utilities.getUuid()+Utilities.getUuid();
