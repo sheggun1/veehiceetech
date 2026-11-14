@@ -87,6 +87,16 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 .sw{border:2px solid var(--line);border-radius:12px;padding:8px;background:var(--bg);color:var(--ink);cursor:pointer;font:500 .8rem "DM Sans",sans-serif;text-align:left}.sw i{display:block;height:22px;border-radius:7px;margin-bottom:6px}
 .sw[aria-pressed=true]{border-color:var(--accent)}
 .lays{display:grid;gap:8px}.lays .ghost{justify-content:flex-start;text-align:left}.lays .ghost[aria-pressed=true]{border-color:var(--accent);background:var(--glow)}
+
+/* Admin-controlled background patterns */
+body{position:relative}
+body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.16}
+[data-pattern=dots] body:before{background-image:radial-gradient(var(--accent) 1px,transparent 1px);background-size:22px 22px}
+[data-pattern=grid] body:before{background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:34px 34px}
+[data-pattern=diagonal] body:before{background-image:repeating-linear-gradient(135deg,transparent 0 18px,var(--line) 19px 20px)}
+[data-pattern=glow] body:before{background:radial-gradient(ellipse at 15% 12%,var(--glow),transparent 48%),radial-gradient(ellipse at 90% 70%,var(--glow),transparent 42%)}
+.pattern-options{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0 18px}
+.pattern-options button[aria-pressed=true]{border-color:var(--accent);background:var(--glow)}
 /* layout templates */
 [data-layout=center] .hero{grid-template-columns:1fr;text-align:center;padding:110px 0 100px}
 [data-layout=center] .lead{margin-inline:auto}[data-layout=center] .actions{justify-content:center}
@@ -95,6 +105,13 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 [data-layout=bold] .signal{position:absolute;right:-6%;top:6%;width:min(520px,70%);opacity:.35;z-index:-1;pointer-events:none}[data-layout=bold] .chip{display:none}
 [data-layout=bold] .cards{grid-template-columns:1fr}[data-layout=bold] .card{display:grid;grid-template-columns:60px 1fr 1.4fr;gap:20px;align-items:center}[data-layout=bold] .card h3,[data-layout=bold] .card .ico{margin:0}
 [data-layout=bold]{--r:6px}
+[data-layout=editorial] .hero{grid-template-columns:.8fr 1.2fr}
+[data-layout=editorial] .hero h1{font-size:clamp(3.5rem,8vw,7rem)}
+[data-layout=editorial] .signal{max-width:560px}
+[data-layout=showcase] .hero{grid-template-columns:1fr;text-align:left;padding-top:70px}
+[data-layout=showcase] .signal{position:absolute;right:0;top:0;width:44%;opacity:.23;z-index:-1;pointer-events:none}
+[data-layout=showcase] .cards{grid-template-columns:repeat(2,1fr)}
+
 @media(max-width:820px){.links{display:none}.hero,.split,.contact,.agrid{grid-template-columns:1fr}.hero{padding:64px 0}.cards{grid-template-columns:1fr}[data-layout=bold] .card{grid-template-columns:1fr}.signal{max-width:320px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.ring{opacity:.4;transform:scale(1)}}
 </style>
@@ -109,7 +126,7 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <div>
 <span class="tag"><b></b>Ado-Ekiti, Nigeria</span>
 <h1>Ideas into <span class="grad">impact.</span></h1>
-<p class="lead">We build software, school systems, websites and ICT solutions that work for real people and growing organisations.</p>
+<p class="lead">We turn everyday business and school challenges into practical digital experiences. From a clear online presence to a complete web application, Veehicee helps ideas become useful tools that save time, improve service and support growth.</p>
 <div class="actions"><a class="btn" href="#contact">Tell us your idea</a><a class="ghost" href="#services">See what we build</a></div>
 </div>
 <div class="signal" aria-hidden="true">
@@ -122,7 +139,7 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 
 <section class="section" id="services"><div class="wrap">
 <h2>Everything your next<br>digital chapter needs.</h2>
-<p class="intro">Strategy, design and engineering under one roof, so your idea gets from sketch to working product without handoffs.</p>
+<p class="intro">Whether you are starting from a blank page or improving an existing process, we bring planning, visual design and development together. You get solutions shaped around your goals, your customers and the way your team works.</p>
 <div class="cards">
 <article class="card"><div class="ico">&lt;/&gt;</div><h3>Software and apps</h3><p>Web and desktop applications built around how your organisation actually works.</p></article>
 <article class="card"><div class="ico">✎</div><h3>Education technology</h3><p>Result systems, CBT, lesson trackers and school tools that save staff hours.</p></article>
@@ -144,9 +161,9 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <section class="section" id="portfolio"><div class="wrap">
 <h2>Work that makes<br>a difference.</h2><p class="intro">A selection of digital projects and solutions.</p>
 <div class="cards" style="margin-top:34px">
-<article class="card"><div class="project-visual portal" role="img" aria-label="Illustrative school portal dashboard preview"><div class="pv-side"><i></i><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-top"></div><div class="pv-stat"><i></i><i></i><i></i></div><div class="pv-lines"><i></i><i></i><i></i></div></div></div><h3>Greater Tomorrow School Portal</h3><p>School administration, results and parent-facing digital tools.</p><a class="ghost" href="https://greaterportal.vercel.app/" target="_blank" rel="noopener">View live project ↗</a></article>
-<article class="card"><div class="project-visual messaging" role="img" aria-label="Illustrative business messaging dashboard preview"><div class="pv-side"><i></i><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-top"></div><div class="pv-stat"><i></i><i></i><i></i></div><div class="pv-lines"><i></i><i></i><i></i></div></div></div><h3>Communication Platform</h3><p>A web application foundation for managing business communication.</p><a class="ghost" href="https://communication-platform-zm0u.onrender.com/" target="_blank" rel="noopener">View live project ↗</a></article>
-<article class="card"><div class="project-visual timetable" role="img" aria-label="Illustrative school timetable interface preview"><div class="pv-side"><i></i><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-top"></div><div class="pv-stat"><i></i><i></i><i></i></div><div class="pv-lines"><i></i><i></i><i></i></div></div></div><h3>School Timetable System</h3><p>A digital tool for organising school timetable workflows.</p><a class="ghost" href="https://gtmctimetable2026.vercel.app/" target="_blank" rel="noopener">View live project ↗</a></article>
+<article class="card"><div class="project-visual portal" role="img" aria-label="Illustrative school portal dashboard preview"><div class="pv-side"><i></i><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-top"></div><div class="pv-stat"><i></i><i></i><i></i></div><div class="pv-lines"><i></i><i></i><i></i></div></div></div><h3>School Portal</h3><p>School administration, results and parent-facing digital tools.</p></article>
+<article class="card"><div class="project-visual messaging" role="img" aria-label="Illustrative business messaging dashboard preview"><div class="pv-side"><i></i><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-top"></div><div class="pv-stat"><i></i><i></i><i></i></div><div class="pv-lines"><i></i><i></i><i></i></div></div></div><h3>Communication Platform</h3><p>A web application foundation for managing business communication.</p></article>
+<article class="card"><div class="project-visual timetable" role="img" aria-label="Illustrative school timetable interface preview"><div class="pv-side"><i></i><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-top"></div><div class="pv-stat"><i></i><i></i><i></i></div><div class="pv-lines"><i></i><i></i><i></i></div></div></div><h3>School Timetable System</h3><p>A digital tool for organising school timetable workflows.</p></article>
 </div>
 <p class="intro" style="margin-top:18px;font-size:.9rem">These are featured project summaries. Add actual screenshots through the Admin → Portfolio Project section to display your own work images here.</p>
 <div class="products" id="portfolioItems"></div>
@@ -195,7 +212,7 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 </div></section>
 
 <section class="section" id="contact"><div class="wrap contact">
-<div><h2>Got an idea?<br>Let's make it real.</h2><p class="intro">Tell us what you are working towards. We reply to every enquiry.</p></div>
+<div><h2>Got an idea?<br>Let's make it real.</h2><p class="intro">Have a business idea, a school process to improve or a website that needs a fresh start? Share what you have in mind. We will listen, discuss practical options and help you take the next step.</p></div>
 <div class="card"><h3 style="margin-top:0">Send an enquiry</h3>
 <form id="contactForm">
 <label for="n">Your name</label><input id="n" name="name" required>
@@ -209,8 +226,6 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 
 <footer><div class="wrap foot"><span>© <span id="year"></span> Veehicee Telecommunications and Services.</span><span>Technology with purpose. <button class="admin-link" onclick="openAdmin()">Admin</button></span></div></footer>
 
-<button class="btn fab" id="fab" aria-expanded="false" aria-controls="studio">🎨 Style this site</button>
-<div class="studio" id="studio"><h4>Theme</h4><div class="swatches" id="swatches"></div><h4>Template</h4><div class="lays" id="lays"></div></div>
 
 <div class="modal" id="adminModal"><div class="modal-box">
 <div class="mh"><h2>Veehicee admin</h2><button class="ghost" onclick="closeAdmin()">Close</button></div>
@@ -219,6 +234,15 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <label for="adminPassword">Password</label><input id="adminPassword" type="password" autocomplete="current-password">
 <button class="btn" onclick="adminLogin()">Sign in</button><p class="status" id="loginStatus" role="status" aria-live="polite"></p></div>
 <div id="dashboard" hidden><p class="status" id="adminStatus" role="status" aria-live="polite">Signed in.</p>
+<div class="card" style="margin:18px 0"><h3 style="margin-top:0">🎨 Website style studio</h3>
+<p class="intro">Choose a colour theme, page layout and background pattern. Save your choices to publish the design across the homepage and marketplace.</p>
+<div class="agrid">
+<div><h4>Colour themes</h4><div class="swatches" id="swatches"></div></div>
+<div><h4>Page templates</h4><div class="lays" id="lays"></div></div>
+</div>
+<h4>Background patterns</h4><div class="pattern-options" id="patterns"></div>
+<button class="btn" id="saveDesignBtn" type="button" onclick="saveSiteDesign()">Save and publish website style</button>
+<p class="status" id="designStatus" role="status" aria-live="polite"></p></div>
 <div class="agrid">
 <div><h3>Page content</h3>
 <label for="pageTitle">Page or section title</label><input id="pageTitle" placeholder="About us">
@@ -297,23 +321,31 @@ async function api(action,data={}){
 }
 
 /* ───────── THEMES + LAYOUTS ───────── */
+const root=document.documentElement;
 const THEMES=[["midnight","Midnight","#5df0c8"],["sunrise","Sunrise","#ff5b37"],["royal","Royal","#ffc83d"],["forest","Forest","#b6f25b"],["ocean","Ocean","#1457ff"],["berry","Berry","#ff4fa3"]];
-const LAYOUTS=[["split","Split","Text left, signal right"],["center","Centered","Everything on the middle line"],["bold","Bold","Giant type, list-style services"]];
-function store(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-function read(k,d){try{return localStorage.getItem(k)||d}catch(e){return d}}
-function apply(){
-  const t=read("vee-theme","midnight"),l=read("vee-layout","split");
-  root.dataset.theme=t;root.dataset.layout=l;
-  document.querySelectorAll(".sw").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===t));
-  document.querySelectorAll("#lays .ghost").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===l));
+const LAYOUTS=[["split","Split","Balanced two-column hero"],["center","Centered","Centered headline and content"],["bold","Bold","Oversized typography and strong cards"],["editorial","Editorial","Magazine-inspired composition"],["showcase","Showcase","Wide hero with layered visual"]];
+const PATTERNS=[["none","No pattern"],["dots","Soft dots"],["grid","Technical grid"],["diagonal","Diagonal lines"],["glow","Ambient glow"]];
+let activeDesign={theme:"midnight",layout:"split",pattern:"none"};
+function applyDesign(d){
+ activeDesign={theme:THEMES.some(x=>x[0]===d.theme)?d.theme:"midnight",layout:LAYOUTS.some(x=>x[0]===d.layout)?d.layout:"split",pattern:PATTERNS.some(x=>x[0]===d.pattern)?d.pattern:"none"};
+ root.dataset.theme=activeDesign.theme;root.dataset.layout=activeDesign.layout;root.dataset.pattern=activeDesign.pattern;
+ document.querySelectorAll(".sw").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===activeDesign.theme));
+ document.querySelectorAll("#lays .ghost").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===activeDesign.layout));
+ document.querySelectorAll("#patterns button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===activeDesign.pattern));
 }
-THEMES.forEach(([v,n,c])=>{const b=document.createElement("button");b.className="sw";b.dataset.v=v;b.innerHTML='<i style="background:'+c+'"></i>'+n;b.onclick=()=>{store("vee-theme",v);apply()};$("swatches").append(b)});
-LAYOUTS.forEach(([v,n,d])=>{const b=document.createElement("button");b.className="ghost";b.dataset.v=v;b.innerHTML="<span><b>"+n+"</b><br><small>"+d+"</small></span>";b.onclick=()=>{store("vee-layout",v);apply()};$("lays").append(b)});
-$("fab").onclick=()=>{const o=$("studio").classList.toggle("open");$("fab").setAttribute("aria-expanded",o)};
-apply();
+THEMES.forEach(([v,n,c])=>{const b=document.createElement("button");b.className="sw";b.dataset.v=v;b.type="button";b.innerHTML='<i style="background:'+c+'"></i>'+n;b.onclick=()=>applyDesign({...activeDesign,theme:v});$("swatches").append(b)});
+LAYOUTS.forEach(([v,n,d])=>{const b=document.createElement("button");b.className="ghost";b.dataset.v=v;b.type="button";b.innerHTML="<span><b>"+n+"</b><br><small>"+d+"</small></span>";b.onclick=()=>applyDesign({...activeDesign,layout:v});$("lays").append(b)});
+PATTERNS.forEach(([v,n])=>{const b=document.createElement("button");b.className="ghost";b.dataset.v=v;b.type="button";b.textContent=n;b.onclick=()=>applyDesign({...activeDesign,pattern:v});$("patterns").append(b)});
+async function saveSiteDesign(){
+ $("designStatus").textContent="Publishing design…";
+ try{
+  for(const [key,value] of [["siteTheme",activeDesign.theme],["siteLayout",activeDesign.layout],["sitePattern",activeDesign.pattern]]) await api("adminSaveSetting",{token:adminToken,key,value});
+  $("designStatus").textContent="Website style saved. It will appear on the homepage and marketplace.";
+ }catch(e){$("designStatus").textContent=e.message}
+}
 async function loadPublicSettings(){
   try{
-    const s=(await api("publicSettings")).settings||{};siteSettingsCache=s;
+    const s=(await api("publicSettings")).settings||{};siteSettingsCache=s;applyDesign({theme:s.siteTheme||"midnight",layout:s.siteLayout||"split",pattern:s.sitePattern||"none"});
     if(s.mission)$("missionText").textContent=s.mission;
     if(s.vision)$("visionText").textContent=s.vision;
     if(s.seoTitle)document.title=s.seoTitle;
@@ -471,6 +503,7 @@ async function adminLogin(){
     await loadProductsAdmin();
     await loadInventoryReport();
     await loadBusinessSettings();
+    const ds=(await api("publicSettings")).settings||{};applyDesign({theme:ds.siteTheme||"midnight",layout:ds.siteLayout||"split",pattern:ds.sitePattern||"none"});
   }catch(e){
     $("adminPassword").value="";
     $("loginStatus").textContent=e.message;
