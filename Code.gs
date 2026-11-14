@@ -77,17 +77,15 @@ function setupVeehicee(adminEmail, adminPassword) {
     [
       ["home","Home","home","Ideas into impact. We create useful digital products and technology experiences.",true,new Date()],
       ["about","About","about","Veehicee makes digital progress practical and accessible.",true,new Date()],
-      ["services","Services","services","Software development, education technology, website design, ICT services, consulting and support.",true,new Date()]
+      ["services","Services","services","Software development, education technology, website design, device setup, ICT support, consulting and support.",true,new Date()]
     ].forEach(r => pages.appendRow(r));
   }
   return {ok:true,spreadsheetUrl:ss.getUrl(),driveFolderUrl:folder.getUrl(),message:"Veehicee database and Drive storage folder are ready. Deploy this project as a web app next."};
 }
 
-// One-click first-time setup for the administrator.
-// Change the temporary password immediately after setup using a secure password-change feature.
-function runVeehiceeSetup() {
-  setupVeehicee("sheggun4@gmail.com", "sheggun2026!");
-}
+// For first-time setup, run setupVeehicee(adminEmail, adminPassword)
+// manually from the Apps Script editor using your own administrator details.
+// Never place administrator credentials in source code or commit them to GitHub.
 
 function doGet(e) {
   const action = e && e.parameter ? e.parameter.action : "";
