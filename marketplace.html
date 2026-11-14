@@ -14,7 +14,7 @@
 [data-theme=berry]{--bg:#17081a;--panel:#261029;--ink:#fdf1fb;--muted:#c9a5c8;--line:#4a2150;--accent:#ff4fa3;--accent2:#ffa24f;--on:#2a0418}
 [data-theme=sunrise]{--bg:#fff7f2;--panel:#fff;--ink:#231815;--muted:#6e5d57;--line:#efd9ce;--accent:#ff5b37;--accent2:#ffb020;--on:#fff}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "DM Sans",sans-serif}
-body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.14}
+body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.14}body>*{position:relative;z-index:1}
 [data-pattern=dots] body:before{background-image:radial-gradient(var(--accent) 1px,transparent 1px);background-size:22px 22px}
 [data-pattern=grid] body:before{background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:34px 34px}
 [data-pattern=diagonal] body:before{background-image:repeating-linear-gradient(135deg,transparent 0 18px,var(--line) 19px 20px)}
@@ -59,7 +59,7 @@ const samples=[
 {name:"Phone & Earbuds Bundle",category:"Audio",description:"Sample photo only — replace with your actual stock.",price:15000,imageUrl:"https://images.pexels.com/photos/17688850/pexels-photo-17688850.jpeg?cs=srgb&dl=pexels-mesut-berkant-yigit-656240210-17688850.jpg&fm=jpg"},
 {name:"Smartphone Power Pack",category:"Power",description:"Sample photo only — confirm exact capacity.",price:16000,imageUrl:"https://images.pexels.com/photos/10104285/pexels-photo-10104285.jpeg?cs=srgb&dl=pexels-zion-10104285.jpg&fm=jpg"},
 {name:"Phone Protection & Cable Kit",category:"Phone accessories",description:"Sample listing — select compatible phone model.",price:5000,imageUrl:"https://images.pexels.com/photos/33061128/pexels-photo-33061128.jpeg?cs=srgb&dl=pexels-zeleboba-33061128.jpg&fm=jpg"}
-
+];
 let products=[],cart=[];
 const money=n=>"₦"+Number(n||0).toLocaleString("en-NG");
 function render(){
