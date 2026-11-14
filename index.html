@@ -128,10 +128,40 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <div class="value"><strong>Our approach</strong><p>Listen carefully, build intentionally, and keep improving with the people who use what we make.</p></div></div>
 </div></section>
 
+<section class="section" id="portfolio"><div class="wrap">
+<h2>Work that makes<br>a difference.</h2><p class="intro">A selection of digital projects and solutions.</p>
+<div class="products" id="portfolioItems"></div>
+</div></section>
+
 <section class="section" id="marketplace"><div class="wrap">
 <h2>Everyday tech,<br>made easier.</h2>
 <p class="intro">Phone accessories, charging essentials, audio and power banks. Delivery covers Ado-Ekiti and nearby towns.</p>
 <div class="products" id="products"></div>
+<div class="card cartbox">
+<h3>Shopping cart <span id="cartCount">0 items</span></h3>
+<div id="cartItems"><p class="intro">Your cart is empty.</p></div>
+<p class="price">Subtotal: <span id="cartSubtotal">₦0</span></p>
+<button class="btn" id="checkoutBtn" type="button" disabled>Continue to checkout</button>
+<form id="checkoutForm" hidden>
+<h3>Delivery details</h3>
+<label for="buyerName">Full name</label><input id="buyerName" required maxlength="150">
+<label for="buyerEmail">Email (for order updates)</label><input id="buyerEmail" type="email">
+<label for="buyerPhone">Phone number</label><input id="buyerPhone" required maxlength="40">
+<label for="buyerTown">Delivery town</label><select id="buyerTown" required><option value="">Loading delivery areas…</option></select>
+<label for="buyerAddress">Full delivery address</label><textarea id="buyerAddress" rows="3" required maxlength="500"></textarea>
+<label for="buyerPayment">Payment method</label><select id="buyerPayment" required>
+<option value="bank_transfer">Bank transfer (manual confirmation)</option>
+<option value="paystack">Paystack</option><option value="flutterwave">Flutterwave</option></select>
+<button class="btn" type="submit">Place order</button>
+<p class="status" id="checkoutStatus" role="status" aria-live="polite"></p>
+</form>
+</div>
+<div class="card cartbox" style="margin-top:18px">
+<h3>Track your order</h3><form id="trackOrderForm">
+<label for="trackOrderId">Order number</label><input id="trackOrderId" required>
+<label for="trackPhone">Phone number used for the order</label><input id="trackPhone" required>
+<button class="ghost" type="submit">Check order status</button><p class="status" id="trackStatus" role="status" aria-live="polite"></p>
+</form></div>
 </div></section>
 
 <section class="section" id="contact"><div class="wrap contact">
@@ -172,8 +202,18 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <label for="pPrice">Price (₦)</label><input id="pPrice" type="number" min="0">
 <label for="pStock">Stock</label><input id="pStock" type="number" min="0">
 <label for="pImg">Image URL (optional)</label><input id="pImg" type="url">
+<label for="pFile">Or upload product image (max 5 MB)</label><input id="pFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
 <label for="pDesc">Description</label><input id="pDesc">
 <button class="btn" onclick="saveProduct()">Save product</button></div>
+<div><h3>Orders and delivery</h3><button class="ghost" onclick="loadOrders()">Refresh orders</button><div id="ordersList"></div>
+<h3>Portfolio project</h3><label for="workTitle">Project title</label><input id="workTitle">
+<label for="workCategory">Category</label><input id="workCategory">
+<label for="workDescription">Description</label><textarea id="workDescription" rows="3"></textarea>
+<label for="workImages">Project images (select up to 12, max 5 MB each)</label><input id="workImages" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
+<label><input id="workFeatured" type="checkbox" style="width:auto"> Featured project</label>
+<label><input id="workPublished" type="checkbox" style="width:auto" checked> Publish project</label>
+<button class="btn" onclick="savePortfolio()">Save project</button><div id="portfolioAdminList"></div>
+</div>
 </div><p style="margin-top:18px"><button class="ghost" onclick="adminLogout()">Sign out</button></p></div>
 </div></div>
 
@@ -217,11 +257,35 @@ apply();
 
 /* ───────── MARKETPLACE ───────── */
 const SAMPLE=[["Phone accessories","Cases, cables and screen protection","📱"],["Charging essentials","Chargers and fast-charge cables","🔌"],["Audio","Earphones and speakers","🎧"],["Power banks","Stay powered through the day","🔋"]];
+let productsCache=[], cart=[];
+const money=n=>"₦"+Number(n||0).toLocaleString("en-NG");
+function updateCart(){
+  $("cartCount").textContent=cart.reduce((s,x)=>s+x.quantity,0)+" items";
+  $("cartSubtotal").textContent=money(cart.reduce((s,x)=>s+x.price*x.quantity,0));
+  $("cartItems").innerHTML="";
+  if(!cart.length){$("cartItems").innerHTML='<p class="intro">Your cart is empty.</p>';$("checkoutBtn").disabled=true;return}
+  cart.forEach(item=>{
+    const row=document.createElement("div");row.className="aitem";
+    const label=document.createElement("span");label.textContent=item.name+" × "+item.quantity+" — "+money(item.price*item.quantity);
+    const minus=document.createElement("button");minus.className="ghost";minus.textContent="−";minus.onclick=()=>changeCart(item.id,-1);
+    const plus=document.createElement("button");plus.className="ghost";plus.textContent="+";plus.onclick=()=>changeCart(item.id,1);
+    const remove=document.createElement("button");remove.className="ghost";remove.textContent="Remove";remove.onclick=()=>{cart=cart.filter(x=>x.id!==item.id);updateCart()};
+    row.append(label,minus,plus,remove);$("cartItems").append(row);
+  });
+  $("checkoutBtn").disabled=false;
+}
+function changeCart(id,delta){
+  const item=cart.find(x=>x.id===id), p=productsCache.find(x=>x.id===id);
+  if(!item||!p)return;
+  if(delta>0 && item.quantity>=Number(p.stock))return;
+  item.quantity+=delta;if(item.quantity<=0)cart=cart.filter(x=>x.id!==id);updateCart();
+}
 function enquire(name){$("m").value="Hello, I'm interested in: "+name;location.hash="#contact";$("n").focus({preventScroll:true})}
 async function loadProducts(){
   const box=$("products");let list=[];
   try{list=(await api("publicProducts")).products||[]}
-  catch(e){console.warn("publicProducts failed, showing sample:",e.message)}
+  catch(e){console.warn("publicProducts failed:",e.message)}
+  productsCache=list;
   box.innerHTML="";
   if(!list.length){SAMPLE.forEach(([n,d,i])=>list.push({name:n,description:d,icon:i}))}
   list.forEach(p=>{
@@ -236,11 +300,59 @@ async function loadProducts(){
     const s=document.createElement("small");s.textContent=p.description||p.category||"";
     b.append(h,s);
     if(p.price!==undefined){const pr=document.createElement("div");pr.className="price";pr.textContent="₦"+Number(p.price).toLocaleString();b.append(pr)}
-    const btn=document.createElement("button");btn.className="btn";btn.textContent=p.price!==undefined?"Order enquiry":"Ask about this";btn.onclick=()=>enquire(p.name);b.append(btn);
+    const btn=document.createElement("button");btn.className="btn";
+    if(p.id && Number(p.price)>=0){btn.textContent=Number(p.stock)>0?"Add to cart":"Out of stock";btn.disabled=Number(p.stock)<=0;btn.onclick=()=>{const found=cart.find(x=>x.id===p.id);if(found){if(found.quantity<Number(p.stock))found.quantity++}else cart.push({id:p.id,name:p.name,price:Number(p.price),quantity:1});updateCart()}}
+    else {btn.textContent="Ask about this";btn.onclick=()=>enquire(p.name)}
+    b.append(btn);
     el.append(img,b);box.append(el);
   });
 }
 loadProducts();
+updateCart();
+
+async function loadDeliveryZones(){
+  try{
+    const r=await api("publicShippingZones");$("buyerTown").innerHTML='<option value="">Select your town</option>';
+    (r.zones||[]).forEach(z=>{const o=document.createElement("option");o.value=z.town;o.textContent=z.town+" — delivery "+money(z.deliveryFee);$("buyerTown").append(o)});
+  }catch(e){$("buyerTown").innerHTML='<option value="">Delivery areas unavailable</option>'}
+}
+loadDeliveryZones();
+$("checkoutBtn").onclick=()=>{$("checkoutForm").hidden=false;$("checkoutForm").scrollIntoView({behavior:"smooth",block:"start"})};
+$("checkoutForm").addEventListener("submit",async e=>{
+  e.preventDefault();$("checkoutStatus").textContent="Placing your order…";
+  try{
+    const result=await api("createOrder",{
+      customerName:$("buyerName").value,email:$("buyerEmail").value,phone:$("buyerPhone").value,
+      town:$("buyerTown").value,address:$("buyerAddress").value,paymentMethod:$("buyerPayment").value,
+      items:cart.map(x=>({id:x.id,quantity:x.quantity}))
+    });
+    $("checkoutStatus").textContent="Order "+result.orderId+" created. Total: "+money(result.total)+".";
+    if(result.payment && result.payment.authorizationUrl){
+      const a=document.createElement("a");a.href=result.payment.authorizationUrl;a.target="_blank";a.rel="noopener";a.className="btn";a.textContent="Proceed to secure payment";$("checkoutStatus").append(document.createTextNode(" "),a);
+    }else{
+      $("checkoutStatus").append(document.createTextNode(" Please transfer payment and contact us with your order number for confirmation."));
+    }
+    cart=[];updateCart();loadProducts();
+  }catch(err){$("checkoutStatus").textContent=err.message}
+});
+$("trackOrderForm").addEventListener("submit",async e=>{
+  e.preventDefault();$("trackStatus").textContent="Checking…";
+  try{const r=await api("customerOrderLookup",{orderId:$("trackOrderId").value,phone:$("trackPhone").value});const o=r.order;$("trackStatus").textContent="Order "+o.id+" — "+o.orderStatus+"; payment: "+o.paymentStatus+"; delivery: "+o.deliveryStatus+(o.trackingCode?"; tracking: "+o.trackingCode:"")}
+  catch(err){$("trackStatus").textContent=err.message}
+});
+async function loadPortfolio(){
+  const box=$("portfolioItems");try{
+    const r=await api("publicPortfolio");box.innerHTML="";
+    (r.projects||[]).forEach(p=>{
+      const card=document.createElement("article");card.className="prod";
+      const media=document.createElement("div");media.className="img";
+      const urls=p.imageUrls||[];if(urls.length){const im=document.createElement("img");im.src=urls[0];im.alt=p.title;im.loading="lazy";media.append(im)}else media.textContent="✦";
+      const body=document.createElement("div");body.className="body";const title=document.createElement("h3");title.textContent=p.title;
+      const desc=document.createElement("small");desc.textContent=p.description||p.category||"Project";body.append(title,desc);card.append(media,body);box.append(card);
+    });
+  }catch(err){console.warn("Portfolio unavailable",err.message)}
+}
+loadPortfolio();
 
 /* ───────── CONTACT ───────── */
 $("contactForm").addEventListener("submit",async e=>{
@@ -266,6 +378,8 @@ async function adminLogin(){
     $("loginPanel").hidden=true;$("dashboard").hidden=false;
     $("adminStatus").textContent="Signed in as "+r.email;
     await loadPages();
+    await loadOrders();
+    await loadPortfolioAdmin();
   }catch(e){
     $("adminPassword").value="";
     $("loginStatus").textContent=e.message;
@@ -310,8 +424,16 @@ async function savePage(){
 }
 
 /* ───────── ADMIN: PRODUCTS ───────── */
+async function fileToDataUrl(file){
+  return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file)});
+}
 async function saveProduct(){
-  const imageUrl=$("pImg").value.trim();
+  let imageUrl=$("pImg").value.trim();
+  if($("pFile").files[0]){
+    const f=$("pFile").files[0];if(f.size>5*1024*1024){$("adminStatus").textContent="Image exceeds 5 MB.";return}
+    const uploaded=await api("adminUploadMedia",{token:adminToken,fileName:f.name,folder:"products",dataUrl:await fileToDataUrl(f)});
+    imageUrl=uploaded.fileUrl;
+  }
   if(imageUrl && !/^https?:\/\//i.test(imageUrl)){
     $("adminStatus").textContent="Image URL must start with http:// or https://";
     return;
@@ -328,8 +450,37 @@ async function saveProduct(){
       active:true
     });
     $("adminStatus").textContent="Product saved.";
-    ["pName","pCat","pPrice","pStock","pImg","pDesc"].forEach(i=>$(i).value="");
+    ["pName","pCat","pPrice","pStock","pImg","pDesc","pFile"].forEach(i=>$(i).value="");
     loadProducts();
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+
+async function loadOrders(){
+  try{
+    const r=await api("adminListOrders",{token:adminToken});$("ordersList").innerHTML="";
+    (r.orders||[]).slice(0,30).forEach(o=>{
+      const el=document.createElement("div");el.className="aitem";
+      const info=document.createElement("span");info.textContent=o.id+" · "+o.customerName+" · "+money(o.total)+" · "+o.paymentStatus+" · "+o.orderStatus;
+      el.append(info);
+      if(o.paymentMethod==="bank_transfer" && !["Paid","Confirmed"].includes(o.paymentStatus)){
+        const b=document.createElement("button");b.className="ghost";b.textContent="Confirm transfer";b.onclick=async()=>{if(!confirm("Confirm that this bank transfer has actually been received?"))return;try{await api("adminConfirmBankTransfer",{token:adminToken,orderId:o.id});await loadOrders();$("adminStatus").textContent="Bank transfer confirmed."}catch(err){$("adminStatus").textContent=err.message}};el.append(b);
+      }
+      $("ordersList").append(el);
+    });
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+async function savePortfolio(){
+  try{
+    const files=Array.from($("workImages").files||[]);if(files.length>12)throw new Error("Choose no more than 12 images.");
+    const imageUrls=[];
+    for(const f of files){if(f.size>5*1024*1024)throw new Error(f.name+" exceeds 5 MB.");const up=await api("adminUploadMedia",{token:adminToken,fileName:f.name,folder:"portfolio",dataUrl:await fileToDataUrl(f)});imageUrls.push(up.fileUrl)}
+    await api("adminSavePortfolio",{token:adminToken,title:$("workTitle").value,category:$("workCategory").value,description:$("workDescription").value,imageUrls:imageUrls,featured:$("workFeatured").checked,published:$("workPublished").checked});
+    $("adminStatus").textContent="Portfolio project saved.";["workTitle","workCategory","workDescription","workImages"].forEach(id=>$(id).value="");loadPortfolio();loadPortfolioAdmin();
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+async function loadPortfolioAdmin(){
+  try{const r=await api("adminListPortfolio",{token:adminToken});$("portfolioAdminList").innerHTML="";
+    (r.projects||[]).forEach(p=>{const el=document.createElement("div");el.className="aitem";el.textContent=p.title+(p.published?"":" (draft)");$("portfolioAdminList").append(el)});
   }catch(e){$("adminStatus").textContent=e.message}
 }
 
