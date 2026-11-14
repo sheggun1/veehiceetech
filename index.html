@@ -255,6 +255,8 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
 <label for="pCat">Category</label><input id="pCat" placeholder="Charging">
 <label for="pPrice">Price (₦)</label><input id="pPrice" type="number" min="0">
 <label for="pStock">Stock</label><input id="pStock" type="number" min="0">
+<label for="pCost">Cost price per unit (₦)</label><input id="pCost" type="number" min="0" value="0">
+<label for="pWholesale">Wholesale price (₦, applies to 5+ units)</label><input id="pWholesale" type="number" min="0" value="0">
 <label for="pImg">Image URL (optional)</label><input id="pImg" type="url">
 <label for="pFile">Or upload product image (max 5 MB)</label><input id="pFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
 <label for="pDesc">Description</label><input id="pDesc">
@@ -270,6 +272,24 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
 <button class="ghost" onclick="saveCategory()">Save category</button>
 <h3>Orders and delivery</h3><button class="ghost" onclick="loadOrders()">Refresh orders</button><div id="ordersList"></div>
 <h3>Inventory and sales report</h3><button class="ghost" onclick="loadInventoryReport()">Refresh report</button><p id="inventoryReport" class="status"></p>
+<h3>Business performance and profit</h3><button class="ghost" onclick="loadBusinessReport()">Refresh financial report</button><p id="businessReport" class="status"></p>
+<h3>Record business expense</h3>
+<label for="expenseCategory">Expense category</label><input id="expenseCategory" placeholder="Transport, rent, data, delivery">
+<label for="expenseDescription">Description</label><input id="expenseDescription" placeholder="What was the expense for?">
+<label for="expenseAmount">Amount (₦)</label><input id="expenseAmount" type="number" min="1">
+<label for="expenseDate">Date</label><input id="expenseDate" type="date">
+<button class="ghost" onclick="saveExpense()">Save expense</button><p id="expenseStatus" class="status"></p>
+<h3>Discount coupons</h3>
+<label for="couponCode">Coupon code</label><input id="couponCode" placeholder="WELCOME10">
+<label for="couponType">Discount type</label><select id="couponType"><option value="percent">Percentage</option><option value="fixed">Fixed amount (₦)</option></select>
+<label for="couponValue">Discount value</label><input id="couponValue" type="number" min="1">
+<label for="couponMinimum">Minimum order (₦)</label><input id="couponMinimum" type="number" min="0" value="0">
+<label for="couponLimit">Usage limit (0 = unlimited)</label><input id="couponLimit" type="number" min="0" value="0">
+<label for="couponExpiry">Expiry date (optional)</label><input id="couponExpiry" type="date">
+<button class="ghost" onclick="saveCoupon()">Save coupon</button><p id="couponStatus" class="status"></p><div id="couponList"></div>
+<h3>Customer product reviews</h3><button class="ghost" onclick="loadReviews()">Refresh reviews</button><div id="reviewsAdminList"></div>
+<h3>Abandoned shopping carts</h3><button class="ghost" onclick="loadAbandonedCarts()">Refresh saved carts</button><div id="abandonedCartsList"></div>
+<h3>Stock alert</h3><button class="ghost" onclick="sendLowStockAlert()">Email low-stock report to administrator</button><p id="stockAlertStatus" class="status"></p>
 <h3>Database backup</h3><button class="ghost" onclick="createDatabaseBackup()">Create Google Drive backup</button><p id="backupStatus" class="status"></p>
 <h3>Business information and SEO</h3>
 <label for="settingPhone">Business phone</label><input id="settingPhone">
@@ -504,6 +524,10 @@ async function adminLogin(){
     await loadProductsAdmin();
     await loadInventoryReport();
     await loadBusinessSettings();
+    await loadBusinessReport();
+    await loadCoupons();
+    await loadReviews();
+    await loadAbandonedCarts();
     const ds=(await api("publicSettings")).settings||{};applyDesign({theme:ds.siteTheme||"midnight",layout:ds.siteLayout||"split",pattern:ds.sitePattern||"none"});
   }catch(e){
     $("adminPassword").value="";
@@ -568,12 +592,14 @@ async function saveProduct(){
       category:$("pCat").value,
       price:$("pPrice").value,
       stock:$("pStock").value,
+      costPrice:$("pCost").value,
+      wholesalePrice:$("pWholesale").value,
       imageUrl:imageUrl,
       description:$("pDesc").value,
       active:true
     });
     $("adminStatus").textContent="Product saved.";
-    ["pName","pCat","pPrice","pStock","pImg","pDesc","pFile","pEditingId"].forEach(i=>$(i).value="");
+    ["pName","pCat","pPrice","pStock","pCost","pWholesale","pImg","pDesc","pFile","pEditingId"].forEach(i=>$(i).value="");
     loadProducts();loadProductsAdmin();
   }catch(e){$("adminStatus").textContent=e.message}
 }
@@ -625,7 +651,7 @@ async function loadProductsAdmin(){
       const el=document.createElement("div");el.className="aitem";
       const info=document.createElement("span");info.textContent=p.name+" · "+money(p.price)+" · stock "+p.stock+(p.active?"":" · hidden");
       const edit=document.createElement("button");edit.className="ghost";edit.textContent="Edit";edit.onclick=()=>{
-        $("pEditingId").value=p.id;$("pName").value=p.name;$("pCat").value=p.category;$("pPrice").value=p.price;$("pStock").value=p.stock;$("pImg").value=p.imageUrl||"";$("pDesc").value=p.description||"";
+        $("pEditingId").value=p.id;$("pName").value=p.name;$("pCat").value=p.category;$("pPrice").value=p.price;$("pStock").value=p.stock;$("pCost").value=p.costPrice||0;$("pWholesale").value=p.wholesalePrice||0;$("pImg").value=p.imageUrl||"";$("pDesc").value=p.description||"";
         $("adminStatus").textContent="Editing "+p.name;
       };
       const toggle=document.createElement("button");toggle.className="ghost";toggle.textContent=p.active?"Hide":"Publish";toggle.onclick=async()=>{await api("adminSetProductStatus",{token:adminToken,id:p.id,active:!p.active});loadProductsAdmin();loadProducts()};
@@ -638,6 +664,37 @@ async function createDatabaseBackup(){
   try{const r=await api("adminCreateBackup",{token:adminToken});$("backupStatus").textContent=r.message+" "+r.fileName;const a=document.createElement("a");a.href=r.fileUrl;a.target="_blank";a.rel="noopener";a.textContent="Open backup";$("backupStatus").append(document.createTextNode(" "),a)}
   catch(e){$("backupStatus").textContent=e.message}
 }
+
+async function loadBusinessReport(){
+ try{const r=await api("adminBusinessReport",{token:adminToken});$("businessReport").textContent="Paid orders: "+r.paidOrders+" · Revenue: "+money(r.revenue)+" · Product cost: "+money(r.costOfGoods)+" · Expenses: "+money(r.expenses)+" · Estimated profit: "+money(r.estimatedProfit)+". "+r.profitNote}
+ catch(e){$("businessReport").textContent=e.message}
+}
+async function saveExpense(){
+ try{await api("adminSaveExpense",{token:adminToken,category:$("expenseCategory").value,description:$("expenseDescription").value,amount:$("expenseAmount").value,expenseDate:$("expenseDate").value});$("expenseStatus").textContent="Expense recorded.";["expenseCategory","expenseDescription","expenseAmount","expenseDate"].forEach(id=>$(id).value="");loadBusinessReport()}
+ catch(e){$("expenseStatus").textContent=e.message}
+}
+async function saveCoupon(){
+ try{await api("adminSaveCoupon",{token:adminToken,code:$("couponCode").value,type:$("couponType").value,value:$("couponValue").value,minimumOrder:$("couponMinimum").value,usageLimit:$("couponLimit").value,expiresAt:$("couponExpiry").value,active:true});$("couponStatus").textContent="Coupon saved.";loadCoupons()}
+ catch(e){$("couponStatus").textContent=e.message}
+}
+async function loadCoupons(){
+ try{const r=await api("adminListCoupons",{token:adminToken});$("couponList").innerHTML="";(r.coupons||[]).forEach(c=>{const p=document.createElement("p");p.textContent=c.code+" · "+(c.type==="percent"?c.value+"%":money(c.value))+" · used "+c.usedCount+(c.usageLimit?" / "+c.usageLimit:"")+" · "+(c.active?"Active":"Inactive");$("couponList").append(p)})}
+ catch(e){$("couponStatus").textContent=e.message}
+}
+async function loadReviews(){
+ try{const r=await api("adminListReviews",{token:adminToken});$("reviewsAdminList").innerHTML="";(r.reviews||[]).forEach(v=>{const el=document.createElement("div");el.className="aitem";const info=document.createElement("span");info.textContent=v.productName+" · "+v.customerName+" · "+v.rating+"/5 — "+v.review;const btn=document.createElement("button");btn.className="ghost";btn.textContent=v.approved?"Hide":"Approve";btn.onclick=async()=>{await api("adminSetReviewStatus",{token:adminToken,id:v.id,approved:!v.approved});loadReviews()};el.append(info,btn);$("reviewsAdminList").append(el)})}
+ catch(e){$("adminStatus").textContent=e.message}
+}
+async function loadAbandonedCarts(){
+ try{const r=await api("adminListAbandonedCarts",{token:adminToken});$("abandonedCartsList").innerHTML="";(r.carts||[]).forEach(c=>{const el=document.createElement("div");el.className="aitem";const info=document.createElement("span");info.textContent=c.email+" · "+c.items;const btn=document.createElement("button");btn.className="ghost";btn.textContent="Send reminder";btn.onclick=async()=>{try{await api("adminSendAbandonedCartReminder",{token:adminToken,id:c.id});btn.textContent="Reminder sent";btn.disabled=true}catch(e){$("adminStatus").textContent=e.message}};el.append(info,btn);$("abandonedCartsList").append(el)})}
+ catch(e){$("adminStatus").textContent=e.message}
+}
+async function sendLowStockAlert(){
+ $("stockAlertStatus").textContent="Sending report…";
+ try{const r=await api("adminSendLowStockAlert",{token:adminToken,threshold:5});$("stockAlertStatus").textContent=r.message+" Items: "+r.count}
+ catch(e){$("stockAlertStatus").textContent=e.message}
+}
+
 async function loadInventoryReport(){
   try{const r=await api("adminInventoryReport",{token:adminToken});$("inventoryReport").textContent="Products: "+r.totalProducts+" · Orders: "+r.totalOrders+" · Paid orders: "+r.paidOrders+" · Paid revenue: "+money(r.revenue)+" · Stock value: "+money(r.stockValue)+" · Low stock: "+r.lowStock.length+(r.lowStock.length?" ("+r.lowStock.map(p=>p.name+" ["+p.stock+"]").join(", ")+")":"")}
   catch(e){$("inventoryReport").textContent=e.message}
