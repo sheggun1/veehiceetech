@@ -988,7 +988,9 @@ function adminSetReviewStatus_(x) {
 }
 function customerLoyaltyBalance_(customerId) {
   const d=sheet_("LoyaltyLedger").getDataRange().getValues().slice(1);
-  return d.filter(r=>String(r[1])===String(customerId)).reduce((s,r)=>s+(Number(r[3])||0),0);
+  const earnedAndRedeemed=d.filter(r=>String(r[1])===String(customerId)).reduce((s,r)=>s+(Number(r[3])||0),0);
+  const pending=sheet_("Orders").getDataRange().getValues().slice(1).filter(r=>String(r[1])===String(customerId)&&!["Paid","Confirmed","Failed"].includes(String(r[11]))&&String(r[12])!=="Cancelled").reduce((s,r)=>s+(Number(r[21])||0),0);
+  return Math.max(0,earnedAndRedeemed-pending);
 }
 function customerLoyalty_(x) {
   const c=requireCustomer_(x.token), d=sheet_("LoyaltyLedger").getDataRange().getValues().slice(1);
