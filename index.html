@@ -169,6 +169,8 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <div id="accountPhoneWrap"><label for="accountPhone">Phone</label><input id="accountPhone">
 </div><label for="accountPassword">Password (minimum 12 characters)</label><input id="accountPassword" type="password" minlength="12">
 <button class="ghost" id="accountSubmit" type="button">Create account</button>
+<button class="ghost" id="myOrdersBtn" type="button">My orders</button>
+<div id="myOrdersList"></div>
 <p class="status" id="accountStatus" role="status" aria-live="polite"></p>
 </div>
 </div></section>
@@ -250,7 +252,7 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 /* ───────── CONFIG ───────── */
 const API_URL = "https://script.google.com/macros/s/AKfycbyOZOCPk8UOk1JtwnMosi9pnCY685lXhSiUFrIUSMKM2R68CpikDiXgsn3cx_K1q-H2_g/exec";
 
-let adminToken = "";
+let adminToken = "", siteSettingsCache = {};
 const $ = id => document.getElementById(id);
 const root = document.documentElement;
 $("year").textContent = new Date().getFullYear();
@@ -285,7 +287,7 @@ $("fab").onclick=()=>{const o=$("studio").classList.toggle("open");$("fab").setA
 apply();
 async function loadPublicSettings(){
   try{
-    const s=(await api("publicSettings")).settings||{};
+    const s=(await api("publicSettings")).settings||{};siteSettingsCache=s;
     if(s.mission)$("missionText").textContent=s.mission;
     if(s.vision)$("visionText").textContent=s.vision;
     if(s.seoTitle)document.title=s.seoTitle;
@@ -369,12 +371,23 @@ $("checkoutForm").addEventListener("submit",async e=>{
     if(result.payment && result.payment.authorizationUrl){
       const a=document.createElement("a");a.href=result.payment.authorizationUrl;a.target="_blank";a.rel="noopener";a.className="btn";a.textContent="Proceed to secure payment";$("checkoutStatus").append(document.createTextNode(" "),a);
     }else{
-      $("checkoutStatus").append(document.createTextNode(" Please transfer payment and contact us with your order number for confirmation."));
+      let bankText=" Please transfer payment and contact us with your order number for confirmation.";
+      if(result.payment && result.payment.method==="bank_transfer" && siteSettingsCache.bankName && siteSettingsCache.bankAccountNumber) {
+        bankText=" Bank: "+siteSettingsCache.bankName+"; Account name: "+(siteSettingsCache.bankAccountName||"")+"; Account number: "+siteSettingsCache.bankAccountNumber+". Please use your order number as the transfer narration.";
+      }
+      $("checkoutStatus").append(document.createTextNode(bankText));
     }
     cart=[];updateCart();loadProducts();
   }catch(err){$("checkoutStatus").textContent=err.message}
 });
 $("accountMode").onchange=()=>{$("accountNameWrap").hidden=$("accountMode").value==="login";$("accountPhoneWrap").hidden=$("accountMode").value==="login";$("accountSubmit").textContent=$("accountMode").value==="login"?"Sign in":"Create account"};
+$("myOrdersBtn").onclick=async()=>{
+  if(!customerToken){$("accountStatus").textContent="Please sign in first.";return}
+  try{const r=await api("customerOrders",{token:customerToken});$("myOrdersList").innerHTML="";
+    (r.orders||[]).forEach(o=>{const p=document.createElement("p");p.textContent=o.id+" · "+money(o.total)+" · "+o.paymentStatus+" · "+o.deliveryStatus;$("myOrdersList").append(p)});
+    if(!(r.orders||[]).length)$("myOrdersList").textContent="No orders yet.";
+  }catch(err){$("accountStatus").textContent=err.message}
+};
 $("accountSubmit").onclick=async()=>{
   const mode=$("accountMode").value;$("accountStatus").textContent="Please wait…";
   try{
