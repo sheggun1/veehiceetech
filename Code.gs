@@ -526,6 +526,10 @@ function createOrder_(x) {
   }
   const notify=PropertiesService.getScriptProperties().getProperty("VEEHICEE_NOTIFY_EMAIL");
   if(notify) { try { MailApp.sendEmail(notify,"New Veehicee order "+orderId,"A new order was placed. Customer: "+customerName+"; Phone: "+phone+"; Total: NGN "+total+"; Payment: "+method+"."); } catch(mailError) {} }
+  if(signedCustomer) {
+    const saved=sheet_("AbandonedCarts"), carts=saved.getDataRange().getValues();
+    for(let i=1;i<carts.length;i++) if(String(carts[i][1])===String(signedCustomer.id)&&String(carts[i][4])==="Open") saved.getRange(i+1,5).setValue("Converted");
+  }
   log_("public","CREATE_ORDER",orderId+" total "+total);
   return {message:"Order created.",orderId:orderId,subtotal:subtotal,deliveryFee:deliveryFee,total:total,payment:payment};
 }
