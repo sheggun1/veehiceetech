@@ -135,6 +135,7 @@ function doPost(e) {
       case "publicShippingZones": result = publicShippingZones_(); break;
       case "adminDashboard": result = adminDashboard_(input); break;
       case "adminSaveProduct": lock.waitLock(15000); result = adminSaveProduct_(input); break;
+      case "adminSetProductStatus": lock.waitLock(15000); result = adminSetProductStatus_(input); break;
       case "adminUpdateOrder": lock.waitLock(15000); result = adminUpdateOrder_(input); break;
       case "publicPages": result = publicPages_(); break;
       case "adminListProducts": result = adminListProducts_(input); break;
@@ -156,6 +157,7 @@ function doPost(e) {
       case "customerLogout": result = customerLogout_(input); break;
       case "customerOrders": result = customerOrders_(input); break;
       case "adminSavePortfolio": lock.waitLock(15000); result = adminSavePortfolio_(input); break;
+      case "adminSetPortfolioStatus": lock.waitLock(15000); result = adminSetPortfolioStatus_(input); break;
       case "adminListPortfolio": result = adminListPortfolio_(input); break;
       case "publicPortfolio": result = publicPortfolio_(); break;
       case "adminSaveSetting": lock.waitLock(15000); result = adminSaveSetting_(input); break;
@@ -675,4 +677,23 @@ function adminInventoryReport_(x) {
   const paid=orders.filter(r=>["Paid","Confirmed"].includes(String(r[11])));
   const revenue=paid.reduce((sum,r)=>sum+(Number(r[9])||0),0);
   return {totalProducts:products.length,lowStock:low,stockValue:stockValue,paidOrders:paid.length,revenue:revenue,totalOrders:orders.length};
+}
+
+function adminSetProductStatus_(x) {
+  const email=requireAdmin_(x.token), id=String(x.id||"");
+  const sh=sheet_("Products"), d=sh.getDataRange().getValues(), idx=d.findIndex((r,i)=>i>0 && String(r[0])===id);
+  if(idx<1) throw new Error("Product not found.");
+  sh.getRange(idx+1,8).setValue(x.active===true);
+  sh.getRange(idx+1,10).setValue(new Date());
+  log_(email,"SET_PRODUCT_STATUS",id+" active="+(x.active===true));
+  return {message:x.active===true?"Product published.":"Product hidden."};
+}
+function adminSetPortfolioStatus_(x) {
+  const email=requireAdmin_(x.token), id=String(x.id||"");
+  const sh=sheet_("Portfolio"), d=sh.getDataRange().getValues(), idx=d.findIndex((r,i)=>i>0 && String(r[0])===id);
+  if(idx<1) throw new Error("Portfolio project not found.");
+  sh.getRange(idx+1,8).setValue(x.published===true);
+  sh.getRange(idx+1,10).setValue(new Date());
+  log_(email,"SET_PORTFOLIO_STATUS",id+" published="+(x.published===true));
+  return {message:x.published===true?"Project published.":"Project hidden."};
 }
