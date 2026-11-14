@@ -25,16 +25,16 @@ const APP = {
     Portfolio: ["id","title","category","description","imageUrls","projectUrl","featured","published","createdAt","updatedAt"],
     Enquiries: ["id","name","contact","message","status","createdAt"],
     Categories: ["id","name","active","createdAt"],
-    Products: ["id","name","category","description","price","stock","imageUrl","active","createdAt","updatedAt"],
+    Products: ["id","name","category","description","price","stock","imageUrl","active","createdAt","updatedAt","costPrice","wholesalePrice"],
     Customers: ["id","name","email","phone","createdAt"],
     CustomerAccounts: ["id","name","email","phone","salt","passwordHash","active","createdAt"],
     CustomerSessions: ["tokenHash","customerId","email","expiresAt","createdAt"],
-    Orders: ["id","customerId","customerName","phone","town","address","itemsJson","subtotal","deliveryFee","total","paymentMethod","paymentStatus","orderStatus","createdAt","deliveryStatus","trackingCode","stockReserved","updatedAt"],
+    Orders: ["id","customerId","customerName","phone","town","address","itemsJson","subtotal","deliveryFee","total","paymentMethod","paymentStatus","orderStatus","createdAt","deliveryStatus","trackingCode","stockReserved","updatedAt","couponCode","discountAmount","loyaltyPointsEarned"],
     Payments: ["id","orderId","reference","amount","status","verifiedAt","createdAt"],
     ShippingZones: ["town","active","deliveryFee"],
     SiteSettings: ["key","value","updatedAt"],
     ActivityLogs: ["id","email","action","details","createdAt"],
-    OrderItems: ["id","orderId","productId","productName","quantity","unitPrice","lineTotal"],
+    OrderItems: ["id","orderId","productId","productName","quantity","unitPrice","lineTotal","costPrice"],
     Addresses: ["id","customerId","name","phone","town","address","createdAt"],
     InventoryMovements: ["id","productId","productName","change","reason","orderId","createdAt"],
     Testimonials: ["id","name","role","message","rating","published","createdAt"],
@@ -42,7 +42,12 @@ const APP = {
     Newsletter: ["id","email","status","createdAt"],
     Media: ["id","fileName","mimeType","fileUrl","folder","createdAt"],
     Backups: ["id","fileId","fileName","fileUrl","createdAt","createdBy"],
-    Coupons: ["code","type","value","minimumOrder","active","expiresAt","usageLimit","usedCount"]
+    Coupons: ["code","type","value","minimumOrder","active","expiresAt","usageLimit","usedCount"],
+    Expenses: ["id","category","description","amount","expenseDate","createdBy","createdAt"],
+    ProductReviews: ["id","productId","customerId","customerName","rating","review","approved","createdAt"],
+    Wishlists: ["customerId","productId","createdAt"],
+    LoyaltyLedger: ["id","customerId","orderId","points","amount","reason","createdAt"],
+    AbandonedCarts: ["id","customerId","email","cartJson","status","updatedAt","reminderSentAt"]
   }
 };
 
@@ -192,6 +197,22 @@ function doPost(e) {
       case "publicSettings": result = publicSettings_(); break;
       case "adminInventoryReport": result = adminInventoryReport_(input); break;
       case "adminCreateBackup": result = adminCreateBackup_(input); break;
+      case "adminSaveExpense": lock.waitLock(15000); result = adminSaveExpense_(input); break;
+      case "adminListExpenses": result = adminListExpenses_(input); break;
+      case "adminBusinessReport": result = adminBusinessReport_(input); break;
+      case "adminSaveCoupon": lock.waitLock(15000); result = adminSaveCoupon_(input); break;
+      case "adminListCoupons": result = adminListCoupons_(input); break;
+      case "publicValidateCoupon": result = publicValidateCoupon_(input); break;
+      case "customerWishlist": result = customerWishlist_(input); break;
+      case "customerSaveWishlist": lock.waitLock(15000); result = customerSaveWishlist_(input); break;
+      case "publicProductReviews": result = publicProductReviews_(input); break;
+      case "customerSubmitReview": lock.waitLock(15000); result = customerSubmitReview_(input); break;
+      case "adminListReviews": result = adminListReviews_(input); break;
+      case "adminSetReviewStatus": lock.waitLock(15000); result = adminSetReviewStatus_(input); break;
+      case "customerLoyalty": result = customerLoyalty_(input); break;
+      case "customerSaveAbandonedCart": lock.waitLock(15000); result = customerSaveAbandonedCart_(input); break;
+      case "adminSendAbandonedCartReminder": result = adminSendAbandonedCartReminder_(input); break;
+      case "adminSendLowStockAlert": result = adminSendLowStockAlert_(input); break;
       default: throw new Error("Unsupported action: " + action);
     }
     return json_(Object.assign({ok:true},result || {}));
@@ -285,7 +306,7 @@ function submitEnquiry_(x) {
 }
 function publicProducts_() {
   const d=sheet_("Products").getDataRange().getValues();
-  return {products:d.slice(1).filter(r=>r[0] && r[7]===true).map(r=>({id:r[0],name:r[1],category:r[2],description:r[3],price:Number(r[4]),stock:Number(r[5]),imageUrl:r[6]}))};
+  return {products:d.slice(1).filter(r=>r[0] && r[7]===true).map(r=>({id:r[0],name:r[1],category:r[2],description:r[3],price:Number(r[4]),stock:Number(r[5]),imageUrl:r[6],wholesalePrice:Number(r[11])||0}))};
 }
 function publicShippingZones_() {
   const d=sheet_("ShippingZones").getDataRange().getValues();
@@ -305,7 +326,9 @@ function adminSaveProduct_(x) {
     throw new Error("Product details are too long.");
   }
   const sh=sheet_("Products"), id=String(x.id||Utilities.getUuid()), d=sh.getDataRange().getValues();
-  const vals=[id,name,String(x.category||"General"),String(x.description||""),price,stock,String(x.imageUrl||""),x.active!==false,new Date(),new Date()];
+  const costPrice=Number(x.costPrice||0), wholesalePrice=Number(x.wholesalePrice||0);
+  if(!isFinite(costPrice)||costPrice<0||!isFinite(wholesalePrice)||wholesalePrice<0) throw new Error("Enter valid non-negative cost and wholesale prices.");
+  const vals=[id,name,String(x.category||"General"),String(x.description||""),price,stock,String(x.imageUrl||""),x.active!==false,new Date(),new Date(),costPrice,wholesalePrice];
   let row=-1, oldStock=0; for(let i=1;i<d.length;i++) if(String(d[i][0])===id){row=i+1;oldStock=Number(d[i][5])||0;break;}
   if(row>0) sh.getRange(row,1,1,vals.length).setValues([vals]); else sh.appendRow(vals);
   if(row>0 && oldStock!==stock) sheet_("InventoryMovements").appendRow([Utilities.getUuid(),id,name,stock-oldStock,"Admin stock adjustment","",new Date()]);
@@ -370,7 +393,7 @@ function publicPages_() {
 function adminListProducts_(x) {
   requireAdmin_(x.token);
   const d=sheet_("Products").getDataRange().getValues();
-  return {products:d.slice(1).filter(r=>r[0]).map(r=>({id:r[0],name:r[1],category:r[2],description:r[3],price:Number(r[4]),stock:Number(r[5]),imageUrl:r[6],active:r[7]===true,createdAt:r[8],updatedAt:r[9]}))};
+  return {products:d.slice(1).filter(r=>r[0]).map(r=>({id:r[0],name:r[1],category:r[2],description:r[3],price:Number(r[4]),stock:Number(r[5]),imageUrl:r[6],active:r[7]===true,createdAt:r[8],updatedAt:r[9],costPrice:Number(r[10])||0,wholesalePrice:Number(r[11])||0}))};
 }
 function adminListOrders_(x) {
   requireAdmin_(x.token);
@@ -440,10 +463,25 @@ function createOrder_(x) {
     const p=productRows[row], already=needed[id]||0;
     if(Number(p[5])<already+qty) throw new Error("Insufficient stock for "+p[1]+".");
     needed[id]=already+qty;
-    const price=Number(p[4]), total=price*qty;
-    subtotal+=total; lines.push({productId:id,name:String(p[1]),quantity:qty,unitPrice:price,lineTotal:total});
+    const retailPrice=Number(p[4]), wholesalePrice=Number(p[11])||0;
+    const price=(qty>=5 && wholesalePrice>0)?wholesalePrice:retailPrice;
+    const costPrice=Number(p[10])||0, lineTotal=price*qty;
+    subtotal+=lineTotal; lines.push({productId:id,name:String(p[1]),quantity:qty,unitPrice:price,costPrice:costPrice,lineTotal:lineTotal});
   });
-  const deliveryFee=Number(zone[2])||0, total=subtotal+deliveryFee;
+  const deliveryFee=Number(zone[2])||0;
+  const couponCode=String(x.couponCode||"").trim().toUpperCase();
+  let discountAmount=0;
+  if(couponCode) discountAmount=validateCouponAmount_(couponCode,subtotal);
+  const loyaltyPointsToRedeem=Math.max(0,Math.min(100000,Math.floor(Number(x.redeemPoints)||0)));
+  let loyaltyDiscount=0;
+  if(loyaltyPointsToRedeem) {
+    if(!signedCustomer) throw new Error("Sign in to redeem loyalty points.");
+    const balance=customerLoyaltyBalance_(signedCustomer.id);
+    if(loyaltyPointsToRedeem>balance) throw new Error("You do not have enough loyalty points.");
+    loyaltyDiscount=Math.min(loyaltyPointsToRedeem,subtotal-discountAmount);
+  }
+  discountAmount+=loyaltyDiscount;
+  const total=Math.max(0,subtotal-discountAmount)+deliveryFee;
   const method=String(x.paymentMethod||"").toLowerCase();
   if(["paystack","flutterwave","bank_transfer"].indexOf(method)<0) throw new Error("Choose a supported payment method.");
   if(["paystack","flutterwave"].includes(method) && !email) throw new Error("Enter your email address for online payment.");
@@ -464,8 +502,11 @@ function createOrder_(x) {
     products.getRange(pidx+1,6).setValue(currentStock-line.quantity);
     sheet_("InventoryMovements").appendRow([Utilities.getUuid(),line.productId,line.name,-line.quantity,"Reserved for order",orderId,new Date()]);
   });
-  sheet_("Orders").appendRow([orderId,customerId,customerName,phone,town,address,JSON.stringify(lines),subtotal,deliveryFee,total,method,method==="bank_transfer"?"Awaiting verification":"Pending","Pending",new Date(),"Pending","",true,new Date()]);
-  const oi=sheet_("OrderItems"); lines.forEach(line=>oi.appendRow([Utilities.getUuid(),orderId,line.productId,line.name,line.quantity,line.unitPrice,line.lineTotal]));
+  const earnedPoints=Math.floor(Math.max(0,total)/1000);
+  sheet_("Orders").appendRow([orderId,customerId,customerName,phone,town,address,JSON.stringify(lines),subtotal,deliveryFee,total,method,method==="bank_transfer"?"Awaiting verification":"Pending","Pending",new Date(),"Pending","",true,new Date(),couponCode,discountAmount,earnedPoints]);
+  const oi=sheet_("OrderItems"); lines.forEach(line=>oi.appendRow([Utilities.getUuid(),orderId,line.productId,line.name,line.quantity,line.unitPrice,line.lineTotal,line.costPrice||0]));
+  if(couponCode) recordCouponUse_(couponCode,orderId,customerId);
+  if(loyaltyPointsToRedeem) sheet_("LoyaltyLedger").appendRow([Utilities.getUuid(),customerId,orderId,-loyaltyPointsToRedeem,-loyaltyDiscount,"Redeemed on order",new Date()]);
   let payment={method:method,status:method==="bank_transfer"?"Awaiting verification":"Pending"};
   try {
     if(method==="paystack") payment=initializePaystack_(orderId,total,email);
@@ -559,6 +600,15 @@ function finalizePaidOrder_(orderId,reference,providerId) {
   const payments=sheet_("Payments"), pay=payments.getDataRange().getValues();
   for(let i=1;i<pay.length;i++) if(String(pay[i][1])===orderId && String(pay[i][2])===reference) {
     payments.getRange(i+1,5).setValue("Paid"); payments.getRange(i+1,6).setValue(new Date());
+  }
+  const refreshed=orders.getDataRange().getValues(), paidRow=refreshed.find((r,i)=>i>0 && String(r[0])===orderId);
+  if(paidRow && paidRow[1]) {
+    const earned=Math.max(0,Math.floor(Number(paidRow[20])||0));
+    if(earned>0) {
+      const ledger=sheet_("LoyaltyLedger").getDataRange().getValues();
+      const exists=ledger.slice(1).some(r=>String(r[2])===orderId && String(r[5])==="Earned on paid order");
+      if(!exists) sheet_("LoyaltyLedger").appendRow([Utilities.getUuid(),paidRow[1],orderId,earned,Number(paidRow[9])||0,"Earned on paid order",new Date()]);
+    }
   }
   log_("system","PAYMENT_VERIFIED",orderId+" provider transaction "+providerId);
 }
@@ -716,7 +766,7 @@ function adminSaveSetting_(x) {
   log_(email,"SAVE_SETTING",key); return {message:"Setting saved."};
 }
 function publicSettings_() {
-  const allowed=["companyName","businessPhone","whatsapp","businessEmail","businessAddress","mission","vision","seoTitle","seoDescription","instagram","facebook","openingHours","bankName","bankAccountName","bankAccountNumber","siteTheme","siteLayout","sitePattern"];
+  const allowed=["companyName","businessPhone","whatsapp","businessEmail","businessAddress","mission","vision","seoTitle","seoDescription","instagram","facebook","openingHours","bankName","bankAccountName","bankAccountNumber","siteTheme","siteLayout","sitePattern","storefrontUrl","lowStockThreshold"];
   const d=sheet_("SiteSettings").getDataRange().getValues(), settings={};
   d.slice(1).forEach(r=>{if(allowed.indexOf(String(r[0]))>=0) settings[String(r[0])]=String(r[1]||"");});
   return {settings:settings};
