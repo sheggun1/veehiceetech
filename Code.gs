@@ -47,8 +47,8 @@ const APP = {
 
 function setupVeehicee(adminEmail, adminPassword) {
   adminEmail = String(adminEmail || "").trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail) || !adminPassword || String(adminPassword).length < 12) {
-    throw new Error("Supply a valid administrator email and a password of at least 12 characters.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail)) {
+    throw new Error("Supply a valid administrator email.");
   }
   const props = PropertiesService.getScriptProperties();
   const existing = props.getProperty("VEEHICEE_SHEET_ID");
@@ -89,6 +89,7 @@ function setupVeehicee(adminEmail, adminPassword) {
   const rows = users.getDataRange().getValues();
   const existsUser = rows.slice(1).some(r => String(r[1]).toLowerCase() === String(adminEmail).toLowerCase());
   if (!existsUser) {
+    if (!adminPassword || String(adminPassword).length < 12) throw new Error("For a new administrator, supply a password of at least 12 characters.");
     const salt = Utilities.getUuid() + Utilities.getUuid();
     users.appendRow([Utilities.getUuid(),String(adminEmail).toLowerCase(),salt,"PBKDF2$"+strongPasswordHash_(adminPassword,salt),"owner",true,new Date()]);
   }
