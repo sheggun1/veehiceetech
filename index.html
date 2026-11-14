@@ -53,6 +53,19 @@ a{color:inherit;text-decoration:none}:focus-visible{outline:3px solid var(--acce
 .value{padding:20px 0;border-bottom:1px solid var(--line)}.value:first-child{padding-top:0}.value strong{font-family:"Bricolage Grotesque",sans-serif;font-size:1.2rem}.value p{margin:4px 0 0;color:var(--muted)}
 .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}.chips span{padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-size:.92rem}
 .products{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;margin-top:36px}
+.project-visual{height:150px;border:1px solid var(--line);border-radius:15px;margin-bottom:16px;padding:14px;overflow:hidden;background:linear-gradient(135deg,var(--panel),color-mix(in srgb,var(--accent) 13%,var(--panel)));display:flex;gap:9px}
+.project-visual .pv-side{width:24%;border-radius:7px;background:color-mix(in srgb,var(--accent) 20%,var(--panel));padding:8px 5px}
+.project-visual .pv-side i{display:block;height:5px;border-radius:5px;background:var(--accent);opacity:.75;margin:7px 0}
+.project-visual .pv-main{flex:1;min-width:0}
+.project-visual .pv-top{height:13px;width:62%;border-radius:5px;background:var(--accent2);opacity:.8;margin-bottom:12px}
+.project-visual .pv-stat{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.project-visual .pv-stat i{height:30px;border-radius:6px;background:color-mix(in srgb,var(--accent) 24%,var(--panel));border:1px solid var(--line)}
+.project-visual .pv-lines{margin-top:9px;display:grid;gap:6px}
+.project-visual .pv-lines i{height:6px;border-radius:5px;background:var(--muted);opacity:.35}
+.project-visual .pv-lines i:nth-child(2){width:78%}.project-visual .pv-lines i:nth-child(3){width:88%}
+.project-visual.timetable{background:linear-gradient(135deg,color-mix(in srgb,var(--accent2) 16%,var(--panel)),var(--panel))}
+.project-visual.messaging{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 16%,var(--panel)),var(--panel))}
+
 .prod{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);overflow:hidden;display:flex;flex-direction:column}
 .prod .img{aspect-ratio:4/3;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:2.4rem;color:var(--on)}
 .prod .img img{width:100%;height:100%;object-fit:cover}.prod .body{padding:18px;display:flex;flex-direction:column;gap:6px;flex:1}
@@ -131,9 +144,9 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <section class="section" id="portfolio"><div class="wrap">
 <h2>Work that makes<br>a difference.</h2><p class="intro">A selection of digital projects and solutions.</p>
 <div class="cards" style="margin-top:34px">
-<article class="card"><div class="ico">▦</div><h3>Greater Tomorrow School Portal</h3><p>School administration, results and parent-facing digital tools.</p><a class="ghost" href="https://greaterportal.vercel.app/" target="_blank" rel="noopener">View live project ↗</a></article>
-<article class="card"><div class="ico">✉</div><h3>Communication Platform</h3><p>A web application foundation for managing business communication.</p><a class="ghost" href="https://communication-platform-zm0u.onrender.com/" target="_blank" rel="noopener">View live project ↗</a></article>
-<article class="card"><div class="ico">▤</div><h3>School Timetable System</h3><p>A digital tool for organising school timetable workflows.</p><a class="ghost" href="https://gtmctimetable2026.vercel.app/" target="_blank" rel="noopener">View live project ↗</a></article>
+<article class="card"><div class="project-visual portal" role="img" aria-label="Illustrative school portal dashboard preview"><div class="pv-side"><i></i><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-top"></div><div class="pv-stat"><i></i><i></i><i></i></div><div class="pv-lines"><i></i><i></i><i></i></div></div></div><h3>Greater Tomorrow School Portal</h3><p>School administration, results and parent-facing digital tools.</p><a class="ghost" href="https://greaterportal.vercel.app/" target="_blank" rel="noopener">View live project ↗</a></article>
+<article class="card"><div class="project-visual messaging" role="img" aria-label="Illustrative business messaging dashboard preview"><div class="pv-side"><i></i><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-top"></div><div class="pv-stat"><i></i><i></i><i></i></div><div class="pv-lines"><i></i><i></i><i></i></div></div></div><h3>Communication Platform</h3><p>A web application foundation for managing business communication.</p><a class="ghost" href="https://communication-platform-zm0u.onrender.com/" target="_blank" rel="noopener">View live project ↗</a></article>
+<article class="card"><div class="project-visual timetable" role="img" aria-label="Illustrative school timetable interface preview"><div class="pv-side"><i></i><i></i><i></i><i></i></div><div class="pv-main"><div class="pv-top"></div><div class="pv-stat"><i></i><i></i><i></i></div><div class="pv-lines"><i></i><i></i><i></i></div></div></div><h3>School Timetable System</h3><p>A digital tool for organising school timetable workflows.</p><a class="ghost" href="https://gtmctimetable2026.vercel.app/" target="_blank" rel="noopener">View live project ↗</a></article>
 </div>
 <p class="intro" style="margin-top:18px;font-size:.9rem">These are featured project summaries. Add actual screenshots through the Admin → Portfolio Project section to display your own work images here.</p>
 <div class="products" id="portfolioItems"></div>
