@@ -211,6 +211,13 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
 .preview-chart{height:45px;display:flex;align-items:end;gap:8px;padding:7px 12px;margin-top:9px;border-radius:7px;background:#ffffff0b}.preview-chart i{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(#5de0cf,#2879ba)}.preview-chart i:nth-child(1){height:38%}.preview-chart i:nth-child(2){height:70%}.preview-chart i:nth-child(3){height:54%}.preview-chart i:nth-child(4){height:88%}.preview-chart i:nth-child(5){height:62%}
 .preview-blur{position:absolute;right:0;bottom:0;padding:4px 7px;border-radius:5px;background:#091a2ddd;color:#a9c7e6;font-size:.52rem;letter-spacing:.1em;backdrop-filter:blur(8px)}
 @media(max-width:700px){.portfolio-showcase{grid-template-columns:1fr}.portfolio-preview{height:175px}}
+
+/* VICORA laptop dashboard artwork replaces the old phone screenshot strip */
+.vicora-laptop-art{min-width:0;width:100%;padding:0;background:transparent;border:0;box-shadow:none;display:flex;flex-direction:column;align-items:center;gap:2px}
+.vicora-laptop-art img{display:block;width:112%;max-width:none;height:auto;object-fit:contain;filter:drop-shadow(0 24px 35px rgba(0,0,0,.3))}
+.vicora-laptop-art .vicora-real-caption{margin:0!important;text-align:center;color:#91a9c3;font-size:.72rem}
+@media(max-width:900px){.vicora-inner{grid-template-columns:1fr;gap:26px}.vicora-laptop-art img{width:100%}}
+@media(max-width:520px){.vicora-laptop-art img{width:108%;max-width:none;margin-left:-4%}.vicora-laptop-art .vicora-real-caption{font-size:.65rem}}
 </style>
 </head>
 <body>
@@ -231,19 +238,9 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
       </div>
       <p class="vicora-note">A product of Veehicee Telecommunications and Services · Education Without Boundaries.</p>
     </div>
-    <div class="vicora-art vicora-real-screens" aria-label="VICORA CBT desktop presentation featuring actual administration screenshots">
-      <div class="vicora-desktop-bar"><span class="vicora-desktop-dots"><i></i><i></i><i></i></span><b>VICORA CBT</b><span>ADMINISTRATION WORKSPACE</span></div>
-      <div class="vicora-desktop-stage">
-      <figure class="vicora-shot vicora-shot-login">
-        <img src="https://raw.githubusercontent.com/sheggun1/veehiceetech/main/Screenshot_20261114_050908.jpg" alt="Actual VICORA CBT administrator sign-in screen" loading="lazy">
-        <figcaption><span>01</span> Administrator sign-in</figcaption>
-      </figure>
-      <figure class="vicora-shot vicora-shot-dashboard">
-        <img src="https://raw.githubusercontent.com/sheggun1/veehiceetech/main/Screenshot_20261114_050944.jpg" alt="Actual VICORA CBT administration dashboard showing examination and candidate overview" loading="lazy">
-        <figcaption><span>02</span> Administration dashboard</figcaption>
-      </figure>
-      <p class="vicora-real-caption">Actual VICORA CBT screens, presented in a desktop-style workspace. Original screen proportions are preserved.</p>
-      </div>
+    <div class="vicora-art vicora-laptop-art">
+      <img src="assets/vicora-laptop-dashboard.svg" alt="VICORA CBT redesigned desktop administration dashboard displayed on a laptop, with navigation, examination statistics, candidate activity and upcoming examinations" loading="eager">
+      <p class="vicora-real-caption">VICORA CBT desktop dashboard concept — redesigned from the original mobile administration interface.</p>
     </div>
   </div>
   <div class="vicora-capabilities">
