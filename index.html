@@ -204,9 +204,11 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <label for="pImg">Image URL (optional)</label><input id="pImg" type="url">
 <label for="pFile">Or upload product image (max 5 MB)</label><input id="pFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
 <label for="pDesc">Description</label><input id="pDesc">
-<button class="btn" onclick="saveProduct()">Save product</button></div>
+<input id="pEditingId" type="hidden">
+<button class="btn" onclick="saveProduct()">Save product</button><div id="productsAdminList"></div></div>
 <div><h3>Orders and delivery</h3><button class="ghost" onclick="loadOrders()">Refresh orders</button><div id="ordersList"></div>
-<h3>Portfolio project</h3><label for="workTitle">Project title</label><input id="workTitle">
+<h3>Portfolio project</h3><input id="workEditingId" type="hidden"><input id="workExistingImages" type="hidden">
+<label for="workTitle">Project title</label><input id="workTitle">
 <label for="workCategory">Category</label><input id="workCategory">
 <label for="workDescription">Description</label><textarea id="workDescription" rows="3"></textarea>
 <label for="workImages">Project images (select up to 12, max 5 MB each)</label><input id="workImages" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
@@ -380,6 +382,7 @@ async function adminLogin(){
     await loadPages();
     await loadOrders();
     await loadPortfolioAdmin();
+    await loadProductsAdmin();
   }catch(e){
     $("adminPassword").value="";
     $("loginStatus").textContent=e.message;
@@ -441,6 +444,7 @@ async function saveProduct(){
   try{
     await api("adminSaveProduct",{
       token:adminToken,
+      id:$("pEditingId").value,
       name:$("pName").value,
       category:$("pCat").value,
       price:$("pPrice").value,
@@ -450,11 +454,26 @@ async function saveProduct(){
       active:true
     });
     $("adminStatus").textContent="Product saved.";
-    ["pName","pCat","pPrice","pStock","pImg","pDesc","pFile"].forEach(i=>$(i).value="");
-    loadProducts();
+    ["pName","pCat","pPrice","pStock","pImg","pDesc","pFile","pEditingId"].forEach(i=>$(i).value="");
+    loadProducts();loadProductsAdmin();
   }catch(e){$("adminStatus").textContent=e.message}
 }
 
+async function loadProductsAdmin(){
+  try{
+    const r=await api("adminListProducts",{token:adminToken});$("productsAdminList").innerHTML="";
+    (r.products||[]).forEach(p=>{
+      const el=document.createElement("div");el.className="aitem";
+      const info=document.createElement("span");info.textContent=p.name+" · "+money(p.price)+" · stock "+p.stock+(p.active?"":" · hidden");
+      const edit=document.createElement("button");edit.className="ghost";edit.textContent="Edit";edit.onclick=()=>{
+        $("pEditingId").value=p.id;$("pName").value=p.name;$("pCat").value=p.category;$("pPrice").value=p.price;$("pStock").value=p.stock;$("pImg").value=p.imageUrl||"";$("pDesc").value=p.description||"";
+        $("adminStatus").textContent="Editing "+p.name;
+      };
+      const toggle=document.createElement("button");toggle.className="ghost";toggle.textContent=p.active?"Hide":"Publish";toggle.onclick=async()=>{await api("adminSetProductStatus",{token:adminToken,id:p.id,active:!p.active});loadProductsAdmin();loadProducts()};
+      el.append(info,edit,toggle);$("productsAdminList").append(el);
+    });
+  }catch(e){$("adminStatus").textContent=e.message}
+}
 async function loadOrders(){
   try{
     const r=await api("adminListOrders",{token:adminToken});$("ordersList").innerHTML="";
@@ -462,6 +481,9 @@ async function loadOrders(){
       const el=document.createElement("div");el.className="aitem";
       const info=document.createElement("span");info.textContent=o.id+" · "+o.customerName+" · "+money(o.total)+" · "+o.paymentStatus+" · "+o.orderStatus;
       el.append(info);
+      const status=document.createElement("select");["Pending","Processing","Ready for dispatch","Dispatched","Delivered","Cancelled","Refunded"].forEach(v=>{const op=document.createElement("option");op.value=v;op.textContent=v;if(v===o.orderStatus)op.selected=true;status.append(op)});
+      const update=document.createElement("button");update.className="ghost";update.textContent="Update status";update.onclick=async()=>{try{await api("adminUpdateOrder",{token:adminToken,id:o.id,orderStatus:status.value});await loadOrders()}catch(err){$("adminStatus").textContent=err.message}};
+      el.append(status,update);
       if(o.paymentMethod==="bank_transfer" && !["Paid","Confirmed"].includes(o.paymentStatus)){
         const b=document.createElement("button");b.className="ghost";b.textContent="Confirm transfer";b.onclick=async()=>{if(!confirm("Confirm that this bank transfer has actually been received?"))return;try{await api("adminConfirmBankTransfer",{token:adminToken,orderId:o.id});await loadOrders();$("adminStatus").textContent="Bank transfer confirmed."}catch(err){$("adminStatus").textContent=err.message}};el.append(b);
       }
@@ -472,15 +494,20 @@ async function loadOrders(){
 async function savePortfolio(){
   try{
     const files=Array.from($("workImages").files||[]);if(files.length>12)throw new Error("Choose no more than 12 images.");
-    const imageUrls=[];
+    const imageUrls=JSON.parse($("workExistingImages").value||"[]");
     for(const f of files){if(f.size>5*1024*1024)throw new Error(f.name+" exceeds 5 MB.");const up=await api("adminUploadMedia",{token:adminToken,fileName:f.name,folder:"portfolio",dataUrl:await fileToDataUrl(f)});imageUrls.push(up.fileUrl)}
-    await api("adminSavePortfolio",{token:adminToken,title:$("workTitle").value,category:$("workCategory").value,description:$("workDescription").value,imageUrls:imageUrls,featured:$("workFeatured").checked,published:$("workPublished").checked});
-    $("adminStatus").textContent="Portfolio project saved.";["workTitle","workCategory","workDescription","workImages"].forEach(id=>$(id).value="");loadPortfolio();loadPortfolioAdmin();
+    await api("adminSavePortfolio",{token:adminToken,id:$("workEditingId").value,title:$("workTitle").value,category:$("workCategory").value,description:$("workDescription").value,imageUrls:imageUrls,featured:$("workFeatured").checked,published:$("workPublished").checked});
+    $("adminStatus").textContent="Portfolio project saved.";["workTitle","workCategory","workDescription","workImages","workEditingId","workExistingImages"].forEach(id=>$(id).value="");loadPortfolio();loadPortfolioAdmin();
   }catch(e){$("adminStatus").textContent=e.message}
 }
 async function loadPortfolioAdmin(){
   try{const r=await api("adminListPortfolio",{token:adminToken});$("portfolioAdminList").innerHTML="";
-    (r.projects||[]).forEach(p=>{const el=document.createElement("div");el.className="aitem";el.textContent=p.title+(p.published?"":" (draft)");$("portfolioAdminList").append(el)});
+    (r.projects||[]).forEach(p=>{
+      const el=document.createElement("div");el.className="aitem";const name=document.createElement("span");name.textContent=p.title+(p.published?"":" (draft)");
+      const edit=document.createElement("button");edit.className="ghost";edit.textContent="Edit";edit.onclick=()=>{$("workEditingId").value=p.id;$("workTitle").value=p.title;$("workCategory").value=p.category;$("workDescription").value=p.description;$("workExistingImages").value=JSON.stringify(p.imageUrls||[]);$("workFeatured").checked=p.featured;$("workPublished").checked=p.published;$("adminStatus").textContent="Editing "+p.title};
+      const toggle=document.createElement("button");toggle.className="ghost";toggle.textContent=p.published?"Hide":"Publish";toggle.onclick=async()=>{await api("adminSetPortfolioStatus",{token:adminToken,id:p.id,published:!p.published});loadPortfolioAdmin();loadPortfolio()};
+      el.append(name,edit,toggle);$("portfolioAdminList").append(el);
+    });
   }catch(e){$("adminStatus").textContent=e.message}
 }
 
