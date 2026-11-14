@@ -56,7 +56,7 @@ header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 90
 <div id="accountPhoneWrap"><label for="accountPhone">Phone number</label><input id="accountPhone"></div>
 <label for="accountPassword">Password (minimum 12 characters)</label><input id="accountPassword" type="password" minlength="12">
 <button class="ghost" id="accountSubmit" type="button">Create account</button> <button class="ghost" id="myLoyaltyBtn" type="button">Check loyalty balance</button>
-<button class="ghost" id="myWishlistBtn" type="button">View my wishlist</button> <button class="ghost" id="myOrdersBtn" type="button">My orders</button>
+<button class="ghost" id="myWishlistBtn" type="button">View my wishlist</button> <button class="ghost" id="myOrdersBtn" type="button">My orders</button> <button class="ghost" id="customerLogoutBtn" type="button">Sign out</button>
 <div id="wishlistItems"></div><div id="myOrdersList"></div><p id="accountStatus" class="status"></p>
 </section>
 <section class="cart" id="comparePanel" hidden><h2>Compare products</h2><div id="compareItems"></div><button class="ghost" id="clearCompare" type="button">Clear comparison</button></section>
@@ -76,7 +76,7 @@ const samples=[
 {name:"Smartphone Power Pack",category:"Power",description:"Sample photo only — confirm exact capacity.",price:16000,imageUrl:"https://images.pexels.com/photos/10104285/pexels-photo-10104285.jpeg?cs=srgb&dl=pexels-zion-10104285.jpg&fm=jpg"},
 {name:"Phone Protection & Cable Kit",category:"Phone accessories",description:"Sample listing — select compatible phone model.",price:5000,imageUrl:"https://images.pexels.com/photos/33061128/pexels-photo-33061128.jpeg?cs=srgb&dl=pexels-zeleboba-33061128.jpg&fm=jpg"}
 ];
-let products=[],cart=[],customerToken="",couponCodeApplied="",compareList=[],siteSettingsCache={};
+let products=[],cart=[],customerToken=sessionStorage.getItem("veehiceeCustomerToken")||"",couponCodeApplied="",compareList=[],siteSettingsCache={};
 const money=n=>"₦"+Number(n||0).toLocaleString("en-NG");
 function render(){
  const q=$("search").value.toLowerCase(),cat=$("category").value,box=$("products");box.innerHTML="";
@@ -122,7 +122,7 @@ $("accountMode").onchange=()=>{$("accountNameWrap").hidden=$("accountMode").valu
 $("accountSubmit").onclick=async()=>{
  const mode=$("accountMode").value;
  try{const data=mode==="register"?{name:$("accountName").value,email:$("accountEmail").value,phone:$("accountPhone").value,password:$("accountPassword").value}:{email:$("accountEmail").value,password:$("accountPassword").value};
- const r=await api(mode==="register"?"customerRegister":"customerLogin",data);customerToken=r.token;$("accountStatus").textContent="Signed in as "+r.customer.name+".";$("buyerName").value=r.customer.name;$("buyerEmail").value=r.customer.email;$("buyerPhone").value=r.customer.phone}
+ const r=await api(mode==="register"?"customerRegister":"customerLogin",data);customerToken=r.token;sessionStorage.setItem("veehiceeCustomerToken",customerToken);$("accountStatus").textContent="Signed in as "+r.customer.name+".";$("buyerName").value=r.customer.name;$("buyerEmail").value=r.customer.email;$("buyerPhone").value=r.customer.phone}
  catch(e){$("accountStatus").textContent=e.message}
 };
 async function saveWishlist(productId,action){
@@ -135,6 +135,7 @@ $("myWishlistBtn").onclick=async()=>{
  try{const r=await api("customerWishlist",{token:customerToken});$("wishlistItems").innerHTML="";(r.items||[]).forEach(p=>{const el=document.createElement("p");el.textContent=p.name+" · "+money(p.price);const b=document.createElement("button");b.className="ghost";b.textContent="Remove";b.onclick=()=>saveWishlist(p.id,"remove");el.append(" ",b);$("wishlistItems").append(el)});if(!r.items.length)$("wishlistItems").textContent="Your wishlist is empty."}
  catch(e){$("accountStatus").textContent=e.message}
 };
+$("customerLogoutBtn").onclick=async()=>{try{if(customerToken)await api("customerLogout",{token:customerToken})}catch(e){}customerToken="";sessionStorage.removeItem("veehiceeCustomerToken");$("accountStatus").textContent="You have signed out."};
 $("myLoyaltyBtn").onclick=async()=>{
  if(!customerToken){$("accountStatus").textContent="Please sign in first.";return}
  try{const r=await api("customerLoyalty",{token:customerToken});$("accountStatus").textContent="Available loyalty balance: "+r.points+" points. 1 point = ₦1."}
