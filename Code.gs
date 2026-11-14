@@ -108,8 +108,19 @@ function setupVeehicee(adminEmail, adminPassword) {
   return {ok:true,spreadsheetUrl:ss.getUrl(),driveFolderUrl:folder.getUrl(),message:"Veehicee database and Drive storage folder are ready. Deploy this project as a web app next."};
 }
 
-// For first-time setup, run setupVeehicee(adminEmail, adminPassword)
-// manually from the Apps Script editor using your own administrator details.
+// Run this no-argument function from the Apps Script editor after setting
+// VEEHICEE_SETUP_ADMIN_EMAIL in Script Properties. For a new admin only,
+// also set VEEHICEE_SETUP_ADMIN_PASSWORD; it is deleted after successful setup.
+function runVeehiceeSetup() {
+  const props=PropertiesService.getScriptProperties();
+  const email=props.getProperty("VEEHICEE_SETUP_ADMIN_EMAIL");
+  const password=props.getProperty("VEEHICEE_SETUP_ADMIN_PASSWORD")||"";
+  if(!email) throw new Error("Add VEEHICEE_SETUP_ADMIN_EMAIL in Script Properties first.");
+  const result=setupVeehicee(email,password);
+  props.deleteProperty("VEEHICEE_SETUP_ADMIN_PASSWORD");
+  return result;
+}
+
 // Never place administrator credentials in source code or commit them to GitHub.
 
 function doGet(e) {
