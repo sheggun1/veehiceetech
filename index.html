@@ -161,7 +161,16 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <label for="trackOrderId">Order number</label><input id="trackOrderId" required>
 <label for="trackPhone">Phone number used for the order</label><input id="trackPhone" required>
 <button class="ghost" type="submit">Check order status</button><p class="status" id="trackStatus" role="status" aria-live="polite"></p>
-</form></div>
+</form>
+<hr><h3>Customer account (optional)</h3>
+<label for="accountMode">Account action</label><select id="accountMode"><option value="register">Create account</option><option value="login">Sign in</option></select>
+<div id="accountNameWrap"><label for="accountName">Full name</label><input id="accountName"></div>
+<label for="accountEmail">Email</label><input id="accountEmail" type="email">
+<div id="accountPhoneWrap"><label for="accountPhone">Phone</label><input id="accountPhone">
+</div><label for="accountPassword">Password (minimum 12 characters)</label><input id="accountPassword" type="password" minlength="12">
+<button class="ghost" id="accountSubmit" type="button">Create account</button>
+<p class="status" id="accountStatus" role="status" aria-live="polite"></p>
+</div>
 </div></section>
 
 <section class="section" id="contact"><div class="wrap contact">
@@ -259,7 +268,7 @@ apply();
 
 /* ───────── MARKETPLACE ───────── */
 const SAMPLE=[["Phone accessories","Cases, cables and screen protection","📱"],["Charging essentials","Chargers and fast-charge cables","🔌"],["Audio","Earphones and speakers","🎧"],["Power banks","Stay powered through the day","🔋"]];
-let productsCache=[], cart=[];
+let productsCache=[], cart=[], customerToken="";
 const money=n=>"₦"+Number(n||0).toLocaleString("en-NG");
 function updateCart(){
   $("cartCount").textContent=cart.reduce((s,x)=>s+x.quantity,0)+" items";
@@ -326,7 +335,7 @@ $("checkoutForm").addEventListener("submit",async e=>{
     const result=await api("createOrder",{
       customerName:$("buyerName").value,email:$("buyerEmail").value,phone:$("buyerPhone").value,
       town:$("buyerTown").value,address:$("buyerAddress").value,paymentMethod:$("buyerPayment").value,
-      items:cart.map(x=>({id:x.id,quantity:x.quantity}))
+      items:cart.map(x=>({id:x.id,quantity:x.quantity})),customerToken:customerToken
     });
     $("checkoutStatus").textContent="Order "+result.orderId+" created. Total: "+money(result.total)+".";
     if(result.payment && result.payment.authorizationUrl){
@@ -337,6 +346,16 @@ $("checkoutForm").addEventListener("submit",async e=>{
     cart=[];updateCart();loadProducts();
   }catch(err){$("checkoutStatus").textContent=err.message}
 });
+$("accountMode").onchange=()=>{$("accountNameWrap").hidden=$("accountMode").value==="login";$("accountPhoneWrap").hidden=$("accountMode").value==="login";$("accountSubmit").textContent=$("accountMode").value==="login"?"Sign in":"Create account"};
+$("accountSubmit").onclick=async()=>{
+  const mode=$("accountMode").value;$("accountStatus").textContent="Please wait…";
+  try{
+    const data=mode==="register"?{name:$("accountName").value,email:$("accountEmail").value,phone:$("accountPhone").value,password:$("accountPassword").value}:{email:$("accountEmail").value,password:$("accountPassword").value};
+    const r=await api(mode==="register"?"customerRegister":"customerLogin",data);customerToken=r.token;
+    $("accountStatus").textContent="Signed in as "+r.customer.name+". Your future orders can be linked to this account.";
+    $("buyerName").value=r.customer.name;$("buyerEmail").value=r.customer.email;$("buyerPhone").value=r.customer.phone;
+  }catch(err){$("accountStatus").textContent=err.message}
+};
 $("trackOrderForm").addEventListener("submit",async e=>{
   e.preventDefault();$("trackStatus").textContent="Checking…";
   try{const r=await api("customerOrderLookup",{orderId:$("trackOrderId").value,phone:$("trackPhone").value});const o=r.order;$("trackStatus").textContent="Order "+o.id+" — "+o.orderStatus+"; payment: "+o.paymentStatus+"; delivery: "+o.deliveryStatus+(o.trackingCode?"; tracking: "+o.trackingCode:"")}
