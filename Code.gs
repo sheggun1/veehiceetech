@@ -16,7 +16,7 @@
 
 const APP = {
   NAME: "Veehicee Telecommunications and Services",
-  VERSION: "1.0.0",
+  VERSION: "2.0.0",
   SHEETS: {
     AdminUsers: ["id","email","salt","passwordHash","role","active","createdAt"],
     AdminSessions: ["tokenHash","email","expiresAt","createdAt"],
@@ -89,7 +89,7 @@ function setupVeehicee(adminEmail, adminPassword) {
   const existsUser = rows.slice(1).some(r => String(r[1]).toLowerCase() === String(adminEmail).toLowerCase());
   if (!existsUser) {
     const salt = Utilities.getUuid() + Utilities.getUuid();
-    users.appendRow([Utilities.getUuid(),String(adminEmail).toLowerCase(),salt,hashPassword_(adminPassword,salt),"owner",true,new Date()]);
+    users.appendRow([Utilities.getUuid(),String(adminEmail).toLowerCase(),salt,"PBKDF2$"+strongPasswordHash_(adminPassword,salt),"owner",true,new Date()]);
   }
   const zones = ss.getSheetByName("ShippingZones");
   if (zones.getLastRow() === 1) {
@@ -141,6 +141,7 @@ function doPost(e) {
     switch (action) {
       case "adminLogin": result = adminLogin_(input); break;
       case "adminLogout": result = adminLogout_(input); break;
+      case "adminChangePassword": lock.waitLock(15000); result = adminChangePassword_(input); break;
       case "adminListPages": result = adminListPages_(input); break;
       case "adminSavePage": lock.waitLock(15000); result = adminSavePage_(input); break;
       case "submitEnquiry": lock.waitLock(15000); result = submitEnquiry_(input); break;
@@ -197,7 +198,16 @@ function adminLogin_(x) {
   const sh = sheet_("AdminUsers"), data = sh.getDataRange().getValues();
   for (let i=1;i<data.length;i++) {
     const r=data[i];
-    if (String(r[1]).toLowerCase()===email && r[5]===true && hashPassword_(password,String(r[2]))===String(r[3])) {
+    const storedHash=String(r[3]||""), salt=String(r[2]||"");
+    const validPassword=storedHash.indexOf("PBKDF2$")===0
+      ? strongPasswordHash_(password,salt)===storedHash.substring(7)
+      : hashPassword_(password,salt)===storedHash;
+    if (String(r[1]).toLowerCase()===email && r[5]===true && validPassword) {
+      // Upgrade older salted SHA-256 credentials to PBKDF2 after a successful sign-in.
+      if(storedHash.indexOf("PBKDF2$")!==0) {
+        const newSalt=Utilities.getUuid()+Utilities.getUuid();
+        sh.getRange(i+1,3,1,2).setValues([[newSalt,"PBKDF2$"+strongPasswordHash_(password,newSalt)]]);
+      }
       const token = Utilities.getUuid()+Utilities.getUuid();
       sheet_("AdminSessions").appendRow([hashToken_(token),email,new Date(Date.now()+6*60*60*1000),new Date()]);
       cache.remove(attemptKey);
@@ -727,4 +737,22 @@ function adminSetPortfolioStatus_(x) {
 
 function escapeHtml_(s) {
   return String(s).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+
+function adminChangePassword_(x) {
+  const email=requireAdmin_(x.token), current=String(x.currentPassword||""), next=String(x.newPassword||"");
+  if(next.length<12 || next.length>256) throw new Error("Your new password must contain at least 12 characters.");
+  const sh=sheet_("AdminUsers"), d=sh.getDataRange().getValues(), idx=d.findIndex((r,i)=>i>0 && String(r[1]).toLowerCase()===email && r[5]===true);
+  if(idx<1) throw new Error("Administrator account not found.");
+  const oldHash=String(d[idx][3]), salt=String(d[idx][2]);
+  const valid=oldHash.indexOf("PBKDF2$")===0 ? strongPasswordHash_(current,salt)===oldHash.substring(7) : hashPassword_(current,salt)===oldHash;
+  if(!valid) throw new Error("Current password is incorrect.");
+  const newSalt=Utilities.getUuid()+Utilities.getUuid();
+  sh.getRange(idx+1,3,1,2).setValues([[newSalt,"PBKDF2$"+strongPasswordHash_(next,newSalt)]]);
+  const sessions=sheet_("AdminSessions"), sd=sessions.getDataRange().getValues();
+  for(let i=sd.length-1;i>=1;i--) if(String(sd[i][1]).toLowerCase()===email) sessions.deleteRow(i+1);
+  const token=Utilities.getUuid()+Utilities.getUuid();
+  sessions.appendRow([hashToken_(token),email,new Date(Date.now()+6*60*60*1000),new Date()]);
+  log_(email,"CHANGE_PASSWORD","Administrator password changed");
+  return {message:"Password changed. Other sessions have been signed out.",token:token};
 }
