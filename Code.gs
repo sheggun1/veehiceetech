@@ -201,6 +201,7 @@ function doPost(e) {
       case "adminCreateBackup": result = adminCreateBackup_(input); break;
       case "adminSaveExpense": lock.waitLock(15000); result = adminSaveExpense_(input); break;
       case "adminListExpenses": result = adminListExpenses_(input); break;
+      case "adminListCustomers": result = adminListCustomers_(input); break;
       case "adminBusinessReport": result = adminBusinessReport_(input); break;
       case "adminSaveCoupon": lock.waitLock(15000); result = adminSaveCoupon_(input); break;
       case "adminListCoupons": result = adminListCoupons_(input); break;
@@ -1022,4 +1023,45 @@ function adminSendLowStockAlert_(x) {
   const body=low.length?low.map(r=>String(r[1])+" — stock "+Number(r[5])).join("\n"):"No products are at or below the selected threshold.";
   MailApp.sendEmail(email,"Veehicee low-stock report",body);
   return {message:"Low-stock report emailed to "+email+".",count:low.length};
+}
+
+function adminListCustomers_(x) {
+  requireAdmin_(x.token);
+  const base=sheet_("Customers").getDataRange().getValues().slice(1);
+  const accounts=sheet_("CustomerAccounts").getDataRange().getValues().slice(1);
+  const orders=sheet_("Orders").getDataRange().getValues().slice(1);
+  const byEmail={};
+  base.concat(accounts).forEach(r=>{
+    const email=String(r[2]||"").toLowerCase(), phone=String(r[3]||"");
+    if(!email&&!phone)return;
+    const key=email||phone;
+    if(!byEmail[key]) byEmail[key]={name:String(r[1]||""),email:email,phone:phone,hasAccount:false};
+    if(r.length>=8 && r[6]===true) byEmail[key].hasAccount=true;
+  });
+  const customers=Object.values(byEmail).map(c=>{
+    const matched=orders.filter(o=>(c.email&&String(o[2]||"").toLowerCase()===c.email)||(!c.email&&c.phone&&String(o[3])===c.phone));
+    const paid=matched.filter(o=>["Paid","Confirmed"].includes(String(o[11])));
+    const last=matched.reduce((v,o)=>!v||new Date(o[13])>new Date(v)?o[13]:v,null);
+    return {name:c.name,email:c.email,phone:c.phone,hasAccount:c.hasAccount,orderCount:matched.length,paidOrderCount:paid.length,totalPaid:paid.reduce((s,o)=>s+(Number(o[9])||0),0),lastOrderAt:last};
+  }).sort((a,b)=>b.orderCount-a.orderCount);
+  return {customers:customers};
+}
+function setupVeehiceeCartReminderTrigger() {
+  const triggers=ScriptApp.getProjectTriggers();
+  if(!triggers.some(t=>t.getHandlerFunction()==="sendDueVeehiceeCartReminders")) {
+    ScriptApp.newTrigger("sendDueVeehiceeCartReminders").timeBased().everyDays(1).atHour(10).create();
+  }
+  return {ok:true,message:"Daily abandoned-cart reminder check scheduled for approximately 10:00 in the Apps Script project time zone."};
+}
+function sendDueVeehiceeCartReminders() {
+  const sh=sheet_("AbandonedCarts"), d=sh.getDataRange().getValues(), cutoff=Date.now()-24*60*60*1000;
+  let sent=0;
+  for(let i=1;i<d.length;i++) {
+    const r=d[i], updated=new Date(r[5]).getTime();
+    if(!r[0]||String(r[4])!=="Open"||r[6]||!String(r[2])||!isFinite(updated)||updated>cutoff) continue;
+    const url="https://sheggun1.github.io/veehiceetech/marketplace.html";
+    const body="You saved items in your Veehicee shopping cart more than 24 hours ago. If you are still interested, visit our marketplace to continue: "+url+"\n\nSaved items: "+String(r[3]).slice(0,3000)+"\n\nThank you for shopping with Veehicee Telecommunications and Services.";
+    try { MailApp.sendEmail(String(r[2]),"Your saved Veehicee shopping cart",body); sh.getRange(i+1,7).setValue(new Date()); sent++; } catch(e) {}
+  }
+  return {sent:sent};
 }
