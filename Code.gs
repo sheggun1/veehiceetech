@@ -34,8 +34,9 @@ const APP = {
 };
 
 function setupVeehicee(adminEmail, adminPassword) {
-  if (!adminEmail || !adminPassword || String(adminPassword).length < 12) {
-    throw new Error("Supply the administrator email and a password of at least 12 characters.");
+  adminEmail = String(adminEmail || "").trim().toLowerCase();
+  if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(adminEmail) || !adminPassword || String(adminPassword).length < 12) {
+    throw new Error("Supply a valid administrator email and a password of at least 12 characters.");
   }
   const props = PropertiesService.getScriptProperties();
   const existing = props.getProperty("VEEHICEE_SHEET_ID");
@@ -97,7 +98,9 @@ function doPost(e) {
   const lock = LockService.getScriptLock();
   try {
     const raw = e && e.postData && e.postData.contents ? e.postData.contents : "{}";
+    if (raw.length > 100000) throw new Error("Request is too large.");
     const input = JSON.parse(raw);
+    if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Invalid request.");
     const action = String(input.action || "");
     let result;
     switch (action) {
@@ -124,17 +127,23 @@ function doPost(e) {
 function adminLogin_(x) {
   const email = String(x.email || "").trim().toLowerCase();
   const password = String(x.password || "");
-  if (!email || !password) throw new Error("Enter your email and password.");
+  if (!email || !password || email.length > 254 || password.length > 256) throw new Error("Enter valid login details.");
+  const cache = CacheService.getScriptCache();
+  const attemptKey = "login_" + hashToken_(email);
+  const attempts = Number(cache.get(attemptKey) || 0);
+  if (attempts >= 5) throw new Error("Too many unsuccessful attempts. Please wait 15 minutes before trying again.");
   const sh = sheet_("AdminUsers"), data = sh.getDataRange().getValues();
   for (let i=1;i<data.length;i++) {
     const r=data[i];
     if (String(r[1]).toLowerCase()===email && r[5]===true && hashPassword_(password,String(r[2]))===String(r[3])) {
       const token = Utilities.getUuid()+Utilities.getUuid();
       sheet_("AdminSessions").appendRow([hashToken_(token),email,new Date(Date.now()+6*60*60*1000),new Date()]);
+      cache.remove(attemptKey);
       log_(email,"LOGIN","Administrator signed in");
       return {token:token,email:email,role:r[4]};
     }
   }
+  cache.put(attemptKey, String(attempts + 1), 900);
   throw new Error("Invalid login details.");
 }
 function adminLogout_(x) {
@@ -174,6 +183,8 @@ function adminSavePage_(x) {
   return {message:"Page saved."};
 }
 function submitEnquiry_(x) {
+  // The hidden website field is a honeypot. Silently accept bot submissions without storing them.
+  if (String(x.website || "").trim()) return {message:"Enquiry received."};
   const name=String(x.name||"").trim(), contact=String(x.contact||"").trim(), message=String(x.message||"").trim();
   if(!name || !contact || !message) throw new Error("Complete all enquiry fields.");
   if(name.length>120 || contact.length>160 || message.length>5000) throw new Error("One or more fields are too long.");
@@ -194,8 +205,13 @@ function adminDashboard_(x) {
 }
 function adminSaveProduct_(x) {
   const email=requireAdmin_(x.token);
-  const name=String(x.name||"").trim(), price=Number(x.price), stock=Math.max(0,Number(x.stock)||0);
-  if(!name || !isFinite(price) || price<0) throw new Error("Enter a product name and valid price.");
+  const name=String(x.name||"").trim(), price=Number(x.price), stock=Number(x.stock);
+  if(!name || name.length>180 || !isFinite(price) || price<0 || price>1000000000 || !Number.isInteger(stock) || stock<0) {
+    throw new Error("Enter a product name, a valid non-negative price and a whole-number stock quantity.");
+  }
+  if(String(x.category||"General").length>100 || String(x.description||"").length>5000 || String(x.imageUrl||"").length>2000) {
+    throw new Error("Product details are too long.");
+  }
   const sh=sheet_("Products"), id=String(x.id||Utilities.getUuid()), d=sh.getDataRange().getValues();
   const vals=[id,name,String(x.category||"General"),String(x.description||""),price,stock,String(x.imageUrl||""),x.active!==false,new Date(),new Date()];
   let row=-1; for(let i=1;i<d.length;i++) if(String(d[i][0])===id){row=i+1;break;}
@@ -205,6 +221,11 @@ function adminSaveProduct_(x) {
 function adminUpdateOrder_(x) {
   const email=requireAdmin_(x.token), id=String(x.id||"");
   const sh=sheet_("Orders"), d=sh.getDataRange().getValues();
+  const allowedOrderStatuses=["Pending","Processing","Ready for dispatch","Dispatched","Delivered","Cancelled","Refunded"];
+  const allowedPaymentStatuses=["Pending","Awaiting verification","Confirmed","Paid","Failed","Refunded"];
+  if(x.orderStatus && !allowedOrderStatuses.includes(String(x.orderStatus))) throw new Error("Invalid order status.");
+  if(x.paymentStatus && !allowedPaymentStatuses.includes(String(x.paymentStatus))) throw new Error("Invalid payment status.");
+  if(!id || id.length>120) throw new Error("A valid order ID is required.");
   for(let i=1;i<d.length;i++) if(String(d[i][0])===id) {
     if(x.orderStatus) sh.getRange(i+1,13).setValue(String(x.orderStatus));
     if(x.paymentStatus) sh.getRange(i+1,12).setValue(String(x.paymentStatus));
