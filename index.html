@@ -225,6 +225,7 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <button class="ghost" onclick="saveCategory()">Save category</button>
 <h3>Orders and delivery</h3><button class="ghost" onclick="loadOrders()">Refresh orders</button><div id="ordersList"></div>
 <h3>Inventory and sales report</h3><button class="ghost" onclick="loadInventoryReport()">Refresh report</button><p id="inventoryReport" class="status"></p>
+<h3>Database backup</h3><button class="ghost" onclick="createDatabaseBackup()">Create Google Drive backup</button><p id="backupStatus" class="status"></p>
 <h3>Business information and SEO</h3>
 <label for="settingPhone">Business phone</label><input id="settingPhone">
 <label for="settingWhatsapp">WhatsApp number (international format)</label><input id="settingWhatsapp">
@@ -558,6 +559,11 @@ async function loadProductsAdmin(){
       el.append(info,edit,toggle);$("productsAdminList").append(el);
     });
   }catch(e){$("adminStatus").textContent=e.message}
+}
+async function createDatabaseBackup(){
+  $("backupStatus").textContent="Creating backup…";
+  try{const r=await api("adminCreateBackup",{token:adminToken});$("backupStatus").textContent=r.message+" "+r.fileName;const a=document.createElement("a");a.href=r.fileUrl;a.target="_blank";a.rel="noopener";a.textContent="Open backup";$("backupStatus").append(document.createTextNode(" "),a)}
+  catch(e){$("backupStatus").textContent=e.message}
 }
 async function loadInventoryReport(){
   try{const r=await api("adminInventoryReport",{token:adminToken});$("inventoryReport").textContent="Products: "+r.totalProducts+" · Orders: "+r.totalOrders+" · Paid orders: "+r.paidOrders+" · Paid revenue: "+money(r.revenue)+" · Stock value: "+money(r.stockValue)+" · Low stock: "+r.lowStock.length+(r.lowStock.length?" ("+r.lowStock.map(p=>p.name+" ["+p.stock+"]").join(", ")+")":"")}
