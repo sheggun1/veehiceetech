@@ -410,7 +410,8 @@ function createOrder_(x) {
   // Reserve stock atomically so two customers cannot buy the same final unit.
   lines.forEach(line=>{
     const pidx=productRows.findIndex((r,i)=>i>0 && String(r[0])===line.productId);
-    products.getRange(pidx+1,6).setValue(Number(productRows[pidx][5])-line.quantity);
+    const currentStock=Number(products.getRange(pidx+1,6).getValue());
+    products.getRange(pidx+1,6).setValue(currentStock-line.quantity);
     sheet_("InventoryMovements").appendRow([Utilities.getUuid(),line.productId,line.name,-line.quantity,"Reserved for order",orderId,new Date()]);
   });
   sheet_("Orders").appendRow([orderId,customerId,customerName,phone,town,address,JSON.stringify(lines),subtotal,deliveryFee,total,method,method==="bank_transfer"?"Awaiting verification":"Pending","Pending",new Date(),"Pending","",true,new Date()]);
@@ -474,7 +475,7 @@ function verifyPayment_(x) {
     if(!secret || !transactionId) throw new Error("Flutterwave transaction ID and verification configuration are required.");
     const resp=UrlFetchApp.fetch("https://api.flutterwave.com/v3/transactions/"+encodeURIComponent(transactionId)+"/verify",{headers:{Authorization:"Bearer "+secret},muteHttpExceptions:true});
     const data=JSON.parse(resp.getContentText()||"{}"), tx=data.data||{};
-    verified=resp.getResponseCode()===200 && data.status==="success" && tx.status==="successful" && Number(tx.amount)>=expected && tx.currency==="NGN" && tx.tx_ref===reference;
+    verified=resp.getResponseCode()===200 && data.status==="success" && tx.status==="successful" && Number(tx.amount)===expected && tx.currency==="NGN" && tx.tx_ref===reference;
     providerId=String(tx.id||"");
   } else {
     throw new Error("This order uses bank transfer. Payment must be confirmed by an administrator.");
@@ -497,7 +498,8 @@ function finalizePaidOrder_(orderId,reference,providerId) {
     });
     lines.forEach(line=>{
       const pidx=pd.findIndex((r,i)=>i>0 && String(r[0])===String(line.productId));
-      products.getRange(pidx+1,6).setValue(Number(pd[pidx][5])-Number(line.quantity));
+      const currentStock=Number(products.getRange(pidx+1,6).getValue());
+      products.getRange(pidx+1,6).setValue(currentStock-Number(line.quantity));
       sheet_("InventoryMovements").appendRow([Utilities.getUuid(),line.productId,line.name,-Number(line.quantity),"Order paid",orderId,new Date()]);
     });
     orders.getRange(idx+1,17).setValue(true);
@@ -514,6 +516,8 @@ function adminConfirmBankTransfer_(x) {
   const email=requireAdmin_(x.token), id=String(x.orderId||"");
   const orders=sheet_("Orders"), d=orders.getDataRange().getValues(), idx=d.findIndex((r,i)=>i>0 && String(r[0])===id);
   if(idx<1 || String(d[idx][10])!=="bank_transfer") throw new Error("Bank-transfer order not found.");
+  if(["Paid","Confirmed"].includes(String(d[idx][11]))) throw new Error("This bank transfer has already been confirmed.");
+  if(String(d[idx][12])==="Cancelled") throw new Error("This order has been cancelled.");
   const reference="BANK-"+id;
   const payments=sheet_("Payments");
   payments.appendRow([Utilities.getUuid(),id,reference,Number(d[idx][9]),"Confirmed",new Date(),new Date()]);
