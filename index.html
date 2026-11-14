@@ -199,6 +199,18 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
 
 
 @media(max-width:600px){.vicora-real-screens{grid-template-columns:1fr;gap:12px}.vicora-shot img,.vicora-shot-login img{max-height:360px}.vicora-shot-login{max-width:78%;justify-self:start}.vicora-shot-dashboard{width:100%}}
+
+/* Portfolio snapshots: anonymised, static product imagery */
+.portfolio-showcase{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+.portfolio-preview{width:100%;height:190px;margin:0 0 22px;padding:12px;border:1px solid var(--line);border-radius:15px;overflow:hidden;background:linear-gradient(135deg,#102849,#071525);color:#eaf2ff}
+.preview-top{height:24px;display:flex;justify-content:space-between;align-items:center;font-size:.62rem;letter-spacing:.09em;color:#dbeafe;border-bottom:1px solid #ffffff22}
+.preview-body{display:grid;grid-template-columns:54px 1fr;gap:12px;height:140px;padding-top:12px}
+.preview-side{padding:7px;background:#ffffff0c;border-radius:8px}.preview-side i{display:block;height:5px;margin:8px 0;border-radius:8px;background:#62d6ca66}
+.preview-main{position:relative;min-width:0}.preview-heading{width:48%;height:10px;border-radius:6px;background:#e8f1ff;margin:2px 0 12px;opacity:.85}
+.preview-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.preview-stats i{height:34px;border-radius:6px;background:linear-gradient(135deg,#1d69a5,#17416b);border:1px solid #ffffff20}
+.preview-chart{height:45px;display:flex;align-items:end;gap:8px;padding:7px 12px;margin-top:9px;border-radius:7px;background:#ffffff0b}.preview-chart i{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(#5de0cf,#2879ba)}.preview-chart i:nth-child(1){height:38%}.preview-chart i:nth-child(2){height:70%}.preview-chart i:nth-child(3){height:54%}.preview-chart i:nth-child(4){height:88%}.preview-chart i:nth-child(5){height:62%}
+.preview-blur{position:absolute;right:0;bottom:0;padding:4px 7px;border-radius:5px;background:#091a2ddd;color:#a9c7e6;font-size:.52rem;letter-spacing:.1em;backdrop-filter:blur(8px)}
+@media(max-width:700px){.portfolio-showcase{grid-template-columns:1fr}.portfolio-preview{height:175px}}
 </style>
 </head>
 <body>
@@ -280,13 +292,12 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
 </div></section>
 
 <section class="section" id="portfolio"><div class="wrap">
-<span class="section-kicker">SELECTED DIGITAL WORK</span><h2>Real problems.<br>Thoughtful digital solutions.</h2><p class="intro">A look at the systems and tools we have been building for real workflows — from school administration and parent access to business communication and smarter scheduling.</p>
-<div class="cards" style="margin-top:34px">
-<article class="card project-card"><span class="project-type">EDTECH · SCHOOL MANAGEMENT</span><h3>School Management Portal</h3><p>A connected school workspace for score entry, result publishing, parent access, class analysis and school administration — designed to reduce manual work and make academic information easier to follow.</p><a class="project-link" href="https://greaterportal.vercel.app/" target="_blank" rel="noopener">View live portal ↗</a></article>
-<article class="card project-card"><span class="project-type">BUSINESS SOFTWARE · COMMUNICATION</span><h3>Business Communication Platform</h3><p>A web-based workspace for organising contacts, preparing campaigns and managing business messaging workflows. Provider integrations are still being configured, so live sending should be confirmed before use.</p><a class="project-link" href="https://communication-platform-zm0u.onrender.com/" target="_blank" rel="noopener">Open platform preview ↗</a></article>
-<article class="card project-card"><span class="project-type">PRODUCTIVITY · SCHEDULING</span><h3>School Timetable Generator</h3><p>A planning tool concept for organising teachers, subjects, fixed periods and combined lessons while respecting school-specific scheduling rules. Built to make complex timetable preparation more manageable.</p><a class="project-link" href="#contact">Discuss a similar solution ↗</a></article>
+<span class="section-kicker">OUR WORK · WEB DESIGN & SOFTWARE</span><h2>Digital solutions built to move your business forward.</h2><p class="intro">We design responsive websites and build practical software for businesses, schools and organisations. These selected project snapshots demonstrate the kind of work we can create around your needs.</p>
+<div class="cards portfolio-showcase" style="margin-top:34px">
+<article class="card project-card"><div class="portfolio-preview school-preview" role="img" aria-label="An anonymised school administration dashboard preview with identifying details obscured"><div class="preview-top"><b>ADMIN WORKSPACE</b><span>•••</span></div><div class="preview-body"><div class="preview-side"><i></i><i></i><i></i><i></i><i></i></div><div class="preview-main"><div class="preview-heading"></div><div class="preview-stats"><i></i><i></i><i></i><i></i></div><div class="preview-chart"><i></i><i></i><i></i><i></i><i></i></div><div class="preview-blur">SCHOOL DETAILS HIDDEN</div></div></div></div><span class="project-type">EDTECH · CUSTOM SOFTWARE</span><h3>School Management Portal</h3><p>A connected platform for score entry, result publishing, parent access, class performance analysis and school administration. School identity and private information are intentionally concealed.</p></article>
+<article class="card project-card"><div class="portfolio-preview comms-preview" role="img" aria-label="A business communication software interface concept"><div class="preview-top"><b>CAMPAIGN WORKSPACE</b><span>•••</span></div><div class="preview-body"><div class="preview-side"><i></i><i></i><i></i><i></i><i></i></div><div class="preview-main"><div class="preview-heading"></div><div class="preview-stats"><i></i><i></i><i></i></div><div class="preview-chart"><i></i><i></i><i></i><i></i><i></i></div><div class="preview-blur">CONTACT DATA HIDDEN</div></div></div></div><span class="project-type">BUSINESS SOFTWARE · COMMUNICATION</span><h3>Business Communication Platform</h3><p>A web-based workspace for organising contacts and preparing business messaging campaigns. Provider connections are still being configured; the project is presented as a development showcase.</p></article>
 </div>
-<p class="portfolio-note">Want to see a specific workflow or discuss a similar system? <a href="#contact">Talk to our team</a>.</p>
+<p class="portfolio-note">Need a business website, customer portal, school platform or custom application? <a href="#contact">Tell us what you want to build</a>.</p>
 <div class="products" id="portfolioItems"></div>
 </div></section>
 
