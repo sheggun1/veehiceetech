@@ -227,38 +227,77 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
 .vicora-copy p{color:#50698d!important}.vicora-note{color:#637b9e!important}.vicora-secondary{color:#17417d!important;border-color:#b8cbe7!important}.vicora-real-caption{color:#637b9e!important}
 .vicora-desktop-bar{background:#eaf2ff!important;color:#18345e!important;border-color:#d3e1f5!important}.vicora-desktop-bar>b{color:#17345f!important}.vicora-desktop-bar>span:last-child{color:#60799e!important}
 @media(max-width:700px){.project-image{aspect-ratio:12/7}}
+
+/* ── Professional UI and admin workspace refresh ── */
+:root{--bg:#f7f9fc;--panel:#fff;--ink:#17243b;--muted:#66758c;--line:#e3e9f2;--accent:#174ea6;--accent2:#4d83c9;--glow:rgba(23,78,166,.09);--r:16px}
+[data-theme=midnight],[data-theme=ocean]{--bg:#f7f9fc;--panel:#fff;--ink:#17243b;--muted:#66758c;--line:#e3e9f2;--accent:#174ea6;--accent2:#4d83c9;--on:#fff;--glow:rgba(23,78,166,.09)}
+body{letter-spacing:0}
+.top{background:rgba(255,255,255,.94);border-color:#e6ebf2}
+.brand{font-size:1.42rem}.brand-lockup small{color:#77849a}
+.btn{border-radius:10px;background:#174ea6;box-shadow:none}.btn:hover{background:#123f87;box-shadow:0 8px 20px rgba(23,78,166,.15)}
+.ghost{border-radius:10px;background:#fff}
+.hero{background:radial-gradient(ellipse at 82% 45%,rgba(23,78,166,.07),transparent 48%)}
+.hero h1{letter-spacing:-.055em}.grad{background:linear-gradient(100deg,#174ea6,#477fc0);-webkit-background-clip:text;background-clip:text}
+.section{border-color:#e8edf4}.card{box-shadow:0 8px 28px rgba(20,38,66,.045);border-radius:16px}.card:hover{box-shadow:0 12px 30px rgba(20,38,66,.075);border-color:#c8d7eb}
+.ico{background:#edf3fb;color:#174ea6;border:1px solid #dce7f5}
+.vicora-feature{margin-top:0;padding:42px 0;background:#f0f4f9;color:#17243b;border-top:1px solid #e1e8f1;border-bottom:1px solid #e1e8f1}
+.vicora-feature:before{opacity:.035}
+.vicora-eyebrow{background:#e5edf8;border-color:#cbd9eb;color:#174ea6}
+.vicora-eyebrow:before{background:#174ea6;box-shadow:0 0 0 4px rgba(23,78,166,.1)}
+.vicora-copy h2{color:#17243b}.vicora-copy h2 span{color:#174ea6}.vicora-copy p{color:#5d6e86}
+.vicora-primary{background:#174ea6;color:#fff}.vicora-secondary{border-color:#bdcadd;color:#17406f}
+.vicora-note{color:#6b7a90!important}
+.modal{background:rgba(12,25,45,.58);backdrop-filter:blur(5px);padding:18px}
+.modal-box{width:min(1120px,100%);max-height:94vh;padding:30px;background:#f7f9fc;border:1px solid #dce4ef;border-radius:18px;box-shadow:0 30px 90px rgba(8,22,44,.25)}
+.mh{position:sticky;top:-30px;z-index:5;margin:-30px -30px 22px;padding:20px 30px;background:#fff;border-bottom:1px solid #e5ebf3}
+.mh h2{font-size:1.5rem;color:#17243b}
+#loginPanel{max-width:460px;margin:24px auto;padding:28px;background:#fff;border:1px solid #e3e9f2;border-radius:16px;box-shadow:0 12px 34px rgba(20,38,66,.06)}
+#dashboard{padding-top:4px}
+#dashboard>.status:first-child{padding:10px 14px;background:#eaf1fa;border:1px solid #d9e5f4;border-radius:10px;color:#174ea6}
+.design-panel{background:#fff;border:1px solid #dce5f1;box-shadow:none}
+.design-panel .section-kicker{color:#174ea6}
+#dashboard>.agrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+#dashboard>.agrid>div{min-width:0;padding:22px;background:#fff;border:1px solid #e2e8f1;border-radius:14px}
+#dashboard>.agrid>div:nth-child(3){grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 20px}
+#dashboard>.agrid>div:nth-child(3)>h3{grid-column:1/-1;margin:22px 0 12px;padding-top:18px;border-top:1px solid #e9eef5;font-size:1.05rem;color:#213b60}
+#dashboard>.agrid>div:nth-child(3)>h3:first-child{margin-top:0;padding-top:0;border-top:0}
+#dashboard>.agrid>div:nth-child(3)>details{grid-column:1/-1;margin:7px 0;border:1px solid #e2e8f1;border-radius:11px;background:#fff;overflow:hidden}
+#dashboard details>summary{padding:14px 16px;cursor:pointer;font-weight:700;color:#213b60;list-style:none;display:flex;align-items:center;justify-content:space-between}
+#dashboard details>summary::-webkit-details-marker{display:none}
+#dashboard details>summary:after{content:"＋";color:#174ea6;font-size:1.1rem}
+#dashboard details[open]>summary:after{content:"−"}
+#dashboard details>.admin-detail-body{padding:4px 16px 16px;border-top:1px solid #edf1f6}
+#dashboard h3{font-size:1.12rem;letter-spacing:-.02em}
+#dashboard input,#dashboard textarea,#dashboard select{background:#fbfcfe;border-color:#dce4ef;border-radius:9px}
+#dashboard .aitem{background:#fbfcfe;border-color:#e3e9f1;flex-wrap:wrap}
+#dashboard .swatches{grid-template-columns:repeat(2,minmax(0,1fr))}
+#dashboard .sw{background:#f7f9fc;border-radius:9px}
+#dashboard .lays .ghost{width:100%}
+#dashboard .card{box-shadow:none}
+#dashboard .design-panel .agrid>div{background:transparent;border:0;padding:0}
+#dashboard .design-panel .agrid{display:grid;grid-template-columns:1fr 1fr}
+#dashboard .design-panel .agrid>div:nth-child(3){display:block;grid-column:auto}
+#dashboard button{transition:background .15s,border-color .15s,transform .15s}
+#dashboard button:focus-visible{outline:3px solid #9bb9e0;outline-offset:2px}
+@media(max-width:760px){
+ .vicora-inner{grid-template-columns:1fr;gap:24px}
+ #dashboard>.agrid{grid-template-columns:1fr}
+ #dashboard>.agrid>div:nth-child(3){grid-column:auto;grid-template-columns:1fr}
+ #dashboard>.agrid>div:nth-child(3)>h3{grid-column:1}
+ .modal-box{padding:20px}
+ .mh{top:-20px;margin:-20px -20px 18px;padding:16px 20px}
+ #dashboard .design-panel .agrid{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap nav"><a class="brand brand-lockup" href="#" aria-label="Veehicee Telecommunications and Services"><span>vee<i>h</i>icee.</span><small>Telecommunications and Services</small></a>
-<nav class="links"><a href="#vicora">VICORA CBT</a><a href="#services">Services</a><a href="#about">About</a><a href="#portfolio">Our work</a><a href="marketplace.html">Marketplace</a><a href="#contact">Contact</a></nav>
+<nav class="links"><a href="#services">Services</a><a href="#about">About</a><a href="#portfolio">Our work</a><a href="marketplace.html">Marketplace</a><a href="#contact">Contact</a></nav>
 <div class="nav-actions"><button class="ghost admin-nav" type="button" onclick="openAdmin()">Admin · Themes</button><a class="btn" href="#contact">Start a project</a></div></div></header>
 
 <main>
-<section class="vicora-feature" id="vicora" aria-labelledby="vicoraTitle">
-  <div class="vicora-inner">
-    <div class="vicora-copy">
-      <span class="vicora-eyebrow">Veehicee flagship education technology</span>
-      <h2 id="vicoraTitle">Meet <span>VICORA CBT.</span><br>Examinations, reimagined.</h2>
-      <p>A modern computer-based testing solution designed to help schools organise question banks, schedule examinations, deliver digital tests and manage marking and results — with a technology foundation spanning web, Windows desktop and Android local-host workflows.</p>
-      <div class="vicora-actions">
-        <a class="vicora-primary" href="#contact">Request a product demo ↗</a>
-        
-      </div>
-      <p class="vicora-note">A product of Veehicee Telecommunications and Services · Education Without Boundaries.</p>
-    </div>
-    <div class="vicora-art vicora-laptop-art">
-      <img src="assets/vicora-laptop-dashboard.svg" alt="VICORA CBT redesigned desktop administration dashboard displayed on a laptop, with navigation, examination statistics, candidate activity and upcoming examinations" loading="eager">
-      <p class="vicora-real-caption">VICORA CBT desktop dashboard concept — redesigned from the original mobile administration interface.</p>
-    </div>
-  </div>
-  <div class="vicora-capabilities">
-    <div class="vicora-cap"><b>Question banks</b><span>Organise and prepare objective examination questions</span></div>
-    <div class="vicora-cap"><b>Exam scheduling</b><span>Plan and deliver computer-based assessments</span></div>
-    <div class="vicora-cap"><b>Marking &amp; results</b><span>Support examination marking and result workflows</span></div>
-    <div class="vicora-cap"><b>Multi-device direction</b><span>Web interface, Windows desktop tools and Android local-host architecture</span></div>
-  </div>
-</section>
+
 <section class="wrap hero">
 <div>
 <span class="tag"><b></b>Ado-Ekiti, Nigeria</span>
@@ -306,6 +345,31 @@ body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opac
 <p class="portfolio-note">Need a business website, customer portal, school platform or custom application? <a href="#contact">Tell us what you want to build</a>.</p>
 <div class="products" id="portfolioItems"></div>
 </div></section>
+
+<section class="vicora-feature" id="vicora" aria-labelledby="vicoraTitle">
+  <div class="vicora-inner">
+    <div class="vicora-copy">
+      <span class="vicora-eyebrow">Veehicee flagship education technology</span>
+      <h2 id="vicoraTitle">Meet <span>VICORA CBT.</span><br>Examinations, reimagined.</h2>
+      <p>A modern computer-based testing solution designed to help schools organise question banks, schedule examinations, deliver digital tests and manage marking and results — with a technology foundation spanning web, Windows desktop and Android local-host workflows.</p>
+      <div class="vicora-actions">
+        <a class="vicora-primary" href="#contact">Request a product demo ↗</a>
+        
+      </div>
+      <p class="vicora-note">A product of Veehicee Telecommunications and Services · Education Without Boundaries.</p>
+    </div>
+    <div class="vicora-art vicora-laptop-art">
+      <img src="assets/vicora-laptop-dashboard.svg" alt="VICORA CBT redesigned desktop administration dashboard displayed on a laptop, with navigation, examination statistics, candidate activity and upcoming examinations" loading="eager">
+      <p class="vicora-real-caption">VICORA CBT desktop dashboard concept — redesigned from the original mobile administration interface.</p>
+    </div>
+  </div>
+  <div class="vicora-capabilities">
+    <div class="vicora-cap"><b>Question banks</b><span>Organise and prepare objective examination questions</span></div>
+    <div class="vicora-cap"><b>Exam scheduling</b><span>Plan and deliver computer-based assessments</span></div>
+    <div class="vicora-cap"><b>Marking &amp; results</b><span>Support examination marking and result workflows</span></div>
+    <div class="vicora-cap"><b>Multi-device direction</b><span>Web interface, Windows desktop tools and Android local-host architecture</span></div>
+  </div>
+</section>
 
 <section class="section" id="marketplace"><div class="wrap">
 <span class="section-kicker">VEEHICEE MARKETPLACE</span><h2>Everyday tech.<br>Easy to shop.</h2>
@@ -467,8 +531,31 @@ let adminToken = "", siteSettingsCache = {};
 const $ = id => document.getElementById(id);
 const root = document.documentElement;
 $("year").textContent = new Date().getFullYear();
-function openAdmin(){$("adminModal").classList.add("open")}
+function openAdmin(){$("adminModal").classList.add("open");arrangeAdminWorkspace()}
+
 function closeAdmin(){$("adminModal").classList.remove("open")}
+function arrangeAdminWorkspace(){
+ const panel=document.querySelector("#dashboard>.agrid>div:nth-child(3)");
+ if(!panel||panel.dataset.organised==="yes")return;
+ const headings=Array.from(panel.children).filter(el=>el.tagName==="H3");
+ headings.forEach((heading,index)=>{
+   const details=document.createElement("details");
+   details.className="admin-group";
+   if(index===0)details.open=true;
+   const summary=document.createElement("summary");
+   summary.textContent=heading.textContent;
+   const body=document.createElement("div");body.className="admin-detail-body";
+   let node=heading.nextSibling;
+   while(node){
+     const next=node.nextSibling;
+     if(node.nodeType===1&&node.tagName==="H3")break;
+     body.appendChild(node);node=next;
+   }
+   details.append(summary,body);panel.insertBefore(details,heading);heading.remove();
+ });
+ panel.dataset.organised="yes";
+}
+
 
 async function api(action,data={}){
   const r = await fetch(API_URL,{
@@ -482,7 +569,7 @@ async function api(action,data={}){
 }
 
 /* ───────── ADMIN DESIGN STUDIO ───────── */
-const THEMES=[["midnight","White & Blue","#1457ff"],["sunrise","Sunrise","#ff5b37"],["royal","Royal","#ffc83d"],["forest","Forest","#b6f25b"],["ocean","Ocean Blue","#1457ff"],["berry","Berry","#ff4fa3"]];
+const THEMES=[["midnight","Professional Blue","#174ea6"]];
 const LAYOUTS=[["split","Split","Balanced two-column hero"],["center","Centered","Centered headline and content"],["bold","Bold","Oversized typography and strong cards"],["editorial","Editorial","Magazine-inspired composition"],["showcase","Showcase","Wide hero with layered visual"]];
 const PATTERNS=[["none","No pattern"],["dots","Soft dots"],["grid","Technical grid"],["diagonal","Diagonal lines"],["glow","Ambient glow"]];
 let activeDesign={theme:"midnight",layout:"split",pattern:"none"};
