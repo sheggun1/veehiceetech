@@ -35,7 +35,7 @@ const APP = {
 
 function setupVeehicee(adminEmail, adminPassword) {
   adminEmail = String(adminEmail || "").trim().toLowerCase();
-  if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(adminEmail) || !adminPassword || String(adminPassword).length < 12) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail) || !adminPassword || String(adminPassword).length < 12) {
     throw new Error("Supply a valid administrator email and a password of at least 12 characters.");
   }
   const props = PropertiesService.getScriptProperties();
