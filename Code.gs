@@ -21,6 +21,7 @@ const APP = {
     AdminUsers: ["id","email","salt","passwordHash","role","active","createdAt"],
     AdminSessions: ["tokenHash","email","expiresAt","createdAt"],
     WebsitePages: ["id","title","slug","body","published","updatedAt"],
+    Portfolio: ["id","title","category","description","imageUrls","projectUrl","featured","published","createdAt","updatedAt"],
     Enquiries: ["id","name","contact","message","status","createdAt"],
     Categories: ["id","name","active","createdAt"],
     Products: ["id","name","category","description","price","stock","imageUrl","active","createdAt","updatedAt"],
@@ -154,6 +155,12 @@ function doPost(e) {
       case "customerLogin": result = customerLogin_(input); break;
       case "customerLogout": result = customerLogout_(input); break;
       case "customerOrders": result = customerOrders_(input); break;
+      case "adminSavePortfolio": lock.waitLock(15000); result = adminSavePortfolio_(input); break;
+      case "adminListPortfolio": result = adminListPortfolio_(input); break;
+      case "publicPortfolio": result = publicPortfolio_(); break;
+      case "adminSaveSetting": lock.waitLock(15000); result = adminSaveSetting_(input); break;
+      case "publicSettings": result = publicSettings_(); break;
+      case "adminInventoryReport": result = adminInventoryReport_(input); break;
       default: throw new Error("Unsupported action: " + action);
     }
     return json_(Object.assign({ok:true},result || {}));
@@ -272,7 +279,7 @@ function adminUpdateOrder_(x) {
     }
     if(x.orderStatus) {
       const previous=String(d[i][12]), next=String(x.orderStatus);
-      if(next==="Cancelled" && previous!=="Cancelled" && d[i][16]===true) restoreReservedStock_(id,d[i]);
+      if(next==="Cancelled" && previous!=="Cancelled" && d[i][16]===true && !["Paid","Confirmed"].includes(String(d[i][11]))) restoreReservedStock_(id,d[i]);
       sh.getRange(i+1,13).setValue(next);
     }
     if(x.paymentStatus) sh.getRange(i+1,12).setValue(String(x.paymentStatus));
@@ -393,8 +400,11 @@ function createOrder_(x) {
   const orderId="VEE-"+Utilities.getUuid().replace(/-/g,"").slice(0,12).toUpperCase();
   let customerId="";
   const customers=sheet_("Customers"), cd=customers.getDataRange().getValues();
+  let account=null;
+  if(x.customerToken) account=requireCustomer_(x.customerToken);
   const existing=cd.slice(1).find(r=>(email && String(r[2]).toLowerCase()===email) || String(r[3])===phone);
-  if(existing) customerId=String(existing[0]);
+  if(account) customerId=String(account.id);
+  else if(existing) customerId=String(existing[0]);
   else {customerId=Utilities.getUuid();customers.appendRow([customerId,customerName,email,phone,new Date()]);}
   sheet_("Addresses").appendRow([Utilities.getUuid(),customerId,customerName,phone,town,address,new Date()]);
   // Reserve stock atomically so two customers cannot buy the same final unit.
@@ -406,8 +416,19 @@ function createOrder_(x) {
   sheet_("Orders").appendRow([orderId,customerId,customerName,phone,town,address,JSON.stringify(lines),subtotal,deliveryFee,total,method,method==="bank_transfer"?"Awaiting verification":"Pending","Pending",new Date(),"Pending","",true,new Date()]);
   const oi=sheet_("OrderItems"); lines.forEach(line=>oi.appendRow([Utilities.getUuid(),orderId,line.productId,line.name,line.quantity,line.unitPrice,line.lineTotal]));
   let payment={method:method,status:method==="bank_transfer"?"Awaiting verification":"Pending"};
-  if(method==="paystack") payment=initializePaystack_(orderId,total,email);
-  if(method==="flutterwave") payment=initializeFlutterwave_(orderId,total,email,customerName,phone);
+  try {
+    if(method==="paystack") payment=initializePaystack_(orderId,total,email);
+    if(method==="flutterwave") payment=initializeFlutterwave_(orderId,total,email,customerName,phone);
+  } catch(paymentError) {
+    const rows=sheet_("Orders").getDataRange().getValues(), idx=rows.findIndex((r,i)=>i>0 && String(r[0])===orderId);
+    if(idx>0) { restoreReservedStock_(orderId,rows[idx]); sheet_("Orders").getRange(idx+1,13).setValue("Cancelled"); }
+    throw paymentError;
+  }
+  if(email) {
+    try { MailApp.sendEmail(email,"Veehicee order "+orderId,"Thank you for your order. Order total: NGN "+total+". We will update you as it is processed."); } catch(mailError) {}
+  }
+  const notify=PropertiesService.getScriptProperties().getProperty("VEEHICEE_NOTIFY_EMAIL");
+  if(notify) { try { MailApp.sendEmail(notify,"New Veehicee order "+orderId,"A new order was placed. Customer: "+customerName+"; Phone: "+phone+"; Total: NGN "+total+"; Payment: "+method+"."); } catch(mailError) {} }
   log_("public","CREATE_ORDER",orderId+" total "+total);
   return {message:"Order created.",orderId:orderId,subtotal:subtotal,deliveryFee:deliveryFee,total:total,payment:payment};
 }
@@ -609,3 +630,45 @@ function strongPasswordHash_(password,salt) {
   return u8hex_(result);
 }
 function u8hex_(bytes) { return bytes.map(b=>(b+256).toString(16).slice(-2)).join(""); }
+
+
+function adminSavePortfolio_(x) {
+  const email=requireAdmin_(x.token), title=String(x.title||"").trim(), description=String(x.description||"");
+  const imageUrls=Array.isArray(x.imageUrls)?x.imageUrls.map(String):[];
+  if(!title || title.length>180 || description.length>5000 || imageUrls.length>12 || imageUrls.some(u=>!/^https:\/\/drive\.google\.com\//.test(u))) throw new Error("Enter a valid project title, description and uploaded Drive image links.");
+  const id=String(x.id||Utilities.getUuid()), sh=sheet_("Portfolio"), d=sh.getDataRange().getValues(), idx=d.findIndex((r,i)=>i>0 && String(r[0])===id);
+  const row=[id,title,String(x.category||"General").slice(0,100),description,JSON.stringify(imageUrls),String(x.projectUrl||"").slice(0,1000),x.featured===true,x.published===true,new Date(),new Date()];
+  if(idx>0) sh.getRange(idx+1,1,1,row.length).setValues([row]); else sh.appendRow(row);
+  log_(email,"SAVE_PORTFOLIO",title); return {message:"Portfolio project saved.",id:id};
+}
+function adminListPortfolio_(x) {
+  requireAdmin_(x.token); const d=sheet_("Portfolio").getDataRange().getValues();
+  return {projects:d.slice(1).filter(r=>r[0]).map(r=>({id:r[0],title:r[1],category:r[2],description:r[3],imageUrls:JSON.parse(String(r[4]||"[]")),projectUrl:r[5],featured:r[6]===true,published:r[7]===true}))};
+}
+function publicPortfolio_() {
+  const d=sheet_("Portfolio").getDataRange().getValues();
+  return {projects:d.slice(1).filter(r=>r[0] && r[7]===true).map(r=>({id:r[0],title:r[1],category:r[2],description:r[3],imageUrls:JSON.parse(String(r[4]||"[]")),projectUrl:r[5],featured:r[6]===true}))};
+}
+function adminSaveSetting_(x) {
+  const email=requireAdmin_(x.token), key=String(x.key||"").trim(), value=String(x.value||"");
+  if(!/^[A-Za-z0-9_.-]{1,100}$/.test(key) || value.length>10000) throw new Error("Invalid setting key or value too long.");
+  const sh=sheet_("SiteSettings"), d=sh.getDataRange().getValues(), idx=d.findIndex((r,i)=>i>0 && String(r[0])===key);
+  const row=[key,value,new Date()];
+  if(idx>0) sh.getRange(idx+1,1,1,row.length).setValues([row]); else sh.appendRow(row);
+  log_(email,"SAVE_SETTING",key); return {message:"Setting saved."};
+}
+function publicSettings_() {
+  const d=sheet_("SiteSettings").getDataRange().getValues(), settings={};
+  d.slice(1).forEach(r=>{if(r[0]) settings[String(r[0])]=String(r[1]||"");});
+  return {settings:settings};
+}
+function adminInventoryReport_(x) {
+  requireAdmin_(x.token);
+  const d=sheet_("Products").getDataRange().getValues(), products=d.slice(1).filter(r=>r[0]);
+  const low=products.filter(r=>Number(r[5])<=5 && r[7]===true).map(r=>({id:r[0],name:r[1],stock:Number(r[5])}));
+  const stockValue=products.reduce((sum,r)=>sum+(Number(r[4])||0)*(Number(r[5])||0),0);
+  const orders=sheet_("Orders").getDataRange().getValues().slice(1).filter(r=>r[0]);
+  const paid=orders.filter(r=>["Paid","Confirmed"].includes(String(r[11])));
+  const revenue=paid.reduce((sum,r)=>sum+(Number(r[9])||0),0);
+  return {totalProducts:products.length,lowStock:low,stockValue:stockValue,paidOrders:paid.length,revenue:revenue,totalOrders:orders.length};
+}
