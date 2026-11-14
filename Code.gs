@@ -48,7 +48,8 @@ const APP = {
     Wishlists: ["customerId","productId","createdAt"],
     LoyaltyLedger: ["id","customerId","orderId","points","amount","reason","createdAt"],
     AbandonedCarts: ["id","customerId","email","cartJson","status","updatedAt","reminderSentAt"],
-    CouponRedemptions: ["id","code","orderId","customerId","createdAt"]
+    CouponRedemptions: ["id","code","orderId","customerId","createdAt"],
+    PriceAlerts: ["id","customerId","email","productId","targetPrice","active","createdAt"]
   }
 };
 
@@ -214,6 +215,7 @@ function doPost(e) {
       case "customerSaveAbandonedCart": lock.waitLock(15000); result = customerSaveAbandonedCart_(input); break;
       case "adminSendAbandonedCartReminder": result = adminSendAbandonedCartReminder_(input); break;
       case "adminListAbandonedCarts": result = adminListAbandonedCarts_(input); break;
+      case "customerSavePriceAlert": lock.waitLock(15000); result = customerSavePriceAlert_(input); break;
       case "adminSendLowStockAlert": result = adminSendLowStockAlert_(input); break;
       default: throw new Error("Unsupported action: " + action);
     }
@@ -331,8 +333,9 @@ function adminSaveProduct_(x) {
   const costPrice=Number(x.costPrice||0), wholesalePrice=Number(x.wholesalePrice||0);
   if(!isFinite(costPrice)||costPrice<0||!isFinite(wholesalePrice)||wholesalePrice<0) throw new Error("Enter valid non-negative cost and wholesale prices.");
   const vals=[id,name,String(x.category||"General"),String(x.description||""),price,stock,String(x.imageUrl||""),x.active!==false,new Date(),new Date(),costPrice,wholesalePrice];
-  let row=-1, oldStock=0; for(let i=1;i<d.length;i++) if(String(d[i][0])===id){row=i+1;oldStock=Number(d[i][5])||0;break;}
+  let row=-1, oldStock=0, oldPrice=null; for(let i=1;i<d.length;i++) if(String(d[i][0])===id){row=i+1;oldStock=Number(d[i][5])||0;oldPrice=Number(d[i][4])||0;break;}
   if(row>0) sh.getRange(row,1,1,vals.length).setValues([vals]); else sh.appendRow(vals);
+  if(row>0 && oldPrice!==null && price<oldPrice) notifyPriceDrop_(id,name,price);
   if(row>0 && oldStock!==stock) sheet_("InventoryMovements").appendRow([Utilities.getUuid(),id,name,stock-oldStock,"Admin stock adjustment","",new Date()]);
   log_(email,"SAVE_PRODUCT",name); return {message:"Product saved.",id:id};
 }
@@ -848,4 +851,24 @@ function adminListAbandonedCarts_(x) {
   requireAdmin_(x.token);
   const d=sheet_("AbandonedCarts").getDataRange().getValues();
   return {carts:d.slice(1).filter(r=>r[0]&&r[4]==="Open").reverse().map(r=>({id:r[0],email:r[2],items:r[3],updatedAt:r[5],reminderSentAt:r[6]}))};
+}
+
+function customerSavePriceAlert_(x) {
+  const c=requireCustomer_(x.token), id=String(x.productId||""), target=Number(x.targetPrice);
+  if(!id||!isFinite(target)||target<=0) throw new Error("Enter a product and a valid target price.");
+  const p=sheet_("Products").getDataRange().getValues().slice(1).find(r=>String(r[0])===id&&r[7]===true);
+  if(!p) throw new Error("Product is unavailable.");
+  const sh=sheet_("PriceAlerts"), d=sh.getDataRange().getValues();
+  if(d.slice(1).some(r=>String(r[1])===String(c.id)&&String(r[3])===id&&r[5]===true)) throw new Error("You already have an active alert for this product.");
+  sh.appendRow([Utilities.getUuid(),c.id,c.email,id,target,true,new Date()]);
+  return {message:"Price alert saved. We will email you if the price reaches your target."};
+}
+function notifyPriceDrop_(productId,name,newPrice) {
+  const sh=sheet_("PriceAlerts"), d=sh.getDataRange().getValues();
+  for(let i=1;i<d.length;i++) {
+    if(String(d[i][3])===String(productId)&&d[i][5]===true&&Number(d[i][4])>=newPrice&&String(d[i][2])) {
+      try { MailApp.sendEmail(String(d[i][2]),"Price drop: "+name,"Good news! "+name+" is now ₦"+newPrice+". Visit the Veehicee Marketplace to check availability."); sh.getRange(i+1,6).setValue(false); }
+      catch(e) {}
+    }
+  }
 }
