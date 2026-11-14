@@ -120,7 +120,7 @@ function doPost(e) {
   const lock = LockService.getScriptLock();
   try {
     const raw = e && e.postData && e.postData.contents ? e.postData.contents : "{}";
-    if (raw.length > 100000) throw new Error("Request is too large.");
+    if (raw.length > 7500000) throw new Error("Request is too large.");
     const input = JSON.parse(raw);
     if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Invalid request.");
     const action = String(input.action || "");
