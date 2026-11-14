@@ -5,7 +5,8 @@
  * FIRST-TIME SETUP:
  * 1. Create a Google Sheet and open Extensions > Apps Script.
  * 2. Replace Code.gs with this file and save.
- * 3. Run setupVeehicee("your-google-email@gmail.com", "a-strong-password").
+ * 3. Add VEEHICEE_SETUP_ADMIN_EMAIL to Script Properties (and, for a new
+ *    administrator, VEEHICEE_SETUP_ADMIN_PASSWORD), then run runVeehiceeSetup.
  * 4. Authorize the script when Google asks.
  * 5. Deploy > New deployment > Web app.
  *    Execute as: Me. Who has access: Anyone.
