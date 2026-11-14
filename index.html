@@ -216,6 +216,7 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <input id="pEditingId" type="hidden">
 <button class="btn" onclick="saveProduct()">Save product</button><div id="productsAdminList"></div></div>
 <div><h3>Orders and delivery</h3><button class="ghost" onclick="loadOrders()">Refresh orders</button><div id="ordersList"></div>
+<h3>Inventory and sales report</h3><button class="ghost" onclick="loadInventoryReport()">Refresh report</button><p id="inventoryReport" class="status"></p>
 <h3>Portfolio project</h3><input id="workEditingId" type="hidden"><input id="workExistingImages" type="hidden">
 <label for="workTitle">Project title</label><input id="workTitle">
 <label for="workCategory">Category</label><input id="workCategory">
@@ -402,6 +403,7 @@ async function adminLogin(){
     await loadOrders();
     await loadPortfolioAdmin();
     await loadProductsAdmin();
+    await loadInventoryReport();
   }catch(e){
     $("adminPassword").value="";
     $("loginStatus").textContent=e.message;
@@ -493,6 +495,10 @@ async function loadProductsAdmin(){
     });
   }catch(e){$("adminStatus").textContent=e.message}
 }
+async function loadInventoryReport(){
+  try{const r=await api("adminInventoryReport",{token:adminToken});$("inventoryReport").textContent="Products: "+r.totalProducts+" · Orders: "+r.totalOrders+" · Paid orders: "+r.paidOrders+" · Paid revenue: "+money(r.revenue)+" · Stock value: "+money(r.stockValue)+" · Low stock: "+r.lowStock.length+(r.lowStock.length?" ("+r.lowStock.map(p=>p.name+" ["+p.stock+"]").join(", ")+")":"")}
+  catch(e){$("inventoryReport").textContent=e.message}
+}
 async function loadOrders(){
   try{
     const r=await api("adminListOrders",{token:adminToken});$("ordersList").innerHTML="";
@@ -501,8 +507,10 @@ async function loadOrders(){
       const info=document.createElement("span");info.textContent=o.id+" · "+o.customerName+" · "+money(o.total)+" · "+o.paymentStatus+" · "+o.orderStatus;
       el.append(info);
       const status=document.createElement("select");["Pending","Processing","Ready for dispatch","Dispatched","Delivered","Cancelled","Refunded"].forEach(v=>{const op=document.createElement("option");op.value=v;op.textContent=v;if(v===o.orderStatus)op.selected=true;status.append(op)});
-      const update=document.createElement("button");update.className="ghost";update.textContent="Update status";update.onclick=async()=>{try{await api("adminUpdateOrder",{token:adminToken,id:o.id,orderStatus:status.value});await loadOrders()}catch(err){$("adminStatus").textContent=err.message}};
-      el.append(status,update);
+      const delivery=document.createElement("select");["Pending","Processing","Ready for dispatch","Dispatched","Delivered","Cancelled"].forEach(v=>{const op=document.createElement("option");op.value=v;op.textContent="Delivery: "+v;if(v===o.deliveryStatus)op.selected=true;delivery.append(op)});
+      const tracking=document.createElement("input");tracking.placeholder="Tracking code";tracking.value=o.trackingCode||"";tracking.style.maxWidth="140px";
+      const update=document.createElement("button");update.className="ghost";update.textContent="Update";update.onclick=async()=>{try{await api("adminUpdateOrder",{token:adminToken,id:o.id,orderStatus:status.value,deliveryStatus:delivery.value,trackingCode:tracking.value});await loadOrders()}catch(err){$("adminStatus").textContent=err.message}};
+      el.append(status,delivery,tracking,update);
       if(o.paymentMethod==="bank_transfer" && !["Paid","Confirmed"].includes(o.paymentStatus)){
         const b=document.createElement("button");b.className="ghost";b.textContent="Confirm transfer";b.onclick=async()=>{if(!confirm("Confirm that this bank transfer has actually been received?"))return;try{await api("adminConfirmBankTransfer",{token:adminToken,orderId:o.id});await loadOrders();$("adminStatus").textContent="Bank transfer confirmed."}catch(err){$("adminStatus").textContent=err.message}};el.append(b);
       }
