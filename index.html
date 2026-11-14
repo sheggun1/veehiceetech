@@ -114,7 +114,7 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <article class="card"><div class="ico">&lt;/&gt;</div><h3>Software and apps</h3><p>Web and desktop applications built around how your organisation actually works.</p></article>
 <article class="card"><div class="ico">✎</div><h3>Education technology</h3><p>Result systems, CBT, lesson trackers and school tools that save staff hours.</p></article>
 <article class="card"><div class="ico">◐</div><h3>Websites and design</h3><p>Distinctive websites, flyers and brand visuals that make you easy to remember.</p></article>
-<article class="card"><div class="ico">⌁</div><h3>Telecom and ICT</h3><p>Setup, networking and ICT support so your team stays online and productive.</p></article>
+<article class="card"><div class="ico">⌁</div><h3>Telecom and ICT</h3><p>Device setup, software installation and ICT support that help your team work productively.</p></article>
 <article class="card"><div class="ico">✦</div><h3>Consulting</h3><p>Plain advice on which digital tools to choose, and how to adopt them.</p></article>
 <article class="card"><div class="ico">⚙</div><h3>Support</h3><p>Help through launch, training and every improvement after it.</p></article>
 </div></div></section>
@@ -123,15 +123,56 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <div><h2>Built around people.<br>Driven by what's possible.</h2>
 <p class="intro">Veehicee Telecommunications and Services makes digital progress practical and accessible for businesses, schools and communities.</p>
 <div class="chips"><span>Software</span><span>Schools</span><span>Websites</span><span>ICT</span><span>Graphic design</span></div></div>
-<div><div class="value"><strong>Our mission</strong><p>Make useful technology accessible through solutions that are dependable and built for real needs.</p></div>
-<div class="value"><strong>Our vision</strong><p>Be the technology partner people trust for meaningful innovation and excellent digital experiences.</p></div>
+<div><div class="value"><strong>Our mission</strong><p id="missionText">Make useful technology accessible through solutions that are dependable and built for real needs.</p></div>
+<div class="value"><strong>Our vision</strong><p id="visionText">Be the technology partner people trust for meaningful innovation and excellent digital experiences.</p></div>
 <div class="value"><strong>Our approach</strong><p>Listen carefully, build intentionally, and keep improving with the people who use what we make.</p></div></div>
+</div></section>
+
+<section class="section" id="portfolio"><div class="wrap">
+<h2>Work that makes<br>a difference.</h2><p class="intro">A selection of digital projects and solutions.</p>
+<div class="products" id="portfolioItems"></div>
 </div></section>
 
 <section class="section" id="marketplace"><div class="wrap">
 <h2>Everyday tech,<br>made easier.</h2>
 <p class="intro">Phone accessories, charging essentials, audio and power banks. Delivery covers Ado-Ekiti and nearby towns.</p>
 <div class="products" id="products"></div>
+<div class="card cartbox">
+<h3>Shopping cart <span id="cartCount">0 items</span></h3>
+<div id="cartItems"><p class="intro">Your cart is empty.</p></div>
+<p class="price">Subtotal: <span id="cartSubtotal">₦0</span></p>
+<button class="btn" id="checkoutBtn" type="button" disabled>Continue to checkout</button>
+<form id="checkoutForm" hidden>
+<h3>Delivery details</h3>
+<label for="buyerName">Full name</label><input id="buyerName" required maxlength="150">
+<label for="buyerEmail">Email (for order updates)</label><input id="buyerEmail" type="email">
+<label for="buyerPhone">Phone number</label><input id="buyerPhone" required maxlength="40">
+<label for="buyerTown">Delivery town</label><select id="buyerTown" required><option value="">Loading delivery areas…</option></select>
+<label for="buyerAddress">Full delivery address</label><textarea id="buyerAddress" rows="3" required maxlength="500"></textarea>
+<label for="buyerPayment">Payment method</label><select id="buyerPayment" required>
+<option value="bank_transfer">Bank transfer (manual confirmation)</option>
+<option value="paystack">Paystack</option><option value="flutterwave">Flutterwave</option></select>
+<button class="btn" type="submit">Place order</button>
+<p class="status" id="checkoutStatus" role="status" aria-live="polite"></p>
+</form>
+</div>
+<div class="card cartbox" style="margin-top:18px">
+<h3>Track your order</h3><form id="trackOrderForm">
+<label for="trackOrderId">Order number</label><input id="trackOrderId" required>
+<label for="trackPhone">Phone number used for the order</label><input id="trackPhone" required>
+<button class="ghost" type="submit">Check order status</button><p class="status" id="trackStatus" role="status" aria-live="polite"></p>
+</form>
+<hr><h3>Customer account (optional)</h3>
+<label for="accountMode">Account action</label><select id="accountMode"><option value="register">Create account</option><option value="login">Sign in</option></select>
+<div id="accountNameWrap"><label for="accountName">Full name</label><input id="accountName"></div>
+<label for="accountEmail">Email</label><input id="accountEmail" type="email">
+<div id="accountPhoneWrap"><label for="accountPhone">Phone</label><input id="accountPhone">
+</div><label for="accountPassword">Password (minimum 12 characters)</label><input id="accountPassword" type="password" minlength="12">
+<button class="ghost" id="accountSubmit" type="button">Create account</button>
+<button class="ghost" id="myOrdersBtn" type="button">My orders</button>
+<div id="myOrdersList"></div>
+<p class="status" id="accountStatus" role="status" aria-live="polite"></p>
+</div>
 </div></section>
 
 <section class="section" id="contact"><div class="wrap contact">
@@ -172,16 +213,53 @@ label{font-size:.88rem;color:var(--muted)}.status{color:var(--accent);min-height
 <label for="pPrice">Price (₦)</label><input id="pPrice" type="number" min="0">
 <label for="pStock">Stock</label><input id="pStock" type="number" min="0">
 <label for="pImg">Image URL (optional)</label><input id="pImg" type="url">
+<label for="pFile">Or upload product image (max 5 MB)</label><input id="pFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
 <label for="pDesc">Description</label><input id="pDesc">
-<button class="btn" onclick="saveProduct()">Save product</button></div>
-</div><p style="margin-top:18px"><button class="ghost" onclick="adminLogout()">Sign out</button></p></div>
+<input id="pEditingId" type="hidden">
+<button class="btn" onclick="saveProduct()">Save product</button><div id="productsAdminList"></div></div>
+<div><h3>Delivery areas and product categories</h3>
+<label for="zoneTown">Delivery town</label><input id="zoneTown" placeholder="Ado-Ekiti">
+<label for="zoneFee">Delivery fee (₦)</label><input id="zoneFee" type="number" min="0" value="0">
+<button class="ghost" onclick="saveDeliveryZone()">Save delivery area</button>
+<label for="categoryName">Product category</label><input id="categoryName" placeholder="Phone cases">
+<button class="ghost" onclick="saveCategory()">Save category</button>
+<h3>Orders and delivery</h3><button class="ghost" onclick="loadOrders()">Refresh orders</button><div id="ordersList"></div>
+<h3>Inventory and sales report</h3><button class="ghost" onclick="loadInventoryReport()">Refresh report</button><p id="inventoryReport" class="status"></p>
+<h3>Database backup</h3><button class="ghost" onclick="createDatabaseBackup()">Create Google Drive backup</button><p id="backupStatus" class="status"></p>
+<h3>Business information and SEO</h3>
+<label for="settingPhone">Business phone</label><input id="settingPhone">
+<label for="settingWhatsapp">WhatsApp number (international format)</label><input id="settingWhatsapp">
+<label for="settingEmail">Business email</label><input id="settingEmail" type="email">
+<label for="settingAddress">Business address</label><input id="settingAddress">
+<label for="settingMission">Mission</label><textarea id="settingMission" rows="2"></textarea>
+<label for="settingVision">Vision</label><textarea id="settingVision" rows="2"></textarea>
+<label for="settingSeoTitle">SEO title</label><input id="settingSeoTitle">
+<label for="settingSeoDescription">SEO description</label><textarea id="settingSeoDescription" rows="2"></textarea>
+<label for="settingBankName">Bank name</label><input id="settingBankName">
+<label for="settingBankAccountName">Bank account name</label><input id="settingBankAccountName">
+<label for="settingBankAccountNumber">Bank account number</label><input id="settingBankAccountNumber">
+<button class="btn" onclick="saveBusinessSettings()">Save business information</button>
+<h3>Portfolio project</h3><input id="workEditingId" type="hidden"><input id="workExistingImages" type="hidden">
+<label for="workTitle">Project title</label><input id="workTitle">
+<label for="workCategory">Category</label><input id="workCategory">
+<label for="workDescription">Description</label><textarea id="workDescription" rows="3"></textarea>
+<label for="workImages">Project images (select up to 12, max 5 MB each)</label><input id="workImages" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
+<label><input id="workFeatured" type="checkbox" style="width:auto"> Featured project</label>
+<label><input id="workPublished" type="checkbox" style="width:auto" checked> Publish project</label>
+<button class="btn" onclick="savePortfolio()">Save project</button><div id="portfolioAdminList"></div>
+</div>
+</div><div class="card" style="margin-top:18px"><h3>Change administrator password</h3>
+<label for="currentAdminPassword">Current password</label><input id="currentAdminPassword" type="password">
+<label for="newAdminPassword">New password (minimum 12 characters)</label><input id="newAdminPassword" type="password" minlength="12">
+<button class="ghost" onclick="changeAdminPassword()">Update password</button></div>
+<p style="margin-top:18px"><button class="ghost" onclick="adminLogout()">Sign out</button></p></div>
 </div></div>
 
 <script>
 /* ───────── CONFIG ───────── */
 const API_URL = "https://script.google.com/macros/s/AKfycbyOZOCPk8UOk1JtwnMosi9pnCY685lXhSiUFrIUSMKM2R68CpikDiXgsn3cx_K1q-H2_g/exec";
 
-let adminToken = "";
+let adminToken = "", siteSettingsCache = {};
 const $ = id => document.getElementById(id);
 const root = document.documentElement;
 $("year").textContent = new Date().getFullYear();
@@ -214,14 +292,48 @@ THEMES.forEach(([v,n,c])=>{const b=document.createElement("button");b.className=
 LAYOUTS.forEach(([v,n,d])=>{const b=document.createElement("button");b.className="ghost";b.dataset.v=v;b.innerHTML="<span><b>"+n+"</b><br><small>"+d+"</small></span>";b.onclick=()=>{store("vee-layout",v);apply()};$("lays").append(b)});
 $("fab").onclick=()=>{const o=$("studio").classList.toggle("open");$("fab").setAttribute("aria-expanded",o)};
 apply();
+async function loadPublicSettings(){
+  try{
+    const s=(await api("publicSettings")).settings||{};siteSettingsCache=s;
+    if(s.mission)$("missionText").textContent=s.mission;
+    if(s.vision)$("visionText").textContent=s.vision;
+    if(s.seoTitle)document.title=s.seoTitle;
+    if(s.seoDescription){const m=document.querySelector('meta[name="description"]');if(m)m.content=s.seoDescription}
+  }catch(e){console.warn("Business settings unavailable",e.message)}
+}
+loadPublicSettings();
 
 /* ───────── MARKETPLACE ───────── */
 const SAMPLE=[["Phone accessories","Cases, cables and screen protection","📱"],["Charging essentials","Chargers and fast-charge cables","🔌"],["Audio","Earphones and speakers","🎧"],["Power banks","Stay powered through the day","🔋"]];
+let productsCache=[], cart=[], customerToken="";
+const money=n=>"₦"+Number(n||0).toLocaleString("en-NG");
+function updateCart(){
+  $("cartCount").textContent=cart.reduce((s,x)=>s+x.quantity,0)+" items";
+  $("cartSubtotal").textContent=money(cart.reduce((s,x)=>s+x.price*x.quantity,0));
+  $("cartItems").innerHTML="";
+  if(!cart.length){$("cartItems").innerHTML='<p class="intro">Your cart is empty.</p>';$("checkoutBtn").disabled=true;return}
+  cart.forEach(item=>{
+    const row=document.createElement("div");row.className="aitem";
+    const label=document.createElement("span");label.textContent=item.name+" × "+item.quantity+" — "+money(item.price*item.quantity);
+    const minus=document.createElement("button");minus.className="ghost";minus.textContent="−";minus.onclick=()=>changeCart(item.id,-1);
+    const plus=document.createElement("button");plus.className="ghost";plus.textContent="+";plus.onclick=()=>changeCart(item.id,1);
+    const remove=document.createElement("button");remove.className="ghost";remove.textContent="Remove";remove.onclick=()=>{cart=cart.filter(x=>x.id!==item.id);updateCart()};
+    row.append(label,minus,plus,remove);$("cartItems").append(row);
+  });
+  $("checkoutBtn").disabled=false;
+}
+function changeCart(id,delta){
+  const item=cart.find(x=>x.id===id), p=productsCache.find(x=>x.id===id);
+  if(!item||!p)return;
+  if(delta>0 && item.quantity>=Number(p.stock))return;
+  item.quantity+=delta;if(item.quantity<=0)cart=cart.filter(x=>x.id!==id);updateCart();
+}
 function enquire(name){$("m").value="Hello, I'm interested in: "+name;location.hash="#contact";$("n").focus({preventScroll:true})}
 async function loadProducts(){
   const box=$("products");let list=[];
   try{list=(await api("publicProducts")).products||[]}
-  catch(e){console.warn("publicProducts failed, showing sample:",e.message)}
+  catch(e){console.warn("publicProducts failed:",e.message)}
+  productsCache=list;
   box.innerHTML="";
   if(!list.length){SAMPLE.forEach(([n,d,i])=>list.push({name:n,description:d,icon:i}))}
   list.forEach(p=>{
@@ -236,11 +348,80 @@ async function loadProducts(){
     const s=document.createElement("small");s.textContent=p.description||p.category||"";
     b.append(h,s);
     if(p.price!==undefined){const pr=document.createElement("div");pr.className="price";pr.textContent="₦"+Number(p.price).toLocaleString();b.append(pr)}
-    const btn=document.createElement("button");btn.className="btn";btn.textContent=p.price!==undefined?"Order enquiry":"Ask about this";btn.onclick=()=>enquire(p.name);b.append(btn);
+    const btn=document.createElement("button");btn.className="btn";
+    if(p.id && Number(p.price)>=0){btn.textContent=Number(p.stock)>0?"Add to cart":"Out of stock";btn.disabled=Number(p.stock)<=0;btn.onclick=()=>{const found=cart.find(x=>x.id===p.id);if(found){if(found.quantity<Number(p.stock))found.quantity++}else cart.push({id:p.id,name:p.name,price:Number(p.price),quantity:1});updateCart()}}
+    else {btn.textContent="Ask about this";btn.onclick=()=>enquire(p.name)}
+    b.append(btn);
     el.append(img,b);box.append(el);
   });
 }
 loadProducts();
+updateCart();
+
+async function loadDeliveryZones(){
+  try{
+    const r=await api("publicShippingZones");$("buyerTown").innerHTML='<option value="">Select your town</option>';
+    (r.zones||[]).forEach(z=>{const o=document.createElement("option");o.value=z.town;o.textContent=z.town+" — delivery "+money(z.deliveryFee);$("buyerTown").append(o)});
+  }catch(e){$("buyerTown").innerHTML='<option value="">Delivery areas unavailable</option>'}
+}
+loadDeliveryZones();
+$("checkoutBtn").onclick=()=>{$("checkoutForm").hidden=false;$("checkoutForm").scrollIntoView({behavior:"smooth",block:"start"})};
+$("checkoutForm").addEventListener("submit",async e=>{
+  e.preventDefault();$("checkoutStatus").textContent="Placing your order…";
+  try{
+    const result=await api("createOrder",{
+      customerName:$("buyerName").value,email:$("buyerEmail").value,phone:$("buyerPhone").value,
+      town:$("buyerTown").value,address:$("buyerAddress").value,paymentMethod:$("buyerPayment").value,
+      items:cart.map(x=>({id:x.id,quantity:x.quantity})),customerToken:customerToken
+    });
+    $("checkoutStatus").textContent="Order "+result.orderId+" created. Total: "+money(result.total)+".";
+    if(result.payment && result.payment.authorizationUrl){
+      const a=document.createElement("a");a.href=result.payment.authorizationUrl;a.target="_blank";a.rel="noopener";a.className="btn";a.textContent="Proceed to secure payment";$("checkoutStatus").append(document.createTextNode(" "),a);
+    }else{
+      let bankText=" Please transfer payment and contact us with your order number for confirmation.";
+      if(result.payment && result.payment.method==="bank_transfer" && siteSettingsCache.bankName && siteSettingsCache.bankAccountNumber) {
+        bankText=" Bank: "+siteSettingsCache.bankName+"; Account name: "+(siteSettingsCache.bankAccountName||"")+"; Account number: "+siteSettingsCache.bankAccountNumber+". Please use your order number as the transfer narration.";
+      }
+      $("checkoutStatus").append(document.createTextNode(bankText));
+    }
+    cart=[];updateCart();loadProducts();
+  }catch(err){$("checkoutStatus").textContent=err.message}
+});
+$("accountMode").onchange=()=>{$("accountNameWrap").hidden=$("accountMode").value==="login";$("accountPhoneWrap").hidden=$("accountMode").value==="login";$("accountSubmit").textContent=$("accountMode").value==="login"?"Sign in":"Create account"};
+$("myOrdersBtn").onclick=async()=>{
+  if(!customerToken){$("accountStatus").textContent="Please sign in first.";return}
+  try{const r=await api("customerOrders",{token:customerToken});$("myOrdersList").innerHTML="";
+    (r.orders||[]).forEach(o=>{const p=document.createElement("p");p.textContent=o.id+" · "+money(o.total)+" · "+o.paymentStatus+" · "+o.deliveryStatus;$("myOrdersList").append(p)});
+    if(!(r.orders||[]).length)$("myOrdersList").textContent="No orders yet.";
+  }catch(err){$("accountStatus").textContent=err.message}
+};
+$("accountSubmit").onclick=async()=>{
+  const mode=$("accountMode").value;$("accountStatus").textContent="Please wait…";
+  try{
+    const data=mode==="register"?{name:$("accountName").value,email:$("accountEmail").value,phone:$("accountPhone").value,password:$("accountPassword").value}:{email:$("accountEmail").value,password:$("accountPassword").value};
+    const r=await api(mode==="register"?"customerRegister":"customerLogin",data);customerToken=r.token;
+    $("accountStatus").textContent="Signed in as "+r.customer.name+". Your future orders can be linked to this account.";
+    $("buyerName").value=r.customer.name;$("buyerEmail").value=r.customer.email;$("buyerPhone").value=r.customer.phone;
+  }catch(err){$("accountStatus").textContent=err.message}
+};
+$("trackOrderForm").addEventListener("submit",async e=>{
+  e.preventDefault();$("trackStatus").textContent="Checking…";
+  try{const r=await api("customerOrderLookup",{orderId:$("trackOrderId").value,phone:$("trackPhone").value});const o=r.order;$("trackStatus").textContent="Order "+o.id+" — "+o.orderStatus+"; payment: "+o.paymentStatus+"; delivery: "+o.deliveryStatus+(o.trackingCode?"; tracking: "+o.trackingCode:"")}
+  catch(err){$("trackStatus").textContent=err.message}
+});
+async function loadPortfolio(){
+  const box=$("portfolioItems");try{
+    const r=await api("publicPortfolio");box.innerHTML="";
+    (r.projects||[]).forEach(p=>{
+      const card=document.createElement("article");card.className="prod";
+      const media=document.createElement("div");media.className="img";
+      const urls=p.imageUrls||[];if(urls.length){const im=document.createElement("img");im.src=urls[0];im.alt=p.title;im.loading="lazy";media.append(im)}else media.textContent="✦";
+      const body=document.createElement("div");body.className="body";const title=document.createElement("h3");title.textContent=p.title;
+      const desc=document.createElement("small");desc.textContent=p.description||p.category||"Project";body.append(title,desc);card.append(media,body);box.append(card);
+    });
+  }catch(err){console.warn("Portfolio unavailable",err.message)}
+}
+loadPortfolio();
 
 /* ───────── CONTACT ───────── */
 $("contactForm").addEventListener("submit",async e=>{
@@ -266,6 +447,11 @@ async function adminLogin(){
     $("loginPanel").hidden=true;$("dashboard").hidden=false;
     $("adminStatus").textContent="Signed in as "+r.email;
     await loadPages();
+    await loadOrders();
+    await loadPortfolioAdmin();
+    await loadProductsAdmin();
+    await loadInventoryReport();
+    await loadBusinessSettings();
   }catch(e){
     $("adminPassword").value="";
     $("loginStatus").textContent=e.message;
@@ -310,15 +496,21 @@ async function savePage(){
 }
 
 /* ───────── ADMIN: PRODUCTS ───────── */
+async function fileToDataUrl(file){
+  return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file)});
+}
 async function saveProduct(){
-  const imageUrl=$("pImg").value.trim();
-  if(imageUrl && !/^https?:\/\//i.test(imageUrl)){
-    $("adminStatus").textContent="Image URL must start with http:// or https://";
-    return;
-  }
   try{
+    let imageUrl=$("pImg").value.trim();
+    if($("pFile").files[0]){
+      const f=$("pFile").files[0];if(f.size>5*1024*1024)throw new Error("Image exceeds 5 MB.");
+      const uploaded=await api("adminUploadMedia",{token:adminToken,fileName:f.name,folder:"products",dataUrl:await fileToDataUrl(f)});
+      imageUrl=uploaded.fileUrl;
+    }
+    if(imageUrl && !/^https?:\/\//i.test(imageUrl)) throw new Error("Image URL must start with http:// or https://");
     await api("adminSaveProduct",{
       token:adminToken,
+      id:$("pEditingId").value,
       name:$("pName").value,
       category:$("pCat").value,
       price:$("pPrice").value,
@@ -328,8 +520,104 @@ async function saveProduct(){
       active:true
     });
     $("adminStatus").textContent="Product saved.";
-    ["pName","pCat","pPrice","pStock","pImg","pDesc"].forEach(i=>$(i).value="");
-    loadProducts();
+    ["pName","pCat","pPrice","pStock","pImg","pDesc","pFile","pEditingId"].forEach(i=>$(i).value="");
+    loadProducts();loadProductsAdmin();
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+
+async function loadBusinessSettings(){
+  try{
+    const s=(await api("publicSettings")).settings||{};
+    const map={businessPhone:"settingPhone",whatsapp:"settingWhatsapp",businessEmail:"settingEmail",businessAddress:"settingAddress",mission:"settingMission",vision:"settingVision",seoTitle:"settingSeoTitle",seoDescription:"settingSeoDescription",bankName:"settingBankName",bankAccountName:"settingBankAccountName",bankAccountNumber:"settingBankAccountNumber"};
+    Object.keys(map).forEach(k=>$(map[k]).value=s[k]||"");
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+async function saveBusinessSettings(){
+  const pairs=[
+    ["businessPhone","settingPhone"],["whatsapp","settingWhatsapp"],["businessEmail","settingEmail"],["businessAddress","settingAddress"],
+    ["mission","settingMission"],["vision","settingVision"],["seoTitle","settingSeoTitle"],["seoDescription","settingSeoDescription"],
+    ["bankName","settingBankName"],["bankAccountName","settingBankAccountName"],["bankAccountNumber","settingBankAccountNumber"]
+  ];
+  try{for(const [key,id] of pairs)await api("adminSaveSetting",{token:adminToken,key:key,value:$(id).value});
+    $("adminStatus").textContent="Business information saved.";loadPublicSettings();
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+async function loadProductsAdmin(){
+  try{
+    const r=await api("adminListProducts",{token:adminToken});$("productsAdminList").innerHTML="";
+    (r.products||[]).forEach(p=>{
+      const el=document.createElement("div");el.className="aitem";
+      const info=document.createElement("span");info.textContent=p.name+" · "+money(p.price)+" · stock "+p.stock+(p.active?"":" · hidden");
+      const edit=document.createElement("button");edit.className="ghost";edit.textContent="Edit";edit.onclick=()=>{
+        $("pEditingId").value=p.id;$("pName").value=p.name;$("pCat").value=p.category;$("pPrice").value=p.price;$("pStock").value=p.stock;$("pImg").value=p.imageUrl||"";$("pDesc").value=p.description||"";
+        $("adminStatus").textContent="Editing "+p.name;
+      };
+      const toggle=document.createElement("button");toggle.className="ghost";toggle.textContent=p.active?"Hide":"Publish";toggle.onclick=async()=>{await api("adminSetProductStatus",{token:adminToken,id:p.id,active:!p.active});loadProductsAdmin();loadProducts()};
+      el.append(info,edit,toggle);$("productsAdminList").append(el);
+    });
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+async function createDatabaseBackup(){
+  $("backupStatus").textContent="Creating backup…";
+  try{const r=await api("adminCreateBackup",{token:adminToken});$("backupStatus").textContent=r.message+" "+r.fileName;const a=document.createElement("a");a.href=r.fileUrl;a.target="_blank";a.rel="noopener";a.textContent="Open backup";$("backupStatus").append(document.createTextNode(" "),a)}
+  catch(e){$("backupStatus").textContent=e.message}
+}
+async function loadInventoryReport(){
+  try{const r=await api("adminInventoryReport",{token:adminToken});$("inventoryReport").textContent="Products: "+r.totalProducts+" · Orders: "+r.totalOrders+" · Paid orders: "+r.paidOrders+" · Paid revenue: "+money(r.revenue)+" · Stock value: "+money(r.stockValue)+" · Low stock: "+r.lowStock.length+(r.lowStock.length?" ("+r.lowStock.map(p=>p.name+" ["+p.stock+"]").join(", ")+")":"")}
+  catch(e){$("inventoryReport").textContent=e.message}
+}
+async function saveDeliveryZone(){
+  try{await api("adminSaveShippingZone",{token:adminToken,town:$("zoneTown").value,deliveryFee:$("zoneFee").value,active:true});$("adminStatus").textContent="Delivery area saved.";loadDeliveryZones()}
+  catch(e){$("adminStatus").textContent=e.message}
+}
+async function saveCategory(){
+  try{await api("adminSaveCategory",{token:adminToken,name:$("categoryName").value,active:true});$("adminStatus").textContent="Category saved.";$("categoryName").value=""}
+  catch(e){$("adminStatus").textContent=e.message}
+}
+async function loadOrders(){
+  try{
+    const r=await api("adminListOrders",{token:adminToken});$("ordersList").innerHTML="";
+    (r.orders||[]).slice(0,30).forEach(o=>{
+      const el=document.createElement("div");el.className="aitem";
+      const info=document.createElement("span");info.textContent=o.id+" · "+o.customerName+" · "+money(o.total)+" · "+o.paymentStatus+" · "+o.orderStatus;
+      el.append(info);
+      const status=document.createElement("select");["Pending","Processing","Ready for dispatch","Dispatched","Delivered","Cancelled","Refunded"].forEach(v=>{const op=document.createElement("option");op.value=v;op.textContent=v;if(v===o.orderStatus)op.selected=true;status.append(op)});
+      const delivery=document.createElement("select");["Pending","Processing","Ready for dispatch","Dispatched","Delivered","Cancelled"].forEach(v=>{const op=document.createElement("option");op.value=v;op.textContent="Delivery: "+v;if(v===o.deliveryStatus)op.selected=true;delivery.append(op)});
+      const tracking=document.createElement("input");tracking.placeholder="Tracking code";tracking.value=o.trackingCode||"";tracking.style.maxWidth="140px";
+      const update=document.createElement("button");update.className="ghost";update.textContent="Update";update.onclick=async()=>{try{await api("adminUpdateOrder",{token:adminToken,id:o.id,orderStatus:status.value,deliveryStatus:delivery.value,trackingCode:tracking.value});await loadOrders()}catch(err){$("adminStatus").textContent=err.message}};
+      el.append(status,delivery,tracking,update);
+      if(o.paymentMethod==="bank_transfer" && !["Paid","Confirmed"].includes(o.paymentStatus)){
+        const b=document.createElement("button");b.className="ghost";b.textContent="Confirm transfer";b.onclick=async()=>{if(!confirm("Confirm that this bank transfer has actually been received?"))return;try{await api("adminConfirmBankTransfer",{token:adminToken,orderId:o.id});await loadOrders();$("adminStatus").textContent="Bank transfer confirmed."}catch(err){$("adminStatus").textContent=err.message}};el.append(b);
+      }
+      $("ordersList").append(el);
+    });
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+async function savePortfolio(){
+  try{
+    const files=Array.from($("workImages").files||[]);if(files.length>12)throw new Error("Choose no more than 12 images.");
+    const imageUrls=JSON.parse($("workExistingImages").value||"[]");
+    for(const f of files){if(f.size>5*1024*1024)throw new Error(f.name+" exceeds 5 MB.");const up=await api("adminUploadMedia",{token:adminToken,fileName:f.name,folder:"portfolio",dataUrl:await fileToDataUrl(f)});imageUrls.push(up.fileUrl)}
+    await api("adminSavePortfolio",{token:adminToken,id:$("workEditingId").value,title:$("workTitle").value,category:$("workCategory").value,description:$("workDescription").value,imageUrls:imageUrls,featured:$("workFeatured").checked,published:$("workPublished").checked});
+    $("adminStatus").textContent="Portfolio project saved.";["workTitle","workCategory","workDescription","workImages","workEditingId","workExistingImages"].forEach(id=>$(id).value="");loadPortfolio();loadPortfolioAdmin();
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+async function loadPortfolioAdmin(){
+  try{const r=await api("adminListPortfolio",{token:adminToken});$("portfolioAdminList").innerHTML="";
+    (r.projects||[]).forEach(p=>{
+      const el=document.createElement("div");el.className="aitem";const name=document.createElement("span");name.textContent=p.title+(p.published?"":" (draft)");
+      const edit=document.createElement("button");edit.className="ghost";edit.textContent="Edit";edit.onclick=()=>{$("workEditingId").value=p.id;$("workTitle").value=p.title;$("workCategory").value=p.category;$("workDescription").value=p.description;$("workExistingImages").value=JSON.stringify(p.imageUrls||[]);$("workFeatured").checked=p.featured;$("workPublished").checked=p.published;$("adminStatus").textContent="Editing "+p.title};
+      const toggle=document.createElement("button");toggle.className="ghost";toggle.textContent=p.published?"Hide":"Publish";toggle.onclick=async()=>{await api("adminSetPortfolioStatus",{token:adminToken,id:p.id,published:!p.published});loadPortfolioAdmin();loadPortfolio()};
+      el.append(name,edit,toggle);$("portfolioAdminList").append(el);
+    });
+  }catch(e){$("adminStatus").textContent=e.message}
+}
+
+async function changeAdminPassword(){
+  try{
+    const r=await api("adminChangePassword",{token:adminToken,currentPassword:$("currentAdminPassword").value,newPassword:$("newAdminPassword").value});
+    adminToken=r.token;$("currentAdminPassword").value="";$("newAdminPassword").value="";
+    $("adminStatus").textContent=r.message;
   }catch(e){$("adminStatus").textContent=e.message}
 }
 
