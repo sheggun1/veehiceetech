@@ -290,6 +290,7 @@ body{letter-spacing:0}
 }
 
 </style>
+<link rel="stylesheet" href="assets/veehicee-themes.css">
 </head>
 <body>
 <header class="top"><div class="wrap nav"><a class="brand brand-lockup" href="#" aria-label="Veehicee Telecommunications and Services"><span>vee<i>h</i>icee.</span><small>Telecommunications and Services</small></a>
@@ -569,7 +570,7 @@ async function api(action,data={}){
 }
 
 /* ───────── ADMIN DESIGN STUDIO ───────── */
-const THEMES=[["midnight","Professional Blue","#174ea6"]];
+const THEMES=[["midnight","Professional Blue","#174ea6"],["agency","Agency Violet","#5b3df5"],["forest","Emerald","#0f7a55"],["sunrise","Warm Coral","#d9481f"],["royal","Royal Navy & Gold","#e0b44c"],["graphite","Graphite Minimal","#111"]];
 const LAYOUTS=[["split","Split","Balanced two-column hero"],["center","Centered","Centered headline and content"],["bold","Bold","Oversized typography and strong cards"],["editorial","Editorial","Magazine-inspired composition"],["showcase","Showcase","Wide hero with layered visual"]];
 const PATTERNS=[["none","No pattern"],["dots","Soft dots"],["grid","Technical grid"],["diagonal","Diagonal lines"],["glow","Ambient glow"]];
 let activeDesign={theme:"midnight",layout:"split",pattern:"none"};
@@ -1045,5 +1046,6 @@ async function adminLogout(){
   $("adminEmail").value="";$("adminPassword").value="";
 }
 </script>
+<script src="assets/veehicee-extras.js" defer></script>
 </body>
                                                                                                                                                                  </html>
