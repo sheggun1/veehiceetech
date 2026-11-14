@@ -289,6 +289,20 @@ body{letter-spacing:0}
  #dashboard .design-panel .agrid{grid-template-columns:1fr}
 }
 
+
+/* Service image gallery */
+.service-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:36px}
+.service-visual-card{overflow:hidden;border:1px solid var(--line);border-radius:22px;background:var(--panel);box-shadow:0 12px 34px rgba(8,25,58,.06);transition:transform .2s,border-color .2s}
+.service-visual-card:hover{transform:translateY(-4px);border-color:var(--accent)}
+.service-visual-card img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;background:var(--glow)}
+.service-visual-copy{padding:18px 20px 21px}.service-visual-copy h3{margin:0 0 6px;font-size:1.12rem}.service-visual-copy p{margin:0;color:var(--muted);font-size:.9rem}
+.service-image-admin{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:16px 0}
+.service-image-editor{border:1px solid var(--line);border-radius:15px;padding:12px;background:var(--bg);min-width:0}
+.service-image-editor img{display:block;width:100%;height:130px;object-fit:cover;border-radius:10px;background:var(--glow);margin-bottom:10px}
+.service-image-editor strong{display:block;margin-bottom:6px}.service-image-editor input[type=file]{font-size:.82rem;padding:8px}
+@media(max-width:820px){.service-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.service-gallery,.service-image-admin{grid-template-columns:1fr}.service-visual-card img{aspect-ratio:16/9}}
+
 </style>
 <link rel="stylesheet" href="assets/veehicee-themes.css">
 </head>
@@ -315,6 +329,14 @@ body{letter-spacing:0}
 <div class="chip"><b>Connected.</b> Web, apps and ICT for your team.</div>
 </div>
 </section>
+
+
+<section class="section" id="visual-work"><div class="wrap">
+<span class="section-kicker">A CLOSER LOOK AT OUR WORK</span>
+<h2>Ideas turned into useful digital experiences.</h2>
+<p class="intro">A visual look at the kind of websites, software, education technology and creative digital solutions we design and build.</p>
+<div class="service-gallery" id="serviceGallery" aria-live="polite"></div>
+</div></section>
 
 <section class="section" id="services"><div class="wrap">
 <span class="section-kicker">WHAT WE DO</span><h2>Technology made useful.<br>Design made memorable.</h2>
@@ -512,6 +534,13 @@ body{letter-spacing:0}
 <label for="settingBankAccountName">Bank account name</label><input id="settingBankAccountName">
 <label for="settingBankAccountNumber">Bank account number</label><input id="settingBankAccountNumber">
 <button class="btn" onclick="saveBusinessSettings()">Save business information</button>
+
+<h3>Homepage service images</h3>
+<p class="intro" style="font-size:.88rem">Replace the six illustrations shown on the homepage. Upload an image from your phone or paste an image URL. Images are uploaded securely through the existing media service; each file must be 5 MB or smaller.</p>
+<div class="service-image-admin" id="serviceImageManager"></div>
+<button class="btn" type="button" onclick="saveServiceImages()">Save homepage images</button>
+<button class="ghost" type="button" onclick="resetServiceImages()">Restore default illustrations</button>
+<p class="status" id="serviceImageStatus" role="status" aria-live="polite"></p>
 <h3>Portfolio project</h3><input id="workEditingId" type="hidden"><input id="workExistingImages" type="hidden">
 <label for="workTitle">Project title</label><input id="workTitle">
 <label for="workCategory">Category</label><input id="workCategory">
@@ -598,13 +627,63 @@ async function saveSiteDesign(){
 async function loadPublicSettings(){
   try{
     const s=(await api("publicSettings")).settings||{};siteSettingsCache=s;applyDesign({theme:s.siteTheme||"midnight",layout:s.siteLayout||"split",pattern:s.sitePattern||"none"});
-    if(s.mission)$("missionText").textContent=s.mission;
+    renderServiceGallery(s.serviceShowcaseImages);if(s.mission)$("missionText").textContent=s.mission;
     if(s.vision)$("visionText").textContent=s.vision;
     if(s.seoTitle)document.title=s.seoTitle;
     if(s.seoDescription){const m=document.querySelector('meta[name="description"]');if(m)m.content=s.seoDescription}
   }catch(e){console.warn("Business settings unavailable",e.message)}
 }
 loadPublicSettings();
+
+
+/* ───────── HOMEPAGE SERVICE IMAGE GALLERY ───────── */
+const SERVICE_IMAGE_DEFAULTS=[
+ {key:"web",title:"Website design",description:"Modern, responsive websites and landing pages.",url:"assets/service-websites.svg",alt:"Illustration of a responsive website design on desktop and mobile screens"},
+ {key:"software",title:"Custom software and apps",description:"Purpose-built dashboards, portals and business applications.",url:"assets/service-software.svg",alt:"Illustration of a custom software dashboard and application interface"},
+ {key:"education",title:"Education technology",description:"School portals, CBT, results and digital learning tools.",url:"assets/service-education.svg",alt:"Illustration of an education technology platform with student records and learning tools"},
+ {key:"design",title:"Branding and graphic design",description:"Visual identities, promotional designs and digital creatives.",url:"assets/service-graphic-design.svg",alt:"Illustration of graphic design tools, brand colours and creative layouts"},
+ {key:"ict",title:"ICT support and digital solutions",description:"Practical technology support, setup and workflow improvements.",url:"assets/service-ict.svg",alt:"Illustration of computer support, connected devices and technical tools"},
+ {key:"communication",title:"Business communication tools",description:"Organised digital communication and customer engagement platforms.",url:"assets/service-communication.svg",alt:"Illustration of a business communication platform with messages and contact cards"}
+];
+let serviceImageDraft=SERVICE_IMAGE_DEFAULTS.map(x=>({...x}));
+function parseServiceImages(raw){
+ try{const saved=typeof raw==="string"?JSON.parse(raw):(raw||[]);if(!Array.isArray(saved))return SERVICE_IMAGE_DEFAULTS.map(x=>({...x}));return SERVICE_IMAGE_DEFAULTS.map(d=>({...d,...(saved.find(x=>x.key===d.key)||{})}))}
+ catch(e){return SERVICE_IMAGE_DEFAULTS.map(x=>({...x}))}
+}
+function renderServiceGallery(raw){
+ const box=$("serviceGallery");if(!box)return;const items=parseServiceImages(raw);box.innerHTML="";
+ items.forEach(item=>{const card=document.createElement("article");card.className="service-visual-card";const img=document.createElement("img");img.src=item.url||item.fallback||"assets/service-websites.svg";img.alt=item.alt||item.title;img.loading="lazy";img.onerror=()=>{img.onerror=null;img.src=SERVICE_IMAGE_DEFAULTS.find(x=>x.key===item.key).url};const copy=document.createElement("div");copy.className="service-visual-copy";const title=document.createElement("h3");title.textContent=item.title;const desc=document.createElement("p");desc.textContent=item.description;copy.append(title,desc);card.append(img,copy);box.append(card)});
+}
+function renderServiceImageAdmin(raw){
+ serviceImageDraft=parseServiceImages(raw);const box=$("serviceImageManager");if(!box)return;box.innerHTML="";
+ serviceImageDraft.forEach((item,index)=>{
+  const card=document.createElement("div");card.className="service-image-editor";
+  const img=document.createElement("img");img.src=item.url;img.alt=item.alt;img.id="serviceImagePreview"+index;
+  const title=document.createElement("strong");title.textContent=item.title;
+  const urlLabel=document.createElement("label");urlLabel.textContent="Image URL";const url=document.createElement("input");url.type="url";url.id="serviceImageUrl"+index;url.placeholder="https://example.com/image.jpg";url.value=item.url;url.oninput=()=>{img.src=url.value||SERVICE_IMAGE_DEFAULTS[index].url};
+  const fileLabel=document.createElement("label");fileLabel.textContent="Or upload a replacement image";const file=document.createElement("input");file.type="file";file.accept="image/png,image/jpeg,image/webp,image/gif";file.id="serviceImageFile"+index;file.onchange=()=>{if(file.files[0])img.src=URL.createObjectURL(file.files[0])};
+  card.append(img,title,urlLabel,url,fileLabel,file);box.append(card);
+ });
+}
+async function saveServiceImages(){
+ const status=$("serviceImageStatus");status.textContent="Saving images…";
+ try{
+  const next=[];
+  for(let i=0;i<SERVICE_IMAGE_DEFAULTS.length;i++){
+   const item={...SERVICE_IMAGE_DEFAULTS[i]};const url=$("serviceImageUrl"+i).value.trim();const file=$("serviceImageFile"+i).files[0];
+   if(file){if(file.size>5*1024*1024)throw new Error(file.name+" exceeds 5 MB.");const uploaded=await api("adminUploadMedia",{token:adminToken,fileName:file.name,folder:"service-gallery",dataUrl:await fileToDataUrl(file)});item.url=uploaded.fileUrl}
+   else if(url){if(!/^https?:\/\//i.test(url)&&!url.startsWith("assets/"))throw new Error("Use a valid http(s) image URL or an assets/ path.");item.url=url}
+   next.push(item);
+  }
+  await api("adminSaveSetting",{token:adminToken,key:"serviceShowcaseImages",value:JSON.stringify(next)});
+  serviceImageDraft=next;renderServiceGallery(next);renderServiceImageAdmin(next);
+  status.textContent="Homepage images saved and published.";
+ }catch(e){status.textContent=e.message}
+}
+async function resetServiceImages(){
+ try{await api("adminSaveSetting",{token:adminToken,key:"serviceShowcaseImages",value:JSON.stringify(SERVICE_IMAGE_DEFAULTS)});renderServiceGallery(SERVICE_IMAGE_DEFAULTS);renderServiceImageAdmin(SERVICE_IMAGE_DEFAULTS);$("serviceImageStatus").textContent="Default illustrations restored."}
+ catch(e){$("serviceImageStatus").textContent=e.message}
+}
 
 /* ───────── MARKETPLACE ───────── */
 const SAMPLE=[["Phone accessories","Cases, cables and screen protection","📱"],["Charging essentials","Chargers and fast-charge cables","🔌"],["Audio","Earphones and speakers","🎧"],["Power banks","Stay powered through the day","🔋"]];
@@ -883,7 +962,7 @@ async function loadBusinessSettings(){
   try{
     const s=(await api("publicSettings")).settings||{};
     const map={businessPhone:"settingPhone",whatsapp:"settingWhatsapp",businessEmail:"settingEmail",businessAddress:"settingAddress",mission:"settingMission",vision:"settingVision",seoTitle:"settingSeoTitle",seoDescription:"settingSeoDescription",bankName:"settingBankName",bankAccountName:"settingBankAccountName",bankAccountNumber:"settingBankAccountNumber"};
-    Object.keys(map).forEach(k=>$(map[k]).value=s[k]||"");
+    Object.keys(map).forEach(k=>$(map[k]).value=s[k]||"");renderServiceImageAdmin(s.serviceShowcaseImages);
   }catch(e){$("adminStatus").textContent=e.message}
 }
 async function saveBusinessSettings(){
