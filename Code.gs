@@ -387,8 +387,11 @@ function adminUploadMedia_(x) {
   return {message:"Image uploaded.",fileId:file.getId(),fileUrl:url};
 }
 function createOrder_(x) {
-  const customerName=String(x.customerName||"").trim(), phone=String(x.phone||"").trim();
-  const email=String(x.email||"").trim().toLowerCase(), town=String(x.town||"").trim(), address=String(x.address||"").trim();
+  let customerName=String(x.customerName||"").trim(), phone=String(x.phone||"").trim();
+  let email=String(x.email||"").trim().toLowerCase();
+  const town=String(x.town||"").trim(), address=String(x.address||"").trim();
+  const signedCustomer=x.customerToken ? requireCustomer_(x.customerToken) : null;
+  if(signedCustomer) { customerName=signedCustomer.name; phone=signedCustomer.phone; email=signedCustomer.email; }
   if(!customerName || customerName.length>150 || !phone || phone.length>40 || !town || town.length>120 || !address || address.length>500) throw new Error("Complete your name, phone, town and delivery address.");
   if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Enter a valid email address.");
   const items=Array.isArray(x.items)?x.items:[];
@@ -417,7 +420,7 @@ function createOrder_(x) {
   let customerId="";
   const customers=sheet_("Customers"), cd=customers.getDataRange().getValues();
   let account=null;
-  if(x.customerToken) account=requireCustomer_(x.customerToken);
+  if(signedCustomer) account=signedCustomer;
   const existing=cd.slice(1).find(r=>(email && String(r[2]).toLowerCase()===email) || String(r[3])===phone);
   if(account) customerId=String(account.id);
   else if(existing) customerId=String(existing[0]);
