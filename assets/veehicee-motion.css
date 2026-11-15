@@ -1,0 +1,28 @@
+/* Veehicee premium motion layer — lightweight, responsive and accessible */
+:root{--motion-ease:cubic-bezier(.2,.75,.25,1)}
+html.motion-ready .motion-reveal{opacity:0;transform:translate3d(0,26px,0);transition:opacity .72s var(--motion-ease),transform .72s var(--motion-ease);transition-delay:var(--motion-delay,0ms);will-change:opacity,transform}
+html.motion-ready .motion-reveal.is-visible{opacity:1;transform:translate3d(0,0,0);will-change:auto}
+html.motion-ready .motion-from-left{transform:translate3d(-30px,0,0)}
+html.motion-ready .motion-from-right{transform:translate3d(30px,0,0)}
+html.motion-ready .motion-scale{transform:scale(.96)}
+html.motion-ready .motion-scale.is-visible{transform:scale(1)}
+.hero{isolation:isolate}
+.hero:after{content:"";position:absolute;z-index:-1;pointer-events:none;width:min(42vw,520px);aspect-ratio:1;right:4%;top:8%;border-radius:50%;background:radial-gradient(circle,rgba(40,120,200,.14),rgba(120,92,255,.08) 38%,transparent 70%);filter:blur(8px);animation:vee-orb-drift 13s ease-in-out infinite alternate}
+.signal{animation:vee-float 7s ease-in-out infinite}
+.signal .chip{animation:vee-chip 5s ease-in-out infinite}
+.card,.prod,.project-card{transition:transform .35s var(--motion-ease),box-shadow .35s,border-color .25s}
+.card:hover,.prod:hover,.project-card:hover{transform:translateY(-7px)}
+.btn,.ghost,.project-link,.social-link{transition:transform .25s var(--motion-ease),box-shadow .25s,border-color .25s,background-color .25s}
+.btn:active,.ghost:active{transform:scale(.97)}
+.vicora-feature{background-size:140% 140%;animation:vee-gradient 18s ease infinite alternate}
+.vicora-feature:after{content:"";position:absolute;inset:auto -15% -65% 35%;height:90%;z-index:-1;pointer-events:none;background:radial-gradient(ellipse,rgba(32,182,164,.18),transparent 68%);animation:vee-orb-drift 14s ease-in-out infinite alternate-reverse}
+.section-kicker,.hero-kicker{animation:vee-kicker-in .8s both}
+.top{transition:box-shadow .3s ease}
+.top.motion-scrolled{box-shadow:0 8px 30px rgba(10,28,60,.08)}
+@keyframes vee-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
+@keyframes vee-chip{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-6px)}}
+@keyframes vee-orb-drift{from{transform:translate3d(-12px,-8px,0) scale(.94)}to{transform:translate3d(18px,14px,0) scale(1.08)}}
+@keyframes vee-gradient{0%{background-position:0% 40%}100%{background-position:100% 60%}}
+@keyframes vee-kicker-in{from{opacity:0;letter-spacing:.22em}to{opacity:1;letter-spacing:.14em}}
+@media(max-width:820px){.hero:after{width:78vw;right:-20%;top:5%;opacity:.75}.signal{animation-duration:9s}.vicora-feature{animation:none}}
+@media(prefers-reduced-motion:reduce){html.motion-ready .motion-reveal,html.motion-ready .motion-reveal.is-visible{opacity:1;transform:none;transition:none;will-change:auto}.hero:after,.signal,.signal .chip,.vicora-feature,.vicora-feature:after,.section-kicker,.hero-kicker{animation:none!important}}
