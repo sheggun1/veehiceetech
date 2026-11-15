@@ -1103,7 +1103,16 @@ async function savePage(){
 
 /* ───────── ADMIN: PRODUCTS ───────── */
 async function fileToDataUrl(file){
-  return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file)});
+  return new Promise((resolve,reject)=>{
+    if(!file) return reject(new Error("Choose an image first."));
+    const reader=new FileReader();
+    reader.onload=()=>typeof reader.result==="string"&&reader.result.startsWith("data:image/")
+      ?resolve(reader.result)
+      :reject(new Error("The selected file could not be read as an image. Choose a JPG, PNG, WebP or GIF."));
+    reader.onerror=()=>reject(new Error("Your phone could not read this image file"+(reader.error&&reader.error.message?": "+reader.error.message:"")+". Save the photo to your device first, then select it again."));
+    reader.onabort=()=>reject(new Error("Image reading was cancelled. Please select the image again."));
+    try{reader.readAsDataURL(file)}catch(e){reject(new Error("Could not open the selected image: "+(e&&e.message?e.message:String(e))))}
+  });
 }
 async function saveProduct(){
   try{
