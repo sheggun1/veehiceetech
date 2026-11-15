@@ -593,6 +593,10 @@ body{font-weight:500;letter-spacing:-.006em}p,.intro,.lead,.card p{font-weight:5
 <button class="btn" type="button" onclick="saveServiceImages()">Save homepage images</button>
 <button class="ghost" type="button" onclick="resetServiceImages()">Restore default service images</button>
 <p class="status" id="serviceImageStatus" role="status" aria-live="polite"></p>
+<h3>Website visits and traffic</h3>
+<p class="intro" style="font-size:.88rem">View visit time, page, referral source, device, browser and operating system. This report does not collect visitor names, email addresses or IP addresses.</p>
+<button class="ghost" type="button" onclick="loadWebsiteVisits()">Refresh website visits</button>
+<p id="websiteVisitSummary" class="status" role="status" aria-live="polite">Tap refresh to load visit statistics.</p><div id="websiteVisitBreakdown"></div><div id="websiteVisitsList"></div>
 <h3>Portfolio project</h3><input id="workEditingId" type="hidden"><input id="workExistingImages" type="hidden">
 <label for="workTitle">Project title</label><input id="workTitle">
 <label for="workCategory">Category</label><input id="workCategory">
@@ -649,6 +653,31 @@ function arrangeAdminWorkspace(){
  panel.dataset.organised="yes";
 }
 
+
+
+function trackWebsiteVisit(){
+ try{
+  const ua=navigator.userAgent||"",deviceType=/tablet|ipad/i.test(ua)?"Tablet":/mobi|android|iphone/i.test(ua)?"Mobile":"Desktop";
+  let browser="Other";if(/edg\//i.test(ua))browser="Edge";else if(/opr\//i.test(ua))browser="Opera";else if(/chrome\//i.test(ua))browser="Chrome";else if(/firefox\//i.test(ua))browser="Firefox";else if(/safari\//i.test(ua))browser="Safari";
+  let operatingSystem="Other";if(/android/i.test(ua))operatingSystem="Android";else if(/iphone|ipad|ios/i.test(ua))operatingSystem="iOS";else if(/windows/i.test(ua))operatingSystem="Windows";else if(/mac os/i.test(ua))operatingSystem="macOS";else if(/linux/i.test(ua))operatingSystem="Linux";
+  const ref=document.referrer||"",u=new URL(location.href),refUrl=ref?new URL(ref):null;
+  api("logWebsiteVisit",{pagePath:location.pathname||"/",pageTitle:document.title,referrer:refUrl?refUrl.origin:"",referrerHost:refUrl?refUrl.hostname:"",deviceType,browser,operatingSystem,screenSize:(screen.width||0)+"x"+(screen.height||0),language:navigator.language||"",campaignSource:u.searchParams.get("utm_source")||"",campaignMedium:u.searchParams.get("utm_medium")||"",campaignName:u.searchParams.get("utm_campaign")||""}).catch(()=>{});
+ }catch(e){}
+}
+async function loadWebsiteVisits(){
+ const summary=$("websiteVisitSummary"),list=$("websiteVisitsList"),breakdown=$("websiteVisitBreakdown");if(!summary||!list||!breakdown)return;
+ summary.textContent="Loading website visits…";list.innerHTML="";breakdown.innerHTML="";
+ try{
+  const r=await api("adminListWebsiteVisits",{token:adminToken});summary.textContent="Total recorded page visits: "+Number(r.totalVisits||0).toLocaleString();
+  const pages=Object.entries(r.byPage||{}).sort((a,b)=>b[1]-a[1]),devices=Object.entries(r.byDevice||{}).sort((a,b)=>b[1]-a[1]);
+  const p=document.createElement("p");p.textContent="Pages: "+pages.map(x=>x[0]+" ("+x[1]+")").join(" · ")+" | Devices: "+devices.map(x=>x[0]+" ("+x[1]+")").join(" · ");breakdown.append(p);
+  const wrap=document.createElement("div");wrap.style.overflowX="auto";const table=document.createElement("table");table.style.cssText="width:100%;border-collapse:collapse;font-size:.84rem";
+  const headings=["Date and time","Page","Referrer","Device","Browser","Operating system","Screen"];
+  const head=document.createElement("tr");headings.forEach(v=>{const th=document.createElement("th");th.textContent=v;th.style.cssText="text-align:left;padding:8px;border-bottom:1px solid var(--line)";head.append(th)});table.append(head);
+  (r.recent||[]).forEach(v=>{const tr=document.createElement("tr");[v.visitedAt?new Date(v.visitedAt).toLocaleString():"",v.pagePath,v.referrerHost||"Direct",v.deviceType,v.browser,v.operatingSystem,v.screenSize].forEach(value=>{const td=document.createElement("td");td.textContent=value||"—";td.style.cssText="padding:8px;border-bottom:1px solid var(--line);vertical-align:top";tr.append(td)});table.append(tr)});
+  wrap.append(table);list.append(wrap);if(!(r.recent||[]).length)list.textContent="No visits recorded yet.";
+ }catch(e){summary.textContent="Could not load visits: "+e.message}
+}
 
 async function api(action,data={}){
   const r = await fetch(API_URL,{
@@ -717,7 +746,7 @@ const PLATFORM_IMAGE_DEFAULTS=[
 function parsePlatformImages(raw){try{const saved=typeof raw==="string"?JSON.parse(raw):(raw||{});return Object.fromEntries(PLATFORM_IMAGE_DEFAULTS.map(x=>[x.key,{...x,...(saved[x.key]||{})}]))}catch(e){return Object.fromEntries(PLATFORM_IMAGE_DEFAULTS.map(x=>[x.key,{...x}]))}}
 function applyPlatformImages(raw){const imgs=parsePlatformImages(raw);document.querySelectorAll("img[data-site-image]").forEach(img=>{const item=imgs[img.dataset.siteImage];if(item&&item.url){img.src=item.url;img.alt=item.alt||img.alt}})}
 function renderPlatformImageAdmin(raw){const box=$("platformImageManager");if(!box)return;const imgs=parsePlatformImages(raw);box.innerHTML="";PLATFORM_IMAGE_DEFAULTS.forEach((def,i)=>{const item=imgs[def.key],card=document.createElement("div");card.className="service-image-editor";const img=document.createElement("img");img.src=item.url;img.alt=item.alt;img.id="platformImagePreview"+i;const title=document.createElement("strong");title.textContent=def.title;const label=document.createElement("label");label.textContent="Image URL";const url=document.createElement("input");url.type="url";url.id="platformImageUrl"+i;url.value=item.url;url.placeholder="https://example.com/image.jpg";url.oninput=()=>{img.src=url.value||def.url};const fileLabel=document.createElement("label");fileLabel.textContent="Or upload an image";const file=document.createElement("input");file.type="file";file.accept="image/png,image/jpeg,image/webp,image/gif";file.id="platformImageFile"+i;file.onchange=()=>{if(file.files[0])img.src=URL.createObjectURL(file.files[0])};card.append(img,title,label,url,fileLabel,file);box.append(card)})}
-async function savePlatformImages(){const status=$("platformImageStatus");status.textContent="Uploading and saving images…";try{const next={};for(let i=0;i<PLATFORM_IMAGE_DEFAULTS.length;i++){const d=PLATFORM_IMAGE_DEFAULTS[i],url=$("platformImageUrl"+i).value.trim(),file=$("platformImageFile"+i).files[0];let finalUrl=url||d.url;if(file){if(file.size>5*1024*1024)throw new Error(file.name+" exceeds 5 MB.");const up=await api("adminUploadMedia",{token:adminToken,fileName:file.name,folder:"site-images",dataUrl:await fileToDataUrl(file)});finalUrl=up.fileUrl}if(!/^https?:\/\//i.test(finalUrl))throw new Error("Use a valid HTTP or HTTPS image URL for "+d.title+".");next[d.key]={url:finalUrl,alt:d.alt}}await api("adminSaveSetting",{token:adminToken,key:"siteImages",value:JSON.stringify(next)});applyPlatformImages(next);renderPlatformImageAdmin(next);status.textContent="Platform images saved. Refresh the public website to see the updated images."}catch(e){status.textContent=e.message}}
+async function savePlatformImages(){const status=$("platformImageStatus");status.textContent="Uploading and saving images…";try{const next={};for(let i=0;i<PLATFORM_IMAGE_DEFAULTS.length;i++){const d=PLATFORM_IMAGE_DEFAULTS[i],url=$("platformImageUrl"+i).value.trim(),file=$("platformImageFile"+i).files[0];let finalUrl=url||d.url;if(file){if(file.size>5*1024*1024)throw new Error(file.name+" exceeds 5 MB.");const up=await api("adminUploadMedia",{token:adminToken,fileName:file.name,folder:"site-images",dataUrl:await fileToDataUrl(file)});finalUrl=up.fileUrl}if(!/^https?:\/\//i.test(finalUrl))throw new Error("Use a valid HTTP or HTTPS image URL for "+d.title+".");next[d.key]={url:finalUrl,alt:d.alt}}await api("adminSaveSetting",{token:adminToken,key:"siteImages",value:JSON.stringify(next)});const check=await api("publicSettings");if(!check.settings||!check.settings.siteImages)throw new Error("Backend did not return the saved image settings. Deploy Apps Script version 2.2.0, then retry.");const saved=parsePlatformImages(check.settings.siteImages);if(PLATFORM_IMAGE_DEFAULTS.some(d=>!saved[d.key]||saved[d.key].url!==next[d.key].url))throw new Error("Backend could not verify every saved image. Deploy Apps Script version 2.2.0 and retry.");applyPlatformImages(check.settings.siteImages);renderPlatformImageAdmin(check.settings.siteImages);status.textContent="Images saved and verified by the backend. Refresh the public website to see them."}catch(e){status.textContent=e.message}}
 
 /* ───────── HOMEPAGE SERVICE IMAGE GALLERY ───────── */
 const SERVICE_IMAGE_DEFAULTS=[
@@ -759,6 +788,7 @@ async function saveServiceImages(){
    next.push(item);
   }
   await api("adminSaveSetting",{token:adminToken,key:"serviceShowcaseImages",value:JSON.stringify(next)});
+  const verify=await api("publicSettings");if(!verify.settings||!verify.settings.serviceShowcaseImages)throw new Error("Images were submitted, but the backend did not return them. Deploy Apps Script version 2.2.0.");
   serviceImageDraft=next;renderServiceGallery(next);renderServiceImageAdmin(next);
   status.textContent="Homepage images saved and published.";
  }catch(e){status.textContent=e.message}
@@ -769,6 +799,7 @@ async function resetServiceImages(){
 }
 
 loadPublicSettings();
+trackWebsiteVisit();
 
 /* ───────── MARKETPLACE ───────── */
 const SAMPLE=[["Phone accessories","Cases, cables and screen protection","📱"],["Charging essentials","Chargers and fast-charge cables","🔌"],["Audio","Earphones and speakers","🎧"],["Power banks","Stay powered through the day","🔋"]];
