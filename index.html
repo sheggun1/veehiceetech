@@ -394,6 +394,14 @@ body{letter-spacing:0}
 </div>
 <p class="portfolio-note">Need a business website, customer portal, school platform or custom application? <a href="#contact">Tell us what you want to build</a>.</p>
 <div class="products" id="portfolioItems"></div>
+<div class="modal" id="projectPreviewModal" role="dialog" aria-modal="true" aria-labelledby="projectPreviewTitle">
+  <div class="modal-box" style="width:min(1100px,100%)">
+    <div class="mh"><h2 id="projectPreviewTitle">Project preview</h2><button class="ghost" type="button" onclick="closeProjectPreview()">Close</button></div>
+    <p id="projectPreviewFallback" class="status">If the project blocks embedded previews, use “Open project” to view it in a new tab.</p>
+    <iframe id="projectPreviewFrame" title="Live project preview" style="width:100%;height:min(68vh,720px);border:1px solid var(--line);border-radius:14px;background:white" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <p><a id="projectPreviewExternal" class="btn" href="#" target="_blank" rel="noopener noreferrer">Open project</a></p>
+  </div>
+</div>
 </div></section>
 
 
@@ -545,7 +553,9 @@ body{letter-spacing:0}
 <label for="workTitle">Project title</label><input id="workTitle">
 <label for="workCategory">Category</label><input id="workCategory">
 <label for="workDescription">Description</label><textarea id="workDescription" rows="3"></textarea>
-<label for="workProjectUrl">Live project website URL</label><input id="workProjectUrl" type="url" placeholder="https://your-project.com">
+<label for="workProjectUrl">Live project website URL (optional)</label><input id="workProjectUrl" type="url" placeholder="https://your-project.com">
+<label for="workGithubUrl">GitHub repository URL (optional)</label><input id="workGithubUrl" type="url" placeholder="https://github.com/owner/repository">
+<label for="workProjectStatus">Project status</label><select id="workProjectStatus"><option>In Development</option><option>Live</option><option>Maintenance</option></select>
 <label for="workImages">Project images (select up to 12, max 5 MB each)</label><input id="workImages" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
 <label><input id="workFeatured" type="checkbox" style="width:auto"> Featured project</label>
 <label><input id="workPublished" type="checkbox" style="width:auto" checked> Publish project</label>
@@ -813,6 +823,21 @@ $("trackOrderForm").addEventListener("submit",async e=>{
   try{const r=await api("customerOrderLookup",{orderId:$("trackOrderId").value,phone:$("trackPhone").value});const o=r.order;$("trackStatus").textContent="Order "+o.id+" — "+o.orderStatus+"; payment: "+o.paymentStatus+"; delivery: "+o.deliveryStatus+(o.trackingCode?"; tracking: "+o.trackingCode:"")}
   catch(err){$("trackStatus").textContent=err.message}
 });
+function safeProjectUrl(value){
+  try{const u=new URL(String(value||""));return (u.protocol==="https:"||u.protocol==="http:")?u.href:""}catch(e){return ""}
+}
+function openProjectPreview(url,title){
+  const safe=safeProjectUrl(url);if(!safe)return;
+  $("projectPreviewTitle").textContent=title||"Project preview";
+  $("projectPreviewFrame").src=safe;
+  $("projectPreviewExternal").href=safe;
+  $("projectPreviewModal").classList.add("open");
+  $("projectPreviewFallback").textContent="Some websites block embedded previews. If the frame stays blank or shows an error, choose Open project to view the site in a new tab.";
+}
+function closeProjectPreview(){
+  $("projectPreviewFrame").src="about:blank";
+  $("projectPreviewModal").classList.remove("open");
+}
 async function loadPortfolio(){
   const box=$("portfolioItems");try{
     const r=await api("publicPortfolio");box.innerHTML="";
@@ -821,7 +846,13 @@ async function loadPortfolio(){
       const media=document.createElement("div");media.className="img";
       const urls=p.imageUrls||[];if(urls.length){const im=document.createElement("img");im.src=urls[0];im.alt=p.title;im.loading="lazy";media.append(im)}else media.textContent="✦";
       const body=document.createElement("div");body.className="body";const title=document.createElement("h3");title.textContent=p.title;
-      const desc=document.createElement("small");desc.textContent=p.description||p.category||"Project";body.append(title,desc);if(p.projectUrl){const link=document.createElement("a");link.className="btn";link.href=p.projectUrl;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Visit Project";body.append(link)}card.append(media,body);box.append(card);
+      const desc=document.createElement("small");desc.textContent=p.description||p.category||"Project";body.append(title,desc);
+      const status=document.createElement("span");status.textContent=p.projectStatus||"In Development";status.style.cssText="display:inline-block;margin:10px 8px 0 0;padding:5px 10px;border:1px solid var(--line);border-radius:999px;font-size:.78rem;color:var(--muted)";body.append(status);
+      const liveUrl=safeProjectUrl(p.projectUrl),githubUrl=safeProjectUrl(p.projectGithubUrl);
+      if(liveUrl){const preview=document.createElement("button");preview.className="btn";preview.type="button";preview.textContent="Live preview";preview.onclick=()=>openProjectPreview(liveUrl,p.title);body.append(preview);const link=document.createElement("a");link.className="ghost";link.href=liveUrl;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Open project";body.append(link)}
+      else {const note=document.createElement("small");note.textContent="Live preview coming soon";note.style.display="block";note.style.marginTop="10px";body.append(note)}
+      if(githubUrl){const source=document.createElement("a");source.className="ghost";source.href=githubUrl;source.target="_blank";source.rel="noopener noreferrer";source.textContent="Source code";body.append(source)}
+      card.append(media,body);box.append(card);
     });
   }catch(err){console.warn("Portfolio unavailable",err.message)}
 }
@@ -1100,15 +1131,15 @@ async function savePortfolio(){
     const files=Array.from($("workImages").files||[]);if(files.length>12)throw new Error("Choose no more than 12 images.");
     const imageUrls=JSON.parse($("workExistingImages").value||"[]");
     for(const f of files){if(f.size>5*1024*1024)throw new Error(f.name+" exceeds 5 MB.");const up=await api("adminUploadMedia",{token:adminToken,fileName:f.name,folder:"portfolio",dataUrl:await fileToDataUrl(f)});imageUrls.push(up.fileUrl)}
-    await api("adminSavePortfolio",{token:adminToken,id:$("workEditingId").value,title:$("workTitle").value,category:$("workCategory").value,description:$("workDescription").value,projectUrl:$("workProjectUrl").value.trim(),imageUrls:imageUrls,featured:$("workFeatured").checked,published:$("workPublished").checked});
-    $("adminStatus").textContent="Portfolio project saved.";["workTitle","workCategory","workDescription","workProjectUrl","workImages","workEditingId","workExistingImages"].forEach(id=>$(id).value="");loadPortfolio();loadPortfolioAdmin();
+    await api("adminSavePortfolio",{token:adminToken,id:$("workEditingId").value,title:$("workTitle").value,category:$("workCategory").value,description:$("workDescription").value,projectUrl:$("workProjectUrl").value.trim(),projectGithubUrl:$("workGithubUrl").value.trim(),projectStatus:$("workProjectStatus").value,imageUrls:imageUrls,featured:$("workFeatured").checked,published:$("workPublished").checked});
+    $("adminStatus").textContent="Portfolio project saved.";["workTitle","workCategory","workDescription","workProjectUrl","workGithubUrl","workImages","workEditingId","workExistingImages"].forEach(id=>$(id).value="");$("workProjectStatus").value="In Development";loadPortfolio();loadPortfolioAdmin();
   }catch(e){$("adminStatus").textContent=e.message}
 }
 async function loadPortfolioAdmin(){
   try{const r=await api("adminListPortfolio",{token:adminToken});$("portfolioAdminList").innerHTML="";
     (r.projects||[]).forEach(p=>{
       const el=document.createElement("div");el.className="aitem";const name=document.createElement("span");name.textContent=p.title+(p.published?"":" (draft)");
-      const edit=document.createElement("button");edit.className="ghost";edit.textContent="Edit";edit.onclick=()=>{$("workEditingId").value=p.id;$("workTitle").value=p.title;$("workCategory").value=p.category;$("workDescription").value=p.description;$("workProjectUrl").value=p.projectUrl||"";$("workExistingImages").value=JSON.stringify(p.imageUrls||[]);$("workFeatured").checked=p.featured;$("workPublished").checked=p.published;$("adminStatus").textContent="Editing "+p.title};
+      const edit=document.createElement("button");edit.className="ghost";edit.textContent="Edit";edit.onclick=()=>{$("workEditingId").value=p.id;$("workTitle").value=p.title;$("workCategory").value=p.category;$("workDescription").value=p.description;$("workProjectUrl").value=p.projectUrl||"";$("workGithubUrl").value=p.projectGithubUrl||"";$("workProjectStatus").value=p.projectStatus||(p.projectUrl?"Live":"In Development");$("workExistingImages").value=JSON.stringify(p.imageUrls||[]);$("workFeatured").checked=p.featured;$("workPublished").checked=p.published;$("adminStatus").textContent="Editing "+p.title};
       const toggle=document.createElement("button");toggle.className="ghost";toggle.textContent=p.published?"Hide":"Publish";toggle.onclick=async()=>{await api("adminSetPortfolioStatus",{token:adminToken,id:p.id,published:!p.published});loadPortfolioAdmin();loadPortfolio()};
       el.append(name,edit,toggle);$("portfolioAdminList").append(el);
     });
