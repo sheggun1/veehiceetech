@@ -22,7 +22,7 @@ const APP = {
     AdminUsers: ["id","email","salt","passwordHash","role","active","createdAt"],
     AdminSessions: ["tokenHash","email","expiresAt","createdAt"],
     WebsitePages: ["id","title","slug","body","published","updatedAt"],
-    Portfolio: ["id","title","category","description","imageUrls","projectUrl","featured","published","createdAt","updatedAt"],
+    Portfolio: ["id","title","category","description","imageUrls","projectUrl","featured","published","createdAt","updatedAt","projectGithubUrl","projectStatus"],
     Enquiries: ["id","name","contact","message","status","createdAt"],
     Categories: ["id","name","active","createdAt"],
     Products: ["id","name","category","description","price","stock","imageUrl","active","createdAt","updatedAt","costPrice","wholesalePrice"],
@@ -755,22 +755,34 @@ function strongPasswordHash_(password,salt) {
 function u8hex_(bytes) { return bytes.map(b=>(b+256).toString(16).slice(-2)).join(""); }
 
 
+function isSafeWebUrl_(value) {
+  const url=String(value||"").trim();
+  return !url || (url.length<=1000 && /^https?:\/\/[A-Za-z0-9.-]+(?::[0-9]{1,5})?(?:[/?#][^\s"'<>]*)?$/i.test(url));
+}
 function adminSavePortfolio_(x) {
   const email=requireAdmin_(x.token), title=String(x.title||"").trim(), description=String(x.description||"");
   const imageUrls=Array.isArray(x.imageUrls)?x.imageUrls.map(String):[];
-  if(!title || title.length>180 || description.length>5000 || imageUrls.length>12 || imageUrls.some(u=>!/^https:\/\/drive\.google\.com\//.test(u))) throw new Error("Enter a valid project title, description and uploaded Drive image links.");
+  const projectUrl=String(x.projectUrl||"").trim(), projectGithubUrl=String(x.projectGithubUrl||"").trim();
+  const projectStatus=String(x.projectStatus|| (projectUrl?"Live":"In Development"));
+  if(!title || title.length>180 || description.length>5000 || imageUrls.length>12 || imageUrls.some(u=>!/^https:\/\/drive\.google\.com\//.test(u)) || !isSafeWebUrl_(projectUrl) || !isSafeWebUrl_(projectGithubUrl) || !["In Development","Live","Maintenance"].includes(projectStatus)) throw new Error("Enter a valid project title, description, safe HTTP/HTTPS links, status and uploaded Drive image links.");
   const id=String(x.id||Utilities.getUuid()), sh=sheet_("Portfolio"), d=sh.getDataRange().getValues(), idx=d.findIndex((r,i)=>i>0 && String(r[0])===id);
-  const row=[id,title,String(x.category||"General").slice(0,100),description,JSON.stringify(imageUrls),String(x.projectUrl||"").slice(0,1000),x.featured===true,x.published===true,new Date(),new Date()];
+  const row=[id,title,String(x.category||"General").slice(0,100),description,JSON.stringify(imageUrls),projectUrl,x.featured===true,x.published===true,new Date(),new Date(),projectGithubUrl,projectStatus];
   if(idx>0) sh.getRange(idx+1,1,1,row.length).setValues([row]); else sh.appendRow(row);
   log_(email,"SAVE_PORTFOLIO",title); return {message:"Portfolio project saved.",id:id};
 }
 function adminListPortfolio_(x) {
   requireAdmin_(x.token); const d=sheet_("Portfolio").getDataRange().getValues();
-  return {projects:d.slice(1).filter(r=>r[0]).map(r=>({id:r[0],title:r[1],category:r[2],description:r[3],imageUrls:JSON.parse(String(r[4]||"[]")),projectUrl:r[5],featured:r[6]===true,published:r[7]===true}))};
+  return {projects:d.slice(1).filter(r=>r[0]).map(r=>({id:r[0],title:r[1],category:r[2],description:r[3],imageUrls:JSON.parse(String(r[4]||"[]")),projectUrl:r[5]||"",featured:r[6]===true,published:r[7]===true,projectGithubUrl:r[10]||"",projectStatus:r[11]||(r[5]?"Live":"In Development")}))};
 }
 function publicPortfolio_() {
   const d=sheet_("Portfolio").getDataRange().getValues();
-  return {projects:d.slice(1).filter(r=>r[0] && r[7]===true).map(r=>({id:r[0],title:r[1],category:r[2],description:r[3],imageUrls:JSON.parse(String(r[4]||"[]")),projectUrl:r[5],featured:r[6]===true}))};
+  const projects=d.slice(1).filter(r=>r[0] && r[7]===true).map(r=>({id:r[0],title:r[1],category:r[2],description:r[3],imageUrls:JSON.parse(String(r[4]||"[]")),projectUrl:r[5]||"",featured:r[6]===true,projectGithubUrl:r[10]||"",projectStatus:r[11]||(r[5]?"Live":"In Development")}));
+  const builtIns=[
+    {id:"vicora-public-practice",title:"VICORA Public Practice",category:"Education Technology",description:"A public examination-practice platform for WAEC, NECO, JAMB and general CBT preparation, with student accounts, scoring, explanations after submission and practice history.",imageUrls:[],projectUrl:"",featured:true,projectGithubUrl:"https://github.com/sheggun1/vicora-public-practice",projectStatus:"In Development"},
+    {id:"vicora-teacher",title:"VICORA TEACHER",category:"Education Technology",description:"A multi-school teaching and planning platform for Nigerian Primary, JSS and SSS levels, supporting lesson notes, schemes of work, instructional materials and PDF/DOCX documents.",imageUrls:[],projectUrl:"",featured:true,projectGithubUrl:"",projectStatus:"In Development"}
+  ];
+  builtIns.forEach(item=>{if(!projects.some(p=>String(p.title).toLowerCase()===item.title.toLowerCase()))projects.push(item)});
+  return {projects:projects};
 }
 function adminSaveSetting_(x) {
   const email=requireAdmin_(x.token), key=String(x.key||"").trim(), value=String(x.value||"");
@@ -781,7 +793,7 @@ function adminSaveSetting_(x) {
   log_(email,"SAVE_SETTING",key); return {message:"Setting saved."};
 }
 function publicSettings_() {
-  const allowed=["companyName","businessPhone","whatsapp","businessEmail","businessAddress","mission","vision","seoTitle","seoDescription","instagram","facebook","openingHours","bankName","bankAccountName","bankAccountNumber","siteTheme","siteLayout","sitePattern","storefrontUrl","lowStockThreshold"];
+  const allowed=["companyName","businessPhone","whatsapp","businessEmail","businessAddress","mission","vision","seoTitle","seoDescription","instagram","facebook","openingHours","bankName","bankAccountName","bankAccountNumber","siteTheme","siteLayout","sitePattern","storefrontUrl","lowStockThreshold","clientNames"];
   const d=sheet_("SiteSettings").getDataRange().getValues(), settings={};
   d.slice(1).forEach(r=>{if(allowed.indexOf(String(r[0]))>=0) settings[String(r[0])]=String(r[1]||"");});
   return {settings:settings};
