@@ -17,7 +17,7 @@
 
 const APP = {
   NAME: "Veehicee Telecommunications and Services",
-  VERSION: "2.1.1",
+  VERSION: "2.1.2",
   SHEETS: {
     AdminUsers: ["id","email","salt","passwordHash","role","active","createdAt"],
     AdminSessions: ["tokenHash","email","expiresAt","createdAt"],
@@ -797,7 +797,7 @@ function adminSaveSetting_(x) {
   log_(email,"SAVE_SETTING",key); return {message:"Setting saved."};
 }
 function publicSettings_() {
-  const allowed=["companyName","businessPhone","whatsapp","businessEmail","businessAddress","mission","vision","seoTitle","seoDescription","instagram","facebook","openingHours","bankName","bankAccountName","bankAccountNumber","siteTheme","siteLayout","sitePattern","storefrontUrl","lowStockThreshold","clientNames"];
+  const allowed=["companyName","businessPhone","whatsapp","businessEmail","businessAddress","mission","vision","seoTitle","seoDescription","instagram","facebook","openingHours","bankName","bankAccountName","bankAccountNumber","siteTheme","siteLayout","sitePattern","storefrontUrl","lowStockThreshold","clientNames","vicoraTeacherUrl","vicoraPracticeUrl"];
   const d=sheet_("SiteSettings").getDataRange().getValues(), settings={};
   d.slice(1).forEach(r=>{if(allowed.indexOf(String(r[0]))>=0) settings[String(r[0])]=String(r[1]||"");});
   return {settings:settings};
