@@ -627,7 +627,7 @@ body{font-weight:500;letter-spacing:-.006em}p,.intro,.lead,.card p{font-weight:5
 <label for="workProjectUrl">Live project website URL (optional)</label><input id="workProjectUrl" type="url" placeholder="https://your-project.com">
 <label for="workGithubUrl">GitHub repository URL (optional)</label><input id="workGithubUrl" type="url" placeholder="https://github.com/owner/repository">
 <label for="workProjectStatus">Project status</label><select id="workProjectStatus"><option>In Development</option><option>Live</option><option>Maintenance</option></select>
-<label for="workImageUrl">Or add a project image URL (direct HTTPS image link)</label><input id="workImageUrl" type="url" placeholder="https://...">
+<label for="workImageUrl">Or add a Google Drive image link</label><input id="workImageUrl" type="url" placeholder="https://drive.google.com/file/d/...">
 <label for="workImages">Or select project images (up to 12, max 5 MB each)</label><input id="workImages" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
 <label><input id="workFeatured" type="checkbox" style="width:auto"> Featured project</label>
 <label><input id="workPublished" type="checkbox" style="width:auto" checked> Publish project</label>
@@ -1334,7 +1334,7 @@ async function savePortfolio(){
   try{
     const files=Array.from($("workImages").files||[]);if(files.length>12)throw new Error("Choose no more than 12 images.");
     const imageUrls=JSON.parse($("workExistingImages").value||"[]");
-    const imageUrl=normaliseImageUrl($("workImageUrl").value);if(imageUrl){if(!imageUrl.startsWith("https://"))throw new Error("Project image URL must begin with https://.");imageUrls.push(imageUrl)}
+    const imageUrl=normaliseImageUrl($("workImageUrl").value);if(imageUrl){if(!imageUrl.startsWith("https://drive.google.com/"))throw new Error("For portfolio images, paste a Google Drive share link.");imageUrls.push(imageUrl)}
     for(const f of files){if(f.size>5*1024*1024)throw new Error(f.name+" exceeds 5 MB.");const up=await api("adminUploadMedia",{token:adminToken,fileName:f.name,folder:"portfolio",dataUrl:await fileToDataUrl(f)});imageUrls.push(up.fileUrl)}
     if(imageUrls.length>12)throw new Error("A project can have no more than 12 images.");
     await api("adminSavePortfolio",{token:adminToken,id:$("workEditingId").value,title:$("workTitle").value,category:$("workCategory").value,description:$("workDescription").value,projectUrl:$("workProjectUrl").value.trim(),projectGithubUrl:$("workGithubUrl").value.trim(),projectStatus:$("workProjectStatus").value,imageUrls:imageUrls,featured:$("workFeatured").checked,published:$("workPublished").checked});
