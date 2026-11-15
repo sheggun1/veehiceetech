@@ -17,7 +17,7 @@
 
 const APP = {
   NAME: "Veehicee Telecommunications and Services",
-  VERSION: "2.1.3",
+  VERSION: "2.2.0",
   SHEETS: {
     AdminUsers: ["id","email","salt","passwordHash","role","active","createdAt"],
     AdminSessions: ["tokenHash","email","expiresAt","createdAt"],
@@ -49,7 +49,8 @@ const APP = {
     LoyaltyLedger: ["id","customerId","orderId","points","amount","reason","createdAt"],
     AbandonedCarts: ["id","customerId","email","cartJson","status","updatedAt","reminderSentAt"],
     CouponRedemptions: ["id","code","orderId","customerId","createdAt"],
-    PriceAlerts: ["id","customerId","email","productId","targetPrice","active","createdAt"]
+    PriceAlerts: ["id","customerId","email","productId","targetPrice","active","createdAt"],
+    WebsiteVisits: ["id","visitedAt","pagePath","pageTitle","referrer","referrerHost","deviceType","browser","operatingSystem","screenSize","language","campaignSource","campaignMedium","campaignName"]
   }
 };
 
@@ -197,6 +198,8 @@ function doPost(e) {
       case "publicPortfolio": result = publicPortfolio_(); break;
       case "adminSaveSetting": lock.waitLock(15000); result = adminSaveSetting_(input); break;
       case "publicSettings": result = publicSettings_(); break;
+      case "logWebsiteVisit": lock.waitLock(15000); result = logWebsiteVisit_(input); break;
+      case "adminListWebsiteVisits": result = adminListWebsiteVisits_(input); break;
       case "adminInventoryReport": result = adminInventoryReport_(input); break;
       case "adminCreateBackup": result = adminCreateBackup_(input); break;
       case "adminSaveExpense": lock.waitLock(15000); result = adminSaveExpense_(input); break;
@@ -802,6 +805,41 @@ function publicSettings_() {
   d.slice(1).forEach(r=>{if(allowed.indexOf(String(r[0]))>=0) settings[String(r[0])]=String(r[1]||"");});
   return {settings:settings};
 }
+
+
+function websiteVisitsSheet_() {
+  const id=PropertiesService.getScriptProperties().getProperty("VEEHICEE_SHEET_ID");
+  if(!id) throw new Error("Website database is not configured.");
+  const ss=SpreadsheetApp.openById(id);
+  let sh=ss.getSheetByName("WebsiteVisits");
+  if(!sh){sh=ss.insertSheet("WebsiteVisits");sh.getRange(1,1,1,APP.SHEETS.WebsiteVisits.length).setValues([APP.SHEETS.WebsiteVisits]);sh.setFrozenRows(1);}
+  return sh;
+}
+function logWebsiteVisit_(x) {
+  const pagePath=String(x.pagePath||"/").slice(0,300);
+  if(pagePath.charAt(0)!=="/" || pagePath.indexOf("..")>=0) throw new Error("Invalid page path.");
+  const row=[Utilities.getUuid(),new Date(),pagePath,String(x.pageTitle||"").slice(0,200),
+    String(x.referrer||"").slice(0,300),String(x.referrerHost||"").slice(0,160),
+    String(x.deviceType||"Unknown").slice(0,40),String(x.browser||"Unknown").slice(0,80),
+    String(x.operatingSystem||"Unknown").slice(0,80),String(x.screenSize||"").slice(0,40),
+    String(x.language||"").slice(0,40),String(x.campaignSource||"").slice(0,120),
+    String(x.campaignMedium||"").slice(0,120),String(x.campaignName||"").slice(0,160)];
+  websiteVisitsSheet_().appendRow(row);
+  return {message:"Visit recorded."};
+}
+function adminListWebsiteVisits_(x) {
+  requireAdmin_(x.token);
+  const rows=websiteVisitsSheet_().getDataRange().getValues().slice(1).filter(r=>r[0]);
+  const recent=rows.slice(-300).reverse().map(r=>({
+    visitedAt:r[1] instanceof Date?r[1].toISOString():String(r[1]||""),
+    pagePath:String(r[2]||""),pageTitle:String(r[3]||""),referrerHost:String(r[5]||""),
+    deviceType:String(r[6]||""),browser:String(r[7]||""),operatingSystem:String(r[8]||""),screenSize:String(r[9]||"")
+  }));
+  const byPage={},byDevice={};
+  rows.forEach(r=>{const p=String(r[2]||"/"),d=String(r[6]||"Unknown");byPage[p]=(byPage[p]||0)+1;byDevice[d]=(byDevice[d]||0)+1;});
+  return {totalVisits:rows.length,recent:recent,byPage:byPage,byDevice:byDevice};
+}
+
 function adminInventoryReport_(x) {
   requireAdmin_(x.token);
   const d=sheet_("Products").getDataRange().getValues(), products=d.slice(1).filter(r=>r[0]);
