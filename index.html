@@ -772,7 +772,7 @@ const PLATFORM_IMAGE_DEFAULTS=[
  {key:"marketplaceHero",title:"Marketplace banner photograph",url:"https://images.pexels.com/photos/33061130/pexels-photo-33061130.jpeg?cs=srgb&dl=pexels-zeleboba-33061130.jpg&fm=jpg",alt:"Phone case, charger and cable accessories"}
 ];
 function parsePlatformImages(raw){try{const saved=typeof raw==="string"?JSON.parse(raw):(raw||{});return Object.fromEntries(PLATFORM_IMAGE_DEFAULTS.map(x=>[x.key,{...x,...(saved[x.key]||{})}]))}catch(e){return Object.fromEntries(PLATFORM_IMAGE_DEFAULTS.map(x=>[x.key,{...x}]))}}
-function applyPlatformImages(raw){const imgs=parsePlatformImages(raw);document.querySelectorAll("img[data-site-image]").forEach(img=>{const item=imgs[img.dataset.siteImage];if(item&&item.url){img.src=item.url;img.alt=item.alt||img.alt}})}
+function applyPlatformImages(raw){const imgs=parsePlatformImages(raw);document.querySelectorAll("img[data-site-image]").forEach(img=>{const key=img.dataset.siteImage,item=imgs[key],fallback=PLATFORM_IMAGE_DEFAULTS.find(x=>x.key===key);if(!item||!item.url)return;img.onerror=()=>{if(fallback&&img.src!==new URL(fallback.url,document.baseURI).href){img.onerror=null;img.src=fallback.url;}};img.src=item.url;img.alt=item.alt||img.alt}})
 function normaliseImageUrl(value){
  const raw=String(value||"").trim();if(!raw)return "";
  const drive=raw.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?[^#]*?id=)([A-Za-z0-9_-]+)/i);
