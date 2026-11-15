@@ -303,6 +303,35 @@ body{letter-spacing:0}
 @media(max-width:820px){.service-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.service-gallery,.service-image-admin{grid-template-columns:1fr}.service-visual-card img{aspect-ratio:16/9}}
 
+
+/* Stronger typography and clearer information hierarchy */
+body{font-weight:500;letter-spacing:-.006em}p,.intro,.lead,.card p{font-weight:500;line-height:1.78}.hero h1,.section h2,.vicora-copy h2{font-weight:900}.section h2{max-width:850px}.card h3,.value strong,.project-card h3{font-weight:800}.nav .links a,.btn,.ghost,.vicora-primary,.vicora-secondary{font-weight:800}
+/* Admin dashboard workspace */
+#adminModal .modal-box{width:min(1180px,calc(100% - 24px));max-height:94vh;padding:clamp(16px,2.5vw,30px);border:1px solid #dce5f1;border-radius:22px;box-shadow:0 28px 90px rgba(12,32,64,.22)}
+#adminModal .mh{position:sticky;top:-1px;z-index:8;padding:10px 0 16px;background:rgba(255,255,255,.96);border-bottom:1px solid #e8edf4}
+#adminModal .mh h2{font-size:1.55rem;font-weight:900;letter-spacing:-.04em}
+#dashboard{padding-top:14px}
+#dashboard>.admin-welcome{padding:20px 22px;margin:0 0 16px;border-radius:16px;background:linear-gradient(115deg,#102e59,#174ea6 65%,#3977bd);color:#fff}
+#dashboard>.admin-welcome strong{display:block;font-size:1.35rem;font-weight:900;letter-spacing:-.03em}
+#dashboard>.admin-welcome span{display:block;color:#dce9fa;font-size:.9rem;margin-top:4px}
+#dashboard>.admin-quicknav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:0 0 18px;position:sticky;top:72px;z-index:6;padding:10px;background:rgba(247,249,252,.96);backdrop-filter:blur(12px);border:1px solid #e3eaf3;border-radius:14px}
+#dashboard .admin-quicknav button{min-height:42px;border:1px solid #dce5f1;border-radius:10px;background:#fff;color:#25466f;font:800 .83rem inherit;cursor:pointer;padding:9px 12px;text-align:left;transition:.2s}
+#dashboard .admin-quicknav button:hover,#dashboard .admin-quicknav button:focus-visible{background:#eaf2fc;border-color:#8eadd5;color:#174ea6;transform:translateY(-1px)}
+#dashboard>.agrid{gap:14px;align-items:start}
+#dashboard>.agrid>div{border-radius:16px;box-shadow:0 8px 28px rgba(22,48,82,.045)}
+#dashboard .admin-group{scroll-margin-top:145px;border-radius:12px}
+#dashboard .admin-group>summary{font-weight:800}
+#dashboard h3{font-weight:900}
+#dashboard label{font-weight:700;color:#334967}
+#dashboard input,#dashboard textarea,#dashboard select{font-weight:600;min-height:42px}
+#dashboard .design-panel{border-radius:16px;box-shadow:0 8px 28px rgba(22,48,82,.045)}
+#dashboard .admin-security{scroll-margin-top:140px}
+.vicora-product-links{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px}
+.vicora-product-links a{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 19px;border-radius:12px;background:#174ea6;color:#fff;font-weight:900;box-shadow:0 8px 20px rgba(23,78,166,.14);transition:transform .2s,box-shadow .2s}
+.vicora-product-links a:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(23,78,166,.2)}
+@media(max-width:700px){#dashboard>.admin-quicknav{grid-template-columns:repeat(2,minmax(0,1fr));top:60px}#dashboard>.agrid{grid-template-columns:1fr}#adminModal .modal-box{width:calc(100% - 12px);padding:13px;border-radius:16px}#dashboard>.agrid>div{padding:15px}}
+@media(prefers-reduced-motion:reduce){#dashboard .admin-quicknav button,.vicora-product-links a{transition:none}}
+
 </style>
 <link rel="stylesheet" href="assets/veehicee-themes.css">
 <link rel="stylesheet" href="assets/veehicee-motion.css">
@@ -370,6 +399,8 @@ body{letter-spacing:0}
       <p>VICORA CBT is a computer-based testing solution built to help schools plan, conduct and manage digital examinations. It is designed to support question-bank organisation, examination setup, candidate access, timed test delivery, automated objective marking and result management. Its development direction covers web access, Windows desktop use and Android local-host workflows, giving schools flexible options for delivering assessments in different technology environments. The aim is to make examination administration more organised, reduce manual marking effort and provide a smoother testing experience for candidates and administrators.</p>
       <div class="vicora-actions">
         <a class="vicora-primary" href="#contact">Request a product demo ↗</a>
+         <a id="vicoraTeacherLink" class="vicora-secondary" href="#" hidden>VICORA Teacher ↗</a>
+         <a id="vicoraPracticeLink" class="vicora-secondary" href="#" hidden>VICORA Examination Study &amp; Practice ↗</a>
         
       </div>
       <p class="vicora-note">A product of Veehicee Telecommunications and Services · Education Without Boundaries.</p>
@@ -472,6 +503,10 @@ body{letter-spacing:0}
 <label for="adminPassword">Password</label><input id="adminPassword" type="password" autocomplete="current-password">
 <button class="btn" onclick="adminLogin()">Sign in</button><p class="status" id="loginStatus" role="status" aria-live="polite"></p></div>
 <div id="dashboard" hidden><p class="status" id="adminStatus" role="status" aria-live="polite">Signed in.</p>
+<div class="admin-welcome"><strong>Welcome to your Veehicee workspace</strong><span>Manage your website, products, orders, portfolio and business settings from one place.</span></div>
+<nav class="admin-quicknav" aria-label="Admin dashboard shortcuts">
+<button type="button" onclick="adminJump('appearance')">Website appearance</button><button type="button" onclick="adminJump('content')">Page content</button><button type="button" onclick="adminJump('products')">Products &amp; store</button><button type="button" onclick="adminJump('orders')">Orders &amp; delivery</button><button type="button" onclick="adminJump('customers')">Customers</button><button type="button" onclick="adminJump('finance')">Finance &amp; reports</button><button type="button" onclick="adminJump('settings')">Business settings</button><button type="button" onclick="adminJump('portfolio')">Portfolio</button>
+</nav>
 <div class="card design-panel" style="margin:18px 0"><span class="section-kicker">SITE APPEARANCE</span><h3 style="margin-top:8px">🎨 Website themes, layouts & patterns</h3>
 <p class="intro">This is where you customise the look of your website. Choose a colour theme, page template and background pattern, preview your choices instantly, then save to publish them across the homepage and marketplace.</p>
 <div class="agrid">
@@ -530,6 +565,11 @@ body{letter-spacing:0}
 <h3>Abandoned shopping carts</h3><button class="ghost" onclick="loadAbandonedCarts()">Refresh saved carts</button><div id="abandonedCartsList"></div><p class="muted">To turn on automatic daily reminders, first update Code.gs in Apps Script, then run <code>setupVeehiceeCartReminderTrigger()</code> once in the Apps Script editor and approve the permissions. Customers must sign in and select “Save my cart”.</p>
 <h3>Stock alert</h3><button class="ghost" onclick="sendLowStockAlert()">Email low-stock report to administrator</button><p id="stockAlertStatus" class="status"></p>
 <h3>Database backup</h3><button class="ghost" onclick="createDatabaseBackup()">Create Google Drive backup</button><p id="backupStatus" class="status"></p>
+<h3>VICORA product links</h3>
+<p class="intro" style="font-size:.88rem">Add or change the public website addresses for your VICORA products. Leave a field blank to hide its homepage button.</p>
+<label for="settingVicoraTeacherUrl">VICORA Teacher website URL</label><input id="settingVicoraTeacherUrl" type="url" placeholder="https://...">
+<label for="settingVicoraPracticeUrl">VICORA Examination Study &amp; Practice URL</label><input id="settingVicoraPracticeUrl" type="url" placeholder="https://...">
+<button class="btn" type="button" onclick="saveVicoraLinks()">Save VICORA links</button><p id="vicoraLinksStatus" class="status" role="status" aria-live="polite"></p>
 <h3>Business information and SEO</h3>
 <label for="settingPhone">Business phone</label><input id="settingPhone">
 <label for="settingWhatsapp">WhatsApp number (international format)</label><input id="settingWhatsapp">
@@ -580,6 +620,10 @@ $("year").textContent = new Date().getFullYear();
 function openAdmin(){$("adminModal").classList.add("open");arrangeAdminWorkspace()}
 
 function closeAdmin(){$("adminModal").classList.remove("open")}
+function adminJump(section){
+ const targets={appearance:document.querySelector("#dashboard .design-panel"),content:document.querySelector("#pageTitle"),products:document.querySelector("#pName"),orders:document.querySelector("#ordersList"),customers:document.querySelector("#customersList"),finance:document.querySelector("#businessReport"),settings:document.querySelector("#settingPhone"),portfolio:document.querySelector("#workTitle")};
+ const target=targets[section];if(!target)return;const group=target.closest("details");if(group)group.open=true;target.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});if(target.focus)target.focus({preventScroll:true});
+}
 function arrangeAdminWorkspace(){
  const panel=document.querySelector("#dashboard>.agrid>div:nth-child(3)");
  if(!panel||panel.dataset.organised==="yes")return;
@@ -636,9 +680,19 @@ async function saveSiteDesign(){
   $("designStatus").textContent="Website style saved. It will appear on the homepage and marketplace.";
  }catch(e){$("designStatus").textContent=e.message}
 }
+function safeProductUrl(value){try{const u=new URL(String(value||"").trim());return ["https:","http:"].includes(u.protocol)?u.href:""}catch(e){return ""}}
+function updateVicoraProductLinks(settings={}){
+ [["vicoraTeacherLink",settings.vicoraTeacherUrl],["vicoraPracticeLink",settings.vicoraPracticeUrl]].forEach(([id,value])=>{const a=$(id);if(!a)return;const url=safeProductUrl(value);a.hidden=!url;if(url){a.href=url;a.target="_blank";a.rel="noopener noreferrer"}});
+}
+async function saveVicoraLinks(){
+ const pairs=[["vicoraTeacherUrl","settingVicoraTeacherUrl"],["vicoraPracticeUrl","settingVicoraPracticeUrl"]];
+ try{for(const [key,id] of pairs){const value=$(id).value.trim();if(value&&!safeProductUrl(value))throw new Error("Enter a valid http:// or https:// link for "+(key==="vicoraTeacherUrl"?"VICORA Teacher":"VICORA Examination Study & Practice")+".");await api("adminSaveSetting",{token:adminToken,key,value});}
+ const current={...siteSettingsCache,vicoraTeacherUrl:$("settingVicoraTeacherUrl").value.trim(),vicoraPracticeUrl:$("settingVicoraPracticeUrl").value.trim()};siteSettingsCache=current;updateVicoraProductLinks(current);$("vicoraLinksStatus").textContent="VICORA product links saved and homepage buttons updated.";
+ }catch(e){$("vicoraLinksStatus").textContent=e.message}
+}
 async function loadPublicSettings(){
   try{
-    const s=(await api("publicSettings")).settings||{};siteSettingsCache=s;applyDesign({theme:s.siteTheme||"midnight",layout:s.siteLayout||"split",pattern:s.sitePattern||"none"});
+    const s=(await api("publicSettings")).settings||{};siteSettingsCache=s;updateVicoraProductLinks(s);applyDesign({theme:s.siteTheme||"midnight",layout:s.siteLayout||"split",pattern:s.sitePattern||"none"});
     renderServiceGallery(s.serviceShowcaseImages);if(s.mission)$("missionText").textContent=s.mission;
     if(s.vision)$("visionText").textContent=s.vision;
     if(s.seoTitle)document.title=s.seoTitle;
@@ -894,7 +948,7 @@ async function adminLogin(){
     await loadAbandonedCarts();
     await loadCustomers();
     await loadExpenses();
-    const ds=(await api("publicSettings")).settings||{};applyDesign({theme:ds.siteTheme||"midnight",layout:ds.siteLayout||"split",pattern:ds.sitePattern||"none"});
+    const ds=(await api("publicSettings")).settings||{};siteSettingsCache=ds;updateVicoraProductLinks(ds);applyDesign({theme:ds.siteTheme||"midnight",layout:ds.siteLayout||"split",pattern:ds.sitePattern||"none"});
   }catch(e){
     $("adminPassword").value="";
     $("loginStatus").textContent=e.message;
@@ -996,7 +1050,7 @@ async function seedStarterProducts(){
 async function loadBusinessSettings(){
   try{
     const s=(await api("publicSettings")).settings||{};
-    const map={businessPhone:"settingPhone",whatsapp:"settingWhatsapp",businessEmail:"settingEmail",businessAddress:"settingAddress",mission:"settingMission",vision:"settingVision",seoTitle:"settingSeoTitle",seoDescription:"settingSeoDescription",bankName:"settingBankName",bankAccountName:"settingBankAccountName",bankAccountNumber:"settingBankAccountNumber"};
+    const map={businessPhone:"settingPhone",whatsapp:"settingWhatsapp",businessEmail:"settingEmail",businessAddress:"settingAddress",mission:"settingMission",vision:"settingVision",seoTitle:"settingSeoTitle",seoDescription:"settingSeoDescription",bankName:"settingBankName",bankAccountName:"settingBankAccountName",bankAccountNumber:"settingBankAccountNumber",vicoraTeacherUrl:"settingVicoraTeacherUrl",vicoraPracticeUrl:"settingVicoraPracticeUrl"};
     Object.keys(map).forEach(k=>$(map[k]).value=s[k]||"");renderServiceImageAdmin(s.serviceShowcaseImages);
   }catch(e){$("adminStatus").textContent=e.message}
 }
@@ -1004,7 +1058,7 @@ async function saveBusinessSettings(){
   const pairs=[
     ["businessPhone","settingPhone"],["whatsapp","settingWhatsapp"],["businessEmail","settingEmail"],["businessAddress","settingAddress"],
     ["mission","settingMission"],["vision","settingVision"],["seoTitle","settingSeoTitle"],["seoDescription","settingSeoDescription"],
-    ["bankName","settingBankName"],["bankAccountName","settingBankAccountName"],["bankAccountNumber","settingBankAccountNumber"]
+    ["bankName","settingBankName"],["bankAccountName","settingBankAccountName"],["bankAccountNumber","settingBankAccountNumber"],["vicoraTeacherUrl","settingVicoraTeacherUrl"],["vicoraPracticeUrl","settingVicoraPracticeUrl"]
   ];
   try{for(const [key,id] of pairs)await api("adminSaveSetting",{token:adminToken,key:key,value:$(id).value});
     $("adminStatus").textContent="Business information saved.";loadPublicSettings();
