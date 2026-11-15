@@ -807,6 +807,14 @@ function publicSettings_() {
 }
 
 
+function websiteVisitsSheet_() {
+  const id=PropertiesService.getScriptProperties().getProperty("VEEHICEE_SHEET_ID");
+  if(!id) throw new Error("Website database is not configured.");
+  const ss=SpreadsheetApp.openById(id);
+  let sh=ss.getSheetByName("WebsiteVisits");
+  if(!sh){sh=ss.insertSheet("WebsiteVisits");sh.getRange(1,1,1,APP.SHEETS.WebsiteVisits.length).setValues([APP.SHEETS.WebsiteVisits]);sh.setFrozenRows(1);}
+  return sh;
+}
 function logWebsiteVisit_(x) {
   const pagePath=String(x.pagePath||"/").slice(0,300);
   if(pagePath.charAt(0)!=="/" || pagePath.indexOf("..")>=0) throw new Error("Invalid page path.");
@@ -816,12 +824,12 @@ function logWebsiteVisit_(x) {
     String(x.operatingSystem||"Unknown").slice(0,80),String(x.screenSize||"").slice(0,40),
     String(x.language||"").slice(0,40),String(x.campaignSource||"").slice(0,120),
     String(x.campaignMedium||"").slice(0,120),String(x.campaignName||"").slice(0,160)];
-  sheet_("WebsiteVisits").appendRow(row);
+  websiteVisitsSheet_().appendRow(row);
   return {message:"Visit recorded."};
 }
 function adminListWebsiteVisits_(x) {
   requireAdmin_(x.token);
-  const rows=sheet_("WebsiteVisits").getDataRange().getValues().slice(1).filter(r=>r[0]);
+  const rows=websiteVisitsSheet_().getDataRange().getValues().slice(1).filter(r=>r[0]);
   const recent=rows.slice(-300).reverse().map(r=>({
     visitedAt:r[1] instanceof Date?r[1].toISOString():String(r[1]||""),
     pagePath:String(r[2]||""),pageTitle:String(r[3]||""),referrerHost:String(r[5]||""),
