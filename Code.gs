@@ -17,7 +17,7 @@
 
 const APP = {
   NAME: "Veehicee Telecommunications and Services",
-  VERSION: "2.1.2",
+  VERSION: "2.1.3",
   SHEETS: {
     AdminUsers: ["id","email","salt","passwordHash","role","active","createdAt"],
     AdminSessions: ["tokenHash","email","expiresAt","createdAt"],
@@ -436,7 +436,7 @@ function adminUploadMedia_(x) {
   if(bytes.length>5*1024*1024) throw new Error("Image exceeds the 5 MB limit.");
   const rootId=PropertiesService.getScriptProperties().getProperty("VEEHICEE_DRIVE_FOLDER_ID");
   if(!rootId) throw new Error("Run setupVeehicee first to create media storage.");
-  const root=DriveApp.getFolderById(rootId), folderName=["portfolio","products","news","general"].includes(String(x.folder))?String(x.folder):"general";
+  const root=DriveApp.getFolderById(rootId), folderName=["portfolio","products","news","general","site-images","service-gallery"].includes(String(x.folder))?String(x.folder):"general";
   const folders=root.getFoldersByName(folderName), folder=folders.hasNext()?folders.next():root.createFolder(folderName);
   const safeName=name.replace(/[^\w.\- ]/g,"_").slice(0,100);
   const file=folder.createFile(Utilities.newBlob(bytes,mime,safeName));
@@ -797,7 +797,7 @@ function adminSaveSetting_(x) {
   log_(email,"SAVE_SETTING",key); return {message:"Setting saved."};
 }
 function publicSettings_() {
-  const allowed=["companyName","businessPhone","whatsapp","businessEmail","businessAddress","mission","vision","seoTitle","seoDescription","instagram","facebook","openingHours","bankName","bankAccountName","bankAccountNumber","siteTheme","siteLayout","sitePattern","storefrontUrl","lowStockThreshold","clientNames","vicoraTeacherUrl","vicoraPracticeUrl"];
+  const allowed=["siteImages","serviceShowcaseImages","companyName","businessPhone","whatsapp","businessEmail","businessAddress","mission","vision","seoTitle","seoDescription","instagram","facebook","openingHours","bankName","bankAccountName","bankAccountNumber","siteTheme","siteLayout","sitePattern","storefrontUrl","lowStockThreshold","clientNames","vicoraTeacherUrl","vicoraPracticeUrl"];
   const d=sheet_("SiteSettings").getDataRange().getValues(), settings={};
   d.slice(1).forEach(r=>{if(allowed.indexOf(String(r[0]))>=0) settings[String(r[0])]=String(r[1]||"");});
   return {settings:settings};
