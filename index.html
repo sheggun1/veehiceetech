@@ -551,8 +551,8 @@ body{font-weight:500;letter-spacing:-.006em}p,.intro,.lead,.card p{font-weight:5
 <label for="pStock">Stock</label><input id="pStock" type="number" min="0">
 <label for="pCost">Cost price per unit (₦)</label><input id="pCost" type="number" min="0" value="0">
 <label for="pWholesale">Wholesale price (₦, applies to 5+ units)</label><input id="pWholesale" type="number" min="0" value="0">
-<input id="pImg" type="hidden">
-<label for="pFile">Choose product image from your phone or computer (optional, max 5 MB)</label><input id="pFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+<label for="pImg">Product image URL (optional; paste a direct HTTPS image link)</label><input id="pImg" type="url" placeholder="https://...">
+<label for="pFile">Or choose product image from your phone or computer (max 5 MB)</label><input id="pFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
 <label for="pDesc">Description</label><input id="pDesc">
 <input id="pEditingId" type="hidden">
 <button class="btn" onclick="saveProduct()">Save product</button>
@@ -606,12 +606,12 @@ body{font-weight:500;letter-spacing:-.006em}p,.intro,.lead,.card p{font-weight:5
 <button class="btn" onclick="saveBusinessSettings()">Save business information</button>
 
 <h3>Platform image manager</h3>
-<p class="intro" style="font-size:.88rem">Change the main photographs across the website: homepage hero, VICORA section, portfolio highlights and marketplace banner. Tap Choose image and select a photo directly from your phone or computer. Maximum upload size: 5 MB per image.</p>
+<p class="intro" style="font-size:.88rem">Manage all five main website photographs: homepage hero, VICORA section, two portfolio highlights and marketplace banner. If Android cannot read a selected file, paste a direct HTTPS image link instead. Product and portfolio project images are managed in their own sections below.</p>
 <div class="service-image-admin" id="platformImageManager"></div>
 <button class="btn" type="button" onclick="savePlatformImages()">Save platform images</button>
 <p class="status" id="platformImageStatus" role="status" aria-live="polite"></p>
 <h3>Homepage service images</h3>
-<p class="intro" style="font-size:.88rem">Manage the six service photographs shown on the homepage. Select replacement photos directly from your phone or computer.</p>
+<p class="intro" style="font-size:.88rem">Manage all six service photographs. Select a local photo or paste a direct HTTPS image link. A public Google Drive image link can also be used.</p>
 <div class="service-image-admin" id="serviceImageManager"></div>
 <button class="btn" type="button" onclick="saveServiceImages()">Save homepage images</button>
 <button class="ghost" type="button" onclick="resetServiceImages()">Restore default service images</button>
@@ -627,7 +627,8 @@ body{font-weight:500;letter-spacing:-.006em}p,.intro,.lead,.card p{font-weight:5
 <label for="workProjectUrl">Live project website URL (optional)</label><input id="workProjectUrl" type="url" placeholder="https://your-project.com">
 <label for="workGithubUrl">GitHub repository URL (optional)</label><input id="workGithubUrl" type="url" placeholder="https://github.com/owner/repository">
 <label for="workProjectStatus">Project status</label><select id="workProjectStatus"><option>In Development</option><option>Live</option><option>Maintenance</option></select>
-<label for="workImages">Project images (select up to 12, max 5 MB each)</label><input id="workImages" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
+<label for="workImageUrl">Or add a project image URL (direct HTTPS image link)</label><input id="workImageUrl" type="url" placeholder="https://...">
+<label for="workImages">Or select project images (up to 12, max 5 MB each)</label><input id="workImages" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
 <label><input id="workFeatured" type="checkbox" style="width:auto"> Featured project</label>
 <label><input id="workPublished" type="checkbox" style="width:auto" checked> Publish project</label>
 <button class="btn" onclick="savePortfolio()">Save project</button><div id="portfolioAdminList"></div>
@@ -768,15 +769,37 @@ const PLATFORM_IMAGE_DEFAULTS=[
 ];
 function parsePlatformImages(raw){try{const saved=typeof raw==="string"?JSON.parse(raw):(raw||{});return Object.fromEntries(PLATFORM_IMAGE_DEFAULTS.map(x=>[x.key,{...x,...(saved[x.key]||{})}]))}catch(e){return Object.fromEntries(PLATFORM_IMAGE_DEFAULTS.map(x=>[x.key,{...x}]))}}
 function applyPlatformImages(raw){const imgs=parsePlatformImages(raw);document.querySelectorAll("img[data-site-image]").forEach(img=>{const item=imgs[img.dataset.siteImage];if(item&&item.url){img.src=item.url;img.alt=item.alt||img.alt}})}
-function renderPlatformImageAdmin(raw){const box=$("platformImageManager");if(!box)return;const imgs=parsePlatformImages(raw);box.innerHTML="";PLATFORM_IMAGE_DEFAULTS.forEach((def,i)=>{const item=imgs[def.key],card=document.createElement("div");card.className="service-image-editor";const img=document.createElement("img");img.src=item.url;img.alt=item.alt;img.id="platformImagePreview"+i;const title=document.createElement("strong");title.textContent=def.title;const fileLabel=document.createElement("label");fileLabel.textContent="Choose image from device";const file=document.createElement("input");file.type="file";file.accept="image/png,image/jpeg,image/webp,image/gif";file.id="platformImageFile"+i;file.dataset.currentUrl=item.url;file.onchange=()=>{if(file.files[0])img.src=URL.createObjectURL(file.files[0])};card.append(img,title,fileLabel,file);box.append(card)})}
+function normaliseImageUrl(value){
+ const raw=String(value||"").trim();if(!raw)return "";
+ const drive=raw.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?[^#]*?id=)([A-Za-z0-9_-]+)/i);
+ return drive?"https://drive.google.com/uc?export=view&id="+drive[1]:raw;
+}
+function renderPlatformImageAdmin(raw){
+ const box=$("platformImageManager");if(!box)return;const imgs=parsePlatformImages(raw);box.innerHTML="";
+ PLATFORM_IMAGE_DEFAULTS.forEach((def,i)=>{
+  const item=imgs[def.key],card=document.createElement("div");card.className="service-image-editor";
+  const img=document.createElement("img");img.src=item.url;img.alt=item.alt;img.id="platformImagePreview"+i;
+  const title=document.createElement("strong");title.textContent=def.title;
+  const fileLabel=document.createElement("label");fileLabel.textContent="Choose image from device";
+  const file=document.createElement("input");file.type="file";file.accept="image/png,image/jpeg,image/webp,image/gif";file.id="platformImageFile"+i;
+  const urlLabel=document.createElement("label");urlLabel.textContent="Or paste a direct image URL";
+  const url=document.createElement("input");url.type="url";url.id="platformImageUrl"+i;url.placeholder="https://...";url.autocomplete="url";
+  file.onchange=()=>{if(file.files[0]){url.value="";img.src=URL.createObjectURL(file.files[0])}};
+  url.onchange=()=>{const value=normaliseImageUrl(url.value);if(value){file.value="";img.src=value}};
+  card.append(img,title,fileLabel,file,urlLabel,url);box.append(card);
+ });
+}
 async function savePlatformImages(){
  const status=$("platformImageStatus");status.textContent="Checking current image settings…";
  try{
   if(!adminToken)throw new Error("Your admin session has expired. Sign in again.");
   const fresh=await api("publicSettings"),current=parsePlatformImages((fresh.settings||{}).siteImages),next={};
   for(let i=0;i<PLATFORM_IMAGE_DEFAULTS.length;i++){
-   const d=PLATFORM_IMAGE_DEFAULTS[i],file=$("platformImageFile"+i).files[0];let finalUrl=current[d.key].url||d.url;
-   if(file){
+   const d=PLATFORM_IMAGE_DEFAULTS[i],file=$("platformImageFile"+i).files[0],manualUrl=normaliseImageUrl($("platformImageUrl"+i).value);let finalUrl=current[d.key].url||d.url;
+   if(manualUrl){
+    if(!manualUrl.startsWith("https://"))throw new Error(d.title+": image URL must begin with https://.");
+    finalUrl=manualUrl;
+   }else if(file){
     if(!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type))throw new Error(file.name+": choose a JPG, PNG, WebP or GIF image.");
     if(file.size>5*1024*1024)throw new Error(file.name+" exceeds the 5 MB limit.");
     status.textContent="Uploading "+d.title+" ("+(i+1)+" of "+PLATFORM_IMAGE_DEFAULTS.length+")…";
@@ -822,8 +845,13 @@ function renderServiceImageAdmin(raw){
   const card=document.createElement("div");card.className="service-image-editor";
   const img=document.createElement("img");img.src=item.url;img.alt=item.alt;img.id="serviceImagePreview"+index;
   const title=document.createElement("strong");title.textContent=item.title;
-  const fileLabel=document.createElement("label");fileLabel.textContent="Choose image from device";const file=document.createElement("input");file.type="file";file.accept="image/png,image/jpeg,image/webp,image/gif";file.id="serviceImageFile"+index;file.dataset.currentUrl=item.url;file.onchange=()=>{if(file.files[0])img.src=URL.createObjectURL(file.files[0])};
-  card.append(img,title,fileLabel,file);box.append(card);
+  const fileLabel=document.createElement("label");fileLabel.textContent="Choose image from device";
+  const file=document.createElement("input");file.type="file";file.accept="image/png,image/jpeg,image/webp,image/gif";file.id="serviceImageFile"+index;
+  const urlLabel=document.createElement("label");urlLabel.textContent="Or paste a direct image URL";
+  const url=document.createElement("input");url.type="url";url.id="serviceImageUrl"+index;url.placeholder="https://...";url.autocomplete="url";
+  file.onchange=()=>{if(file.files[0]){url.value="";img.src=URL.createObjectURL(file.files[0])}};
+  url.onchange=()=>{const value=normaliseImageUrl(url.value);if(value){file.value="";img.src=value}};
+  card.append(img,title,fileLabel,file,urlLabel,url);box.append(card);
  });
 }
 async function saveServiceImages(){
@@ -832,9 +860,12 @@ async function saveServiceImages(){
   if(!adminToken)throw new Error("Your admin session has expired. Sign in again.");
   const fresh=await api("publicSettings"),current=parseServiceImages((fresh.settings||{}).serviceShowcaseImages),next=[];
   for(let i=0;i<SERVICE_IMAGE_DEFAULTS.length;i++){
-   const item={...SERVICE_IMAGE_DEFAULTS[i]},file=$("serviceImageFile"+i).files[0];
+   const item={...SERVICE_IMAGE_DEFAULTS[i]},file=$("serviceImageFile"+i).files[0],manualUrl=normaliseImageUrl($("serviceImageUrl"+i).value);
    item.url=current.find(x=>x.key===item.key)?.url||item.url;
-   if(file){
+   if(manualUrl){
+    if(!manualUrl.startsWith("https://"))throw new Error(item.title+": image URL must begin with https://.");
+    item.url=manualUrl;
+   }else if(file){
     if(!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type))throw new Error(file.name+": choose a JPG, PNG, WebP or GIF image.");
     if(file.size>5*1024*1024)throw new Error(file.name+" exceeds the 5 MB limit.");
     status.textContent="Uploading "+item.title+" ("+(i+1)+" of "+SERVICE_IMAGE_DEFAULTS.length+")…";
@@ -1117,7 +1148,7 @@ async function fileToDataUrl(file){
 async function saveProduct(){
   try{
     let imageUrl=$("pImg").value.trim();
-    if($("pFile").files[0]){
+    if($("pFile").files[0] && !imageUrl){
       const f=$("pFile").files[0];if(f.size>5*1024*1024)throw new Error("Image exceeds 5 MB.");
       const uploaded=await api("adminUploadMedia",{token:adminToken,fileName:f.name,folder:"products",dataUrl:await fileToDataUrl(f)});
       imageUrl=uploaded.fileUrl;
@@ -1303,16 +1334,18 @@ async function savePortfolio(){
   try{
     const files=Array.from($("workImages").files||[]);if(files.length>12)throw new Error("Choose no more than 12 images.");
     const imageUrls=JSON.parse($("workExistingImages").value||"[]");
+    const imageUrl=normaliseImageUrl($("workImageUrl").value);if(imageUrl){if(!imageUrl.startsWith("https://"))throw new Error("Project image URL must begin with https://.");imageUrls.push(imageUrl)}
     for(const f of files){if(f.size>5*1024*1024)throw new Error(f.name+" exceeds 5 MB.");const up=await api("adminUploadMedia",{token:adminToken,fileName:f.name,folder:"portfolio",dataUrl:await fileToDataUrl(f)});imageUrls.push(up.fileUrl)}
+    if(imageUrls.length>12)throw new Error("A project can have no more than 12 images.");
     await api("adminSavePortfolio",{token:adminToken,id:$("workEditingId").value,title:$("workTitle").value,category:$("workCategory").value,description:$("workDescription").value,projectUrl:$("workProjectUrl").value.trim(),projectGithubUrl:$("workGithubUrl").value.trim(),projectStatus:$("workProjectStatus").value,imageUrls:imageUrls,featured:$("workFeatured").checked,published:$("workPublished").checked});
-    $("adminStatus").textContent="Portfolio project saved.";["workTitle","workCategory","workDescription","workProjectUrl","workGithubUrl","workImages","workEditingId","workExistingImages"].forEach(id=>$(id).value="");$("workProjectStatus").value="In Development";loadPortfolio();loadPortfolioAdmin();
+    $("adminStatus").textContent="Portfolio project saved.";["workTitle","workCategory","workDescription","workProjectUrl","workGithubUrl","workImageUrl","workImages","workEditingId","workExistingImages"].forEach(id=>$(id).value="");$("workProjectStatus").value="In Development";loadPortfolio();loadPortfolioAdmin();
   }catch(e){$("adminStatus").textContent=e.message}
 }
 async function loadPortfolioAdmin(){
   try{const r=await api("adminListPortfolio",{token:adminToken});$("portfolioAdminList").innerHTML="";
     (r.projects||[]).forEach(p=>{
       const el=document.createElement("div");el.className="aitem";const name=document.createElement("span");name.textContent=p.title+(p.published?"":" (draft)");
-      const edit=document.createElement("button");edit.className="ghost";edit.textContent="Edit";edit.onclick=()=>{$("workEditingId").value=p.id;$("workTitle").value=p.title;$("workCategory").value=p.category;$("workDescription").value=p.description;$("workProjectUrl").value=p.projectUrl||"";$("workGithubUrl").value=p.projectGithubUrl||"";$("workProjectStatus").value=p.projectStatus||(p.projectUrl?"Live":"In Development");$("workExistingImages").value=JSON.stringify(p.imageUrls||[]);$("workFeatured").checked=p.featured;$("workPublished").checked=p.published;$("adminStatus").textContent="Editing "+p.title};
+      const edit=document.createElement("button");edit.className="ghost";edit.textContent="Edit";edit.onclick=()=>{$("workEditingId").value=p.id;$("workTitle").value=p.title;$("workCategory").value=p.category;$("workDescription").value=p.description;$("workProjectUrl").value=p.projectUrl||"";$("workGithubUrl").value=p.projectGithubUrl||"";$("workProjectStatus").value=p.projectStatus||(p.projectUrl?"Live":"In Development");$("workExistingImages").value=JSON.stringify(p.imageUrls||[]);$("workImageUrl").value="";$("workFeatured").checked=p.featured;$("workPublished").checked=p.published;$("adminStatus").textContent="Editing "+p.title};
       const toggle=document.createElement("button");toggle.className="ghost";toggle.textContent=p.published?"Hide":"Publish";toggle.onclick=async()=>{await api("adminSetPortfolioStatus",{token:adminToken,id:p.id,published:!p.published});loadPortfolioAdmin();loadPortfolio()};
       el.append(name,edit,toggle);$("portfolioAdminList").append(el);
     });
