@@ -657,31 +657,6 @@ function arrangeAdminWorkspace(){
 
 function trackWebsiteVisit(){
  try{
-  const ua=navigator.userAgent||"",deviceType=/tablet|ipad/i.test(ua)?"Tablet":/mobi|android|iphone/i.test(ua)?"Mobile":"Desktop";
-  let browser="Other";if(/edg\//i.test(ua))browser="Edge";else if(/opr\//i.test(ua))browser="Opera";else if(/chrome\//i.test(ua))browser="Chrome";else if(/firefox\//i.test(ua))browser="Firefox";else if(/safari\//i.test(ua))browser="Safari";
-  let operatingSystem="Other";if(/android/i.test(ua))operatingSystem="Android";else if(/iphone|ipad|ios/i.test(ua))operatingSystem="iOS";else if(/windows/i.test(ua))operatingSystem="Windows";else if(/mac os/i.test(ua))operatingSystem="macOS";else if(/linux/i.test(ua))operatingSystem="Linux";
-  const ref=document.referrer||"",u=new URL(location.href),refUrl=ref?new URL(ref):null;
-  api("logWebsiteVisit",{pagePath:location.pathname||"/",pageTitle:document.title,referrer:refUrl?refUrl.origin:"",referrerHost:refUrl?refUrl.hostname:"",deviceType,browser,operatingSystem,screenSize:(screen.width||0)+"x"+(screen.height||0),language:navigator.language||"",campaignSource:u.searchParams.get("utm_source")||"",campaignMedium:u.searchParams.get("utm_medium")||"",campaignName:u.searchParams.get("utm_campaign")||""}).catch(()=>{});
- }catch(e){}
-}
-async function loadWebsiteVisits(){
- const summary=$("websiteVisitSummary"),list=$("websiteVisitsList"),breakdown=$("websiteVisitBreakdown");if(!summary||!list||!breakdown)return;
- summary.textContent="Loading website visits…";list.innerHTML="";breakdown.innerHTML="";
- try{
-  const r=await api("adminListWebsiteVisits",{token:adminToken});summary.textContent="Total recorded page visits: "+Number(r.totalVisits||0).toLocaleString();
-  const pages=Object.entries(r.byPage||{}).sort((a,b)=>b[1]-a[1]),devices=Object.entries(r.byDevice||{}).sort((a,b)=>b[1]-a[1]);
-  const p=document.createElement("p");p.textContent="Pages: "+pages.map(x=>x[0]+" ("+x[1]+")").join(" · ")+" | Devices: "+devices.map(x=>x[0]+" ("+x[1]+")").join(" · ");breakdown.append(p);
-  const wrap=document.createElement("div");wrap.style.overflowX="auto";const table=document.createElement("table");table.style.cssText="width:100%;border-collapse:collapse;font-size:.84rem";
-  const headings=["Date and time","Page","Referrer","Device","Browser","Operating system","Screen"];
-  const head=document.createElement("tr");headings.forEach(v=>{const th=document.createElement("th");th.textContent=v;th.style.cssText="text-align:left;padding:8px;border-bottom:1px solid var(--line)";head.append(th)});table.append(head);
-  (r.recent||[]).forEach(v=>{const tr=document.createElement("tr");[v.visitedAt?new Date(v.visitedAt).toLocaleString():"",v.pagePath,v.referrerHost||"Direct",v.deviceType,v.browser,v.operatingSystem,v.screenSize].forEach(value=>{const td=document.createElement("td");td.textContent=value||"—";td.style.cssText="padding:8px;border-bottom:1px solid var(--line);vertical-align:top";tr.append(td)});table.append(tr)});
-  wrap.append(table);list.append(wrap);if(!(r.recent||[]).length)list.textContent="No visits recorded yet.";
- }catch(e){summary.textContent="Could not load visits: "+e.message}
-}
-
-
-function trackWebsiteVisit(){
- try{
   const ua=navigator.userAgent||"",lower=ua.toLowerCase();
   const deviceType=/tablet|ipad/i.test(ua)?"Tablet":/mobi|android|iphone/i.test(ua)?"Mobile":"Desktop";
   let browser="Other";if(lower.includes("edg/"))browser="Edge";else if(lower.includes("opr/"))browser="Opera";else if(lower.includes("chrome/"))browser="Chrome";else if(lower.includes("firefox/"))browser="Firefox";else if(lower.includes("safari/"))browser="Safari";
