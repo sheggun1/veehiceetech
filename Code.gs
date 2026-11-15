@@ -806,9 +806,10 @@ function publicSettings_() {
   return {settings:settings};
 }
 
+
 function logWebsiteVisit_(x) {
   const pagePath=String(x.pagePath||"/").slice(0,300);
-  if(!/^\/[A-Za-z0-9._~!function adminInventoryReport_(x) {'()*+,;=:@%/-]*$/.test(pagePath)) throw new Error("Invalid page path.");
+  if(pagePath.charAt(0)!=="/" || pagePath.indexOf("..")>=0) throw new Error("Invalid page path.");
   const row=[Utilities.getUuid(),new Date(),pagePath,String(x.pageTitle||"").slice(0,200),
     String(x.referrer||"").slice(0,300),String(x.referrerHost||"").slice(0,160),
     String(x.deviceType||"Unknown").slice(0,40),String(x.browser||"Unknown").slice(0,80),
