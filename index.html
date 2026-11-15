@@ -551,8 +551,8 @@ body{font-weight:500;letter-spacing:-.006em}p,.intro,.lead,.card p{font-weight:5
 <label for="pStock">Stock</label><input id="pStock" type="number" min="0">
 <label for="pCost">Cost price per unit (₦)</label><input id="pCost" type="number" min="0" value="0">
 <label for="pWholesale">Wholesale price (₦, applies to 5+ units)</label><input id="pWholesale" type="number" min="0" value="0">
-<label for="pImg">Image URL (optional)</label><input id="pImg" type="url">
-<label for="pFile">Or upload product image (max 5 MB)</label><input id="pFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+<input id="pImg" type="hidden">
+<label for="pFile">Choose product image from your phone or computer (optional, max 5 MB)</label><input id="pFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
 <label for="pDesc">Description</label><input id="pDesc">
 <input id="pEditingId" type="hidden">
 <button class="btn" onclick="saveProduct()">Save product</button>
@@ -606,12 +606,12 @@ body{font-weight:500;letter-spacing:-.006em}p,.intro,.lead,.card p{font-weight:5
 <button class="btn" onclick="saveBusinessSettings()">Save business information</button>
 
 <h3>Platform image manager</h3>
-<p class="intro" style="font-size:.88rem">Change the main photographs across the website: homepage hero, VICORA section, portfolio highlights and marketplace banner. Upload from your phone or paste an image URL. Maximum upload size: 5 MB per image.</p>
+<p class="intro" style="font-size:.88rem">Change the main photographs across the website: homepage hero, VICORA section, portfolio highlights and marketplace banner. Tap Choose image and select a photo directly from your phone or computer. Maximum upload size: 5 MB per image.</p>
 <div class="service-image-admin" id="platformImageManager"></div>
 <button class="btn" type="button" onclick="savePlatformImages()">Save platform images</button>
 <p class="status" id="platformImageStatus" role="status" aria-live="polite"></p>
 <h3>Homepage service images</h3>
-<p class="intro" style="font-size:.88rem">Manage the six service photographs shown on the homepage. Upload a replacement or paste an image URL.</p>
+<p class="intro" style="font-size:.88rem">Manage the six service photographs shown on the homepage. Select replacement photos directly from your phone or computer.</p>
 <div class="service-image-admin" id="serviceImageManager"></div>
 <button class="btn" type="button" onclick="saveServiceImages()">Save homepage images</button>
 <button class="ghost" type="button" onclick="resetServiceImages()">Restore default service images</button>
@@ -768,8 +768,8 @@ const PLATFORM_IMAGE_DEFAULTS=[
 ];
 function parsePlatformImages(raw){try{const saved=typeof raw==="string"?JSON.parse(raw):(raw||{});return Object.fromEntries(PLATFORM_IMAGE_DEFAULTS.map(x=>[x.key,{...x,...(saved[x.key]||{})}]))}catch(e){return Object.fromEntries(PLATFORM_IMAGE_DEFAULTS.map(x=>[x.key,{...x}]))}}
 function applyPlatformImages(raw){const imgs=parsePlatformImages(raw);document.querySelectorAll("img[data-site-image]").forEach(img=>{const item=imgs[img.dataset.siteImage];if(item&&item.url){img.src=item.url;img.alt=item.alt||img.alt}})}
-function renderPlatformImageAdmin(raw){const box=$("platformImageManager");if(!box)return;const imgs=parsePlatformImages(raw);box.innerHTML="";PLATFORM_IMAGE_DEFAULTS.forEach((def,i)=>{const item=imgs[def.key],card=document.createElement("div");card.className="service-image-editor";const img=document.createElement("img");img.src=item.url;img.alt=item.alt;img.id="platformImagePreview"+i;const title=document.createElement("strong");title.textContent=def.title;const label=document.createElement("label");label.textContent="Image URL";const url=document.createElement("input");url.type="url";url.id="platformImageUrl"+i;url.value=item.url;url.placeholder="https://example.com/image.jpg";url.oninput=()=>{img.src=url.value||def.url};const fileLabel=document.createElement("label");fileLabel.textContent="Or upload an image";const file=document.createElement("input");file.type="file";file.accept="image/png,image/jpeg,image/webp,image/gif";file.id="platformImageFile"+i;file.onchange=()=>{if(file.files[0])img.src=URL.createObjectURL(file.files[0])};card.append(img,title,label,url,fileLabel,file);box.append(card)})}
-async function savePlatformImages(){const status=$("platformImageStatus");status.textContent="Uploading and saving images…";try{const next={};for(let i=0;i<PLATFORM_IMAGE_DEFAULTS.length;i++){const d=PLATFORM_IMAGE_DEFAULTS[i],url=$("platformImageUrl"+i).value.trim(),file=$("platformImageFile"+i).files[0];let finalUrl=url||d.url;if(file){if(file.size>5*1024*1024)throw new Error(file.name+" exceeds 5 MB.");const up=await api("adminUploadMedia",{token:adminToken,fileName:file.name,folder:"site-images",dataUrl:await fileToDataUrl(file)});finalUrl=up.fileUrl}if(!/^https?:\/\//i.test(finalUrl))throw new Error("Use a valid HTTP or HTTPS image URL for "+d.title+".");next[d.key]={url:finalUrl,alt:d.alt}}await api("adminSaveSetting",{token:adminToken,key:"siteImages",value:JSON.stringify(next)});const check=await api("publicSettings");if(!check.settings||!check.settings.siteImages)throw new Error("Backend did not return the saved image settings. Deploy Apps Script version 2.2.0, then retry.");const saved=parsePlatformImages(check.settings.siteImages);if(PLATFORM_IMAGE_DEFAULTS.some(d=>!saved[d.key]||saved[d.key].url!==next[d.key].url))throw new Error("Backend could not verify every saved image. Deploy Apps Script version 2.2.0 and retry.");applyPlatformImages(check.settings.siteImages);renderPlatformImageAdmin(check.settings.siteImages);status.textContent="Images saved and verified by the backend. Refresh the public website to see them."}catch(e){status.textContent=e.message}}
+function renderPlatformImageAdmin(raw){const box=$("platformImageManager");if(!box)return;const imgs=parsePlatformImages(raw);box.innerHTML="";PLATFORM_IMAGE_DEFAULTS.forEach((def,i)=>{const item=imgs[def.key],card=document.createElement("div");card.className="service-image-editor";const img=document.createElement("img");img.src=item.url;img.alt=item.alt;img.id="platformImagePreview"+i;const title=document.createElement("strong");title.textContent=def.title;const fileLabel=document.createElement("label");fileLabel.textContent="Choose image from device";const file=document.createElement("input");file.type="file";file.accept="image/png,image/jpeg,image/webp,image/gif";file.id="platformImageFile"+i;file.dataset.currentUrl=item.url;file.onchange=()=>{if(file.files[0])img.src=URL.createObjectURL(file.files[0])};card.append(img,title,fileLabel,file);box.append(card)})}
+async function savePlatformImages(){const status=$("platformImageStatus");status.textContent="Uploading and saving images…";try{const current=parsePlatformImages(siteSettingsCache.siteImages),next={};for(let i=0;i<PLATFORM_IMAGE_DEFAULTS.length;i++){const d=PLATFORM_IMAGE_DEFAULTS[i],file=$("platformImageFile"+i).files[0];let finalUrl=current[d.key].url||d.url;if(file){if(file.size>5*1024*1024)throw new Error(file.name+" exceeds 5 MB.");const up=await api("adminUploadMedia",{token:adminToken,fileName:file.name,folder:"site-images",dataUrl:await fileToDataUrl(file)});finalUrl=up.fileUrl}next[d.key]={url:finalUrl,alt:d.alt}}await api("adminSaveSetting",{token:adminToken,key:"siteImages",value:JSON.stringify(next)});const check=await api("publicSettings");if(!check.settings||!check.settings.siteImages)throw new Error("Backend did not return the saved image settings. Deploy Apps Script version 2.2.0, then retry.");const saved=parsePlatformImages(check.settings.siteImages);if(PLATFORM_IMAGE_DEFAULTS.some(d=>!saved[d.key]||saved[d.key].url!==next[d.key].url))throw new Error("Backend could not verify every saved image. Deploy Apps Script version 2.2.0 and retry.");siteSettingsCache=check.settings;applyPlatformImages(check.settings.siteImages);renderPlatformImageAdmin(check.settings.siteImages);status.textContent="Images saved and verified. Your selected photos are now published."}catch(e){status.textContent=e.message}}
 
 /* ───────── HOMEPAGE SERVICE IMAGE GALLERY ───────── */
 const SERVICE_IMAGE_DEFAULTS=[
@@ -795,9 +795,8 @@ function renderServiceImageAdmin(raw){
   const card=document.createElement("div");card.className="service-image-editor";
   const img=document.createElement("img");img.src=item.url;img.alt=item.alt;img.id="serviceImagePreview"+index;
   const title=document.createElement("strong");title.textContent=item.title;
-  const urlLabel=document.createElement("label");urlLabel.textContent="Image URL";const url=document.createElement("input");url.type="url";url.id="serviceImageUrl"+index;url.placeholder="https://example.com/image.jpg";url.value=item.url;url.oninput=()=>{img.src=url.value||SERVICE_IMAGE_DEFAULTS[index].url};
-  const fileLabel=document.createElement("label");fileLabel.textContent="Or upload a replacement image";const file=document.createElement("input");file.type="file";file.accept="image/png,image/jpeg,image/webp,image/gif";file.id="serviceImageFile"+index;file.onchange=()=>{if(file.files[0])img.src=URL.createObjectURL(file.files[0])};
-  card.append(img,title,urlLabel,url,fileLabel,file);box.append(card);
+  const fileLabel=document.createElement("label");fileLabel.textContent="Choose image from device";const file=document.createElement("input");file.type="file";file.accept="image/png,image/jpeg,image/webp,image/gif";file.id="serviceImageFile"+index;file.dataset.currentUrl=item.url;file.onchange=()=>{if(file.files[0])img.src=URL.createObjectURL(file.files[0])};
+  card.append(img,title,fileLabel,file);box.append(card);
  });
 }
 async function saveServiceImages(){
@@ -805,15 +804,15 @@ async function saveServiceImages(){
  try{
   const next=[];
   for(let i=0;i<SERVICE_IMAGE_DEFAULTS.length;i++){
-   const item={...SERVICE_IMAGE_DEFAULTS[i]};const url=$("serviceImageUrl"+i).value.trim();const file=$("serviceImageFile"+i).files[0];
+   const item={...SERVICE_IMAGE_DEFAULTS[i]};const file=$("serviceImageFile"+i).files[0];item.url=$("serviceImageFile"+i).dataset.currentUrl||item.url;
    if(file){if(file.size>5*1024*1024)throw new Error(file.name+" exceeds 5 MB.");const uploaded=await api("adminUploadMedia",{token:adminToken,fileName:file.name,folder:"service-gallery",dataUrl:await fileToDataUrl(file)});item.url=uploaded.fileUrl}
-   else if(url){if(!/^https?:\/\//i.test(url)&&!url.startsWith("assets/"))throw new Error("Use a valid http(s) image URL or an assets/ path.");item.url=url}
    next.push(item);
   }
   await api("adminSaveSetting",{token:adminToken,key:"serviceShowcaseImages",value:JSON.stringify(next)});
   const verify=await api("publicSettings");if(!verify.settings||!verify.settings.serviceShowcaseImages)throw new Error("Images were submitted, but the backend did not return them. Deploy Apps Script version 2.2.0.");
-  serviceImageDraft=next;renderServiceGallery(next);renderServiceImageAdmin(next);
-  status.textContent="Homepage images saved and published.";
+  const verified=parseServiceImages(verify.settings.serviceShowcaseImages);if(next.some(item=>verified.find(v=>v.key===item.key)?.url!==item.url))throw new Error("The backend could not verify every selected image. Please retry.");
+  siteSettingsCache=verify.settings;serviceImageDraft=verified;renderServiceGallery(verified);renderServiceImageAdmin(verified);
+  status.textContent="Homepage images saved and verified.";
  }catch(e){status.textContent=e.message}
 }
 async function resetServiceImages(){
