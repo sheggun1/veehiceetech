@@ -353,9 +353,7 @@ body{font-weight:500;letter-spacing:-.006em}p,.intro,.lead,.card p{font-weight:5
 <div class="hero-proof"><span><b>01</b> Purpose-built software</span><span><b>02</b> Professional web design</span><span><b>03</b> Everyday tech essentials</span></div>
 </div>
 <div class="signal" aria-hidden="true">
-<svg viewBox="0 0 460 460"><circle class="ring" cx="230" cy="230" r="220"/><circle class="ring" cx="230" cy="230" r="220"/><circle class="ring" cx="230" cy="230" r="220"/><circle class="ring" cx="230" cy="230" r="220"/><circle class="ring" cx="230" cy="230" r="220"/>
-<circle cx="230" cy="230" r="46" fill="url(#g)"/><text x="230" y="244" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="40" fill="var(--on)">v</text>
-<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent2)"/></linearGradient></defs></svg>
+<img class="hero-photo" data-site-image="hero" src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1100&q=85" alt="Technology professionals collaborating around computers in a modern digital workplace" loading="eager">
 <div class="chip"><b>Connected.</b> Web, apps and ICT for your team.</div>
 </div>
 </section>
@@ -406,8 +404,8 @@ body{font-weight:500;letter-spacing:-.006em}p,.intro,.lead,.card p{font-weight:5
       <p class="vicora-note">A product of Veehicee Telecommunications and Services · Education Without Boundaries.</p>
     </div>
     <div class="vicora-art vicora-laptop-art">
-      <img src="assets/vicora-laptop-dashboard.svg" alt="VICORA CBT redesigned desktop administration dashboard displayed on a laptop, with navigation, examination statistics, candidate activity and upcoming examinations" loading="eager">
-      <p class="vicora-real-caption">VICORA CBT desktop dashboard concept — redesigned from the original mobile administration interface.</p>
+      <img data-site-image="vicora" src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1100&q=85" alt="Students using computers for digital learning and computer-based examinations" loading="eager">
+      <p class="vicora-real-caption">A real-world view of the computer-based learning and examination environment VICORA supports.</p>
     </div>
   </div>
   <div class="vicora-capabilities">
@@ -421,8 +419,8 @@ body{font-weight:500;letter-spacing:-.006em}p,.intro,.lead,.card p{font-weight:5
 <section class="section" id="portfolio"><div class="wrap">
 <span class="section-kicker">OUR WORK · WEB DESIGN & SOFTWARE</span><h2>Digital solutions built to move your business forward.</h2><p class="intro">Explore a selection of digital products and project concepts that demonstrate how thoughtful technology can simplify work, improve access to information and support better decisions. The previews use demonstration data, with school identity and private information removed or concealed. Each solution can be tailored to your organisation, users, processes and long-term objectives.</p>
 <div class="cards portfolio-showcase" style="margin-top:34px">
-<article class="card project-card"><img class="project-image" src="assets/school-portal-anonymised.svg" alt="Anonymised school management portal dashboard preview with school identity and private data concealed" loading="lazy"><span class="project-type">EDTECH · CUSTOM SOFTWARE</span><h3>School Management Portal</h3><p>A school-focused digital platform designed to bring essential academic and administrative activities into one organised workspace. Features include teacher score entry, result processing and publishing, parent access, class performance analysis and tools that help school administrators monitor academic information more efficiently. The concept is designed to reduce repetitive manual work, improve access to information and support timely communication between schools and families. School identity and private information are not displayed.</p></article>
-<article class="card project-card"><img class="project-image" src="assets/business-communication-preview.svg" alt="Business communication platform dashboard preview with contact data masked" loading="lazy"><span class="project-type">BUSINESS SOFTWARE · COMMUNICATION</span><h3>Business Communication Platform</h3><p>A web-based communication workspace created to help businesses organise contact information, prepare messaging campaigns and manage customer outreach from a more structured environment. The project is intended to support clearer communication workflows, reduce repetitive tasks and give growing businesses a central place to coordinate their messaging activities.</p></article>
+<article class="card project-card"><img class="project-image" data-site-image="portfolioSchool" src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1100&q=85" alt="Students and teachers in a modern school learning environment" loading="lazy"><span class="project-type">EDTECH · CUSTOM SOFTWARE</span><h3>School Management Portal</h3><p>A school-focused digital platform designed to bring essential academic and administrative activities into one organised workspace. Features include teacher score entry, result processing and publishing, parent access, class performance analysis and tools that help school administrators monitor academic information more efficiently. The concept is designed to reduce repetitive manual work, improve access to information and support timely communication between schools and families. School identity and private information are not displayed.</p></article>
+<article class="card project-card"><img class="project-image" data-site-image="portfolioBusiness" src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1100&q=85" alt="Business team collaborating and communicating around a table" loading="lazy"><span class="project-type">BUSINESS SOFTWARE · COMMUNICATION</span><h3>Business Communication Platform</h3><p>A web-based communication workspace created to help businesses organise contact information, prepare messaging campaigns and manage customer outreach from a more structured environment. The project is intended to support clearer communication workflows, reduce repetitive tasks and give growing businesses a central place to coordinate their messaging activities.</p></article>
 </div>
 <p class="portfolio-note">Need a business website, customer portal, school platform or custom application? <a href="#contact">Tell us what you want to build</a>.</p>
 <div class="products" id="portfolioItems"></div>
@@ -584,11 +582,16 @@ body{font-weight:500;letter-spacing:-.006em}p,.intro,.lead,.card p{font-weight:5
 <label for="settingBankAccountNumber">Bank account number</label><input id="settingBankAccountNumber">
 <button class="btn" onclick="saveBusinessSettings()">Save business information</button>
 
+<h3>Platform image manager</h3>
+<p class="intro" style="font-size:.88rem">Change the main photographs across the website: homepage hero, VICORA section, portfolio highlights and marketplace banner. Upload from your phone or paste an image URL. Maximum upload size: 5 MB per image.</p>
+<div class="service-image-admin" id="platformImageManager"></div>
+<button class="btn" type="button" onclick="savePlatformImages()">Save platform images</button>
+<p class="status" id="platformImageStatus" role="status" aria-live="polite"></p>
 <h3>Homepage service images</h3>
-<p class="intro" style="font-size:.88rem">Replace the six illustrations shown on the homepage. Upload an image from your phone or paste an image URL. Images are uploaded securely through the existing media service; each file must be 5 MB or smaller.</p>
+<p class="intro" style="font-size:.88rem">Manage the six service photographs shown on the homepage. Upload a replacement or paste an image URL.</p>
 <div class="service-image-admin" id="serviceImageManager"></div>
 <button class="btn" type="button" onclick="saveServiceImages()">Save homepage images</button>
-<button class="ghost" type="button" onclick="resetServiceImages()">Restore default illustrations</button>
+<button class="ghost" type="button" onclick="resetServiceImages()">Restore default service images</button>
 <p class="status" id="serviceImageStatus" role="status" aria-live="polite"></p>
 <h3>Portfolio project</h3><input id="workEditingId" type="hidden"><input id="workExistingImages" type="hidden">
 <label for="workTitle">Project title</label><input id="workTitle">
@@ -693,7 +696,7 @@ async function saveVicoraLinks(){
 async function loadPublicSettings(){
   try{
     const s=(await api("publicSettings")).settings||{};siteSettingsCache=s;updateVicoraProductLinks(s);applyDesign({theme:s.siteTheme||"midnight",layout:s.siteLayout||"split",pattern:s.sitePattern||"none"});
-    renderServiceGallery(s.serviceShowcaseImages);if(s.mission)$("missionText").textContent=s.mission;
+    applyPlatformImages(s.siteImages);renderServiceGallery(s.serviceShowcaseImages);if(s.mission)$("missionText").textContent=s.mission;
     if(s.vision)$("visionText").textContent=s.vision;
     if(s.seoTitle)document.title=s.seoTitle;
     if(s.seoDescription){const m=document.querySelector('meta[name="description"]');if(m)m.content=s.seoDescription}
@@ -702,14 +705,28 @@ async function loadPublicSettings(){
 
 
 
+
+/* ───────── PLATFORM-WIDE IMAGE MANAGER ───────── */
+const PLATFORM_IMAGE_DEFAULTS=[
+ {key:"hero",title:"Homepage hero photograph",url:"https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1100&q=85",alt:"Technology professionals collaborating around computers"},
+ {key:"vicora",title:"VICORA learning and examination photograph",url:"https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1100&q=85",alt:"Students using computers for digital learning and examinations"},
+ {key:"portfolioSchool",title:"School management portfolio photograph",url:"https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1100&q=85",alt:"Students and teachers in a modern school"},
+ {key:"portfolioBusiness",title:"Business communication portfolio photograph",url:"https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1100&q=85",alt:"Business team collaborating at work"},
+ {key:"marketplaceHero",title:"Marketplace banner photograph",url:"https://images.pexels.com/photos/33061130/pexels-photo-33061130.jpeg?cs=srgb&dl=pexels-zeleboba-33061130.jpg&fm=jpg",alt:"Phone case, charger and cable accessories"}
+];
+function parsePlatformImages(raw){try{const saved=typeof raw==="string"?JSON.parse(raw):(raw||{});return Object.fromEntries(PLATFORM_IMAGE_DEFAULTS.map(x=>[x.key,{...x,...(saved[x.key]||{})}]))}catch(e){return Object.fromEntries(PLATFORM_IMAGE_DEFAULTS.map(x=>[x.key,{...x}]))}}
+function applyPlatformImages(raw){const imgs=parsePlatformImages(raw);document.querySelectorAll("img[data-site-image]").forEach(img=>{const item=imgs[img.dataset.siteImage];if(item&&item.url){img.src=item.url;img.alt=item.alt||img.alt}})}
+function renderPlatformImageAdmin(raw){const box=$("platformImageManager");if(!box)return;const imgs=parsePlatformImages(raw);box.innerHTML="";PLATFORM_IMAGE_DEFAULTS.forEach((def,i)=>{const item=imgs[def.key],card=document.createElement("div");card.className="service-image-editor";const img=document.createElement("img");img.src=item.url;img.alt=item.alt;img.id="platformImagePreview"+i;const title=document.createElement("strong");title.textContent=def.title;const label=document.createElement("label");label.textContent="Image URL";const url=document.createElement("input");url.type="url";url.id="platformImageUrl"+i;url.value=item.url;url.placeholder="https://example.com/image.jpg";url.oninput=()=>{img.src=url.value||def.url};const fileLabel=document.createElement("label");fileLabel.textContent="Or upload an image";const file=document.createElement("input");file.type="file";file.accept="image/png,image/jpeg,image/webp,image/gif";file.id="platformImageFile"+i;file.onchange=()=>{if(file.files[0])img.src=URL.createObjectURL(file.files[0])};card.append(img,title,label,url,fileLabel,file);box.append(card)})}
+async function savePlatformImages(){const status=$("platformImageStatus");status.textContent="Uploading and saving images…";try{const next={};for(let i=0;i<PLATFORM_IMAGE_DEFAULTS.length;i++){const d=PLATFORM_IMAGE_DEFAULTS[i],url=$("platformImageUrl"+i).value.trim(),file=$("platformImageFile"+i).files[0];let finalUrl=url||d.url;if(file){if(file.size>5*1024*1024)throw new Error(file.name+" exceeds 5 MB.");const up=await api("adminUploadMedia",{token:adminToken,fileName:file.name,folder:"site-images",dataUrl:await fileToDataUrl(file)});finalUrl=up.fileUrl}if(!/^https?:\/\//i.test(finalUrl))throw new Error("Use a valid HTTP or HTTPS image URL for "+d.title+".");next[d.key]={url:finalUrl,alt:d.alt}}await api("adminSaveSetting",{token:adminToken,key:"siteImages",value:JSON.stringify(next)});applyPlatformImages(next);renderPlatformImageAdmin(next);status.textContent="Platform images saved. Refresh the public website to see the updated images."}catch(e){status.textContent=e.message}}
+
 /* ───────── HOMEPAGE SERVICE IMAGE GALLERY ───────── */
 const SERVICE_IMAGE_DEFAULTS=[
- {key:"web",title:"Website design",description:"Modern, responsive websites and landing pages.",url:"assets/service-websites.svg",alt:"Illustration of a responsive website design on desktop and mobile screens"},
- {key:"software",title:"Custom software and apps",description:"Purpose-built dashboards, portals and business applications.",url:"assets/service-software.svg",alt:"Illustration of a custom software dashboard and application interface"},
- {key:"education",title:"Education technology",description:"School portals, CBT, results and digital learning tools.",url:"assets/service-education.svg",alt:"Illustration of an education technology platform with student records and learning tools"},
- {key:"design",title:"Branding and graphic design",description:"Visual identities, promotional designs and digital creatives.",url:"assets/service-graphic-design.svg",alt:"Illustration of graphic design tools, brand colours and creative layouts"},
- {key:"ict",title:"ICT support and digital solutions",description:"Practical technology support, setup and workflow improvements.",url:"assets/service-ict.svg",alt:"Illustration of computer support, connected devices and technical tools"},
- {key:"communication",title:"Business communication tools",description:"Organised digital communication and customer engagement platforms.",url:"assets/service-communication.svg",alt:"Illustration of a business communication platform with messages and contact cards"}
+ {key:"web",title:"Website design",description:"Modern, responsive websites and landing pages.",url:"https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=85",alt:"Photograph of a web developer working on a website at a computer"},
+ {key:"software",title:"Custom software and apps",description:"Purpose-built dashboards, portals and business applications.",url:"https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=85",alt:"Photograph representing software analytics and application dashboards"},
+ {key:"education",title:"Education technology",description:"School portals, CBT, results and digital learning tools.",url:"https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=900&q=85",alt:"Photograph of a modern classroom with students learning"},
+ {key:"design",title:"Branding and graphic design",description:"Visual identities, promotional designs and digital creatives.",url:"https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=900&q=85",alt:"Photograph of a designer working on a digital creative project"},
+ {key:"ict",title:"ICT support and digital solutions",description:"Practical technology support, setup and workflow improvements.",url:"https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=900&q=85",alt:"Photograph representing ICT equipment and technical support"},
+ {key:"communication",title:"Business communication tools",description:"Organised digital communication and customer engagement platforms.",url:"https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=85",alt:"Photograph of colleagues collaborating and communicating at work"}
 ];
 let serviceImageDraft=SERVICE_IMAGE_DEFAULTS.map(x=>({...x}));
 function parseServiceImages(raw){
@@ -1051,7 +1068,7 @@ async function loadBusinessSettings(){
   try{
     const s=(await api("publicSettings")).settings||{};
     const map={businessPhone:"settingPhone",whatsapp:"settingWhatsapp",businessEmail:"settingEmail",businessAddress:"settingAddress",mission:"settingMission",vision:"settingVision",seoTitle:"settingSeoTitle",seoDescription:"settingSeoDescription",bankName:"settingBankName",bankAccountName:"settingBankAccountName",bankAccountNumber:"settingBankAccountNumber",vicoraTeacherUrl:"settingVicoraTeacherUrl",vicoraPracticeUrl:"settingVicoraPracticeUrl"};
-    Object.keys(map).forEach(k=>$(map[k]).value=s[k]||"");renderServiceImageAdmin(s.serviceShowcaseImages);
+    Object.keys(map).forEach(k=>$(map[k]).value=s[k]||"");renderPlatformImageAdmin(s.siteImages);renderServiceImageAdmin(s.serviceShowcaseImages);
   }catch(e){$("adminStatus").textContent=e.message}
 }
 async function saveBusinessSettings(){
