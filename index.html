@@ -1148,7 +1148,7 @@ async function fileToDataUrl(file){
 async function saveProduct(){
   try{
     let imageUrl=$("pImg").value.trim();
-    if($("pFile").files[0] && !imageUrl){
+    if($("pFile").files[0]){
       const f=$("pFile").files[0];if(f.size>5*1024*1024)throw new Error("Image exceeds 5 MB.");
       const uploaded=await api("adminUploadMedia",{token:adminToken,fileName:f.name,folder:"products",dataUrl:await fileToDataUrl(f)});
       imageUrl=uploaded.fileUrl;
