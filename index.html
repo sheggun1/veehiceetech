@@ -777,7 +777,7 @@ async function savePlatformImages(){
   for(let i=0;i<PLATFORM_IMAGE_DEFAULTS.length;i++){
    const d=PLATFORM_IMAGE_DEFAULTS[i],file=$("platformImageFile"+i).files[0];let finalUrl=current[d.key].url||d.url;
    if(file){
-    if(!/^image\\/(jpeg|png|webp|gif)$/i.test(file.type))throw new Error(file.name+": choose a JPG, PNG, WebP or GIF image.");
+    if(!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type))throw new Error(file.name+": choose a JPG, PNG, WebP or GIF image.");
     if(file.size>5*1024*1024)throw new Error(file.name+" exceeds the 5 MB limit.");
     status.textContent="Uploading "+d.title+" ("+(i+1)+" of "+PLATFORM_IMAGE_DEFAULTS.length+")…";
     const up=await api("adminUploadMedia",{token:adminToken,fileName:file.name,folder:"site-images",dataUrl:await fileToDataUrl(file)});
@@ -835,7 +835,7 @@ async function saveServiceImages(){
    const item={...SERVICE_IMAGE_DEFAULTS[i]},file=$("serviceImageFile"+i).files[0];
    item.url=current.find(x=>x.key===item.key)?.url||item.url;
    if(file){
-    if(!/^image\\/(jpeg|png|webp|gif)$/i.test(file.type))throw new Error(file.name+": choose a JPG, PNG, WebP or GIF image.");
+    if(!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type))throw new Error(file.name+": choose a JPG, PNG, WebP or GIF image.");
     if(file.size>5*1024*1024)throw new Error(file.name+" exceeds the 5 MB limit.");
     status.textContent="Uploading "+item.title+" ("+(i+1)+" of "+SERVICE_IMAGE_DEFAULTS.length+")…";
     const uploaded=await api("adminUploadMedia",{token:adminToken,fileName:file.name,folder:"service-gallery",dataUrl:await fileToDataUrl(file)});
