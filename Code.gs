@@ -17,7 +17,7 @@
 
 const APP = {
   NAME: "Veehicee Telecommunications and Services",
-  VERSION: "2.1.0",
+  VERSION: "2.1.1",
   SHEETS: {
     AdminUsers: ["id","email","salt","passwordHash","role","active","createdAt"],
     AdminSessions: ["tokenHash","email","expiresAt","createdAt"],
@@ -778,10 +778,14 @@ function publicPortfolio_() {
   const d=sheet_("Portfolio").getDataRange().getValues();
   const projects=d.slice(1).filter(r=>r[0] && r[7]===true).map(r=>({id:r[0],title:r[1],category:r[2],description:r[3],imageUrls:JSON.parse(String(r[4]||"[]")),projectUrl:r[5]||"",featured:r[6]===true,projectGithubUrl:r[10]||"",projectStatus:r[11]||(r[5]?"Live":"In Development")}));
   const builtIns=[
-    {id:"vicora-public-practice",title:"VICORA Public Practice",category:"Education Technology",description:"A public examination-practice platform for WAEC, NECO, JAMB and general CBT preparation, with student accounts, scoring, explanations after submission and practice history.",imageUrls:[],projectUrl:"",featured:true,projectGithubUrl:"https://github.com/sheggun1/vicora-public-practice",projectStatus:"In Development"},
-    {id:"vicora-teacher",title:"VICORA TEACHER",category:"Education Technology",description:"A multi-school teaching and planning platform for Nigerian Primary, JSS and SSS levels, supporting lesson notes, schemes of work, instructional materials and PDF/DOCX documents.",imageUrls:[],projectUrl:"",featured:true,projectGithubUrl:"",projectStatus:"In Development"}
+    {id:"vicora-public-practice",title:"VICORA Examination Study and Practice",category:"Education Technology",description:"An examination study and practice platform for WAEC, NECO, JAMB and general CBT preparation. It supports student accounts, subject and examination practice, timed attempts, scoring, explanations after submission and practice history.",imageUrls:[],projectUrl:"",featured:true,projectGithubUrl:"https://github.com/sheggun1/vicora-public-practice",projectStatus:"In Development"},
+    {id:"vicora-teacher",title:"VICORA TEACHER",category:"Education Technology",description:"A multi-school teaching and planning platform for Nigerian Primary, JSS and SSS levels, supporting teacher and school accounts, AI-assisted lesson notes, schemes of work, instructional materials, curriculum resources and professional PDF/DOCX documents.",imageUrls:[],projectUrl:"",featured:true,projectGithubUrl:"https://github.com/sheggun1/vicora-teacher",projectStatus:"In Development"}
   ];
-  builtIns.forEach(item=>{if(!projects.some(p=>String(p.title).toLowerCase()===item.title.toLowerCase()))projects.push(item)});
+  builtIns.forEach(item=>{
+    const legacyTitles=item.id==="vicora-public-practice"?["vicora public practice"]:["vicora teacher"];
+    const alreadyListed=projects.some(p=>String(p.id)===item.id || String(p.title).toLowerCase()===item.title.toLowerCase() || legacyTitles.includes(String(p.title).toLowerCase()));
+    if(!alreadyListed) projects.push(item);
+  });
   return {projects:projects};
 }
 function adminSaveSetting_(x) {
