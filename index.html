@@ -769,7 +769,34 @@ const PLATFORM_IMAGE_DEFAULTS=[
 function parsePlatformImages(raw){try{const saved=typeof raw==="string"?JSON.parse(raw):(raw||{});return Object.fromEntries(PLATFORM_IMAGE_DEFAULTS.map(x=>[x.key,{...x,...(saved[x.key]||{})}]))}catch(e){return Object.fromEntries(PLATFORM_IMAGE_DEFAULTS.map(x=>[x.key,{...x}]))}}
 function applyPlatformImages(raw){const imgs=parsePlatformImages(raw);document.querySelectorAll("img[data-site-image]").forEach(img=>{const item=imgs[img.dataset.siteImage];if(item&&item.url){img.src=item.url;img.alt=item.alt||img.alt}})}
 function renderPlatformImageAdmin(raw){const box=$("platformImageManager");if(!box)return;const imgs=parsePlatformImages(raw);box.innerHTML="";PLATFORM_IMAGE_DEFAULTS.forEach((def,i)=>{const item=imgs[def.key],card=document.createElement("div");card.className="service-image-editor";const img=document.createElement("img");img.src=item.url;img.alt=item.alt;img.id="platformImagePreview"+i;const title=document.createElement("strong");title.textContent=def.title;const fileLabel=document.createElement("label");fileLabel.textContent="Choose image from device";const file=document.createElement("input");file.type="file";file.accept="image/png,image/jpeg,image/webp,image/gif";file.id="platformImageFile"+i;file.dataset.currentUrl=item.url;file.onchange=()=>{if(file.files[0])img.src=URL.createObjectURL(file.files[0])};card.append(img,title,fileLabel,file);box.append(card)})}
-async function savePlatformImages(){const status=$("platformImageStatus");status.textContent="Uploading and saving images…";try{const current=parsePlatformImages(siteSettingsCache.siteImages),next={};for(let i=0;i<PLATFORM_IMAGE_DEFAULTS.length;i++){const d=PLATFORM_IMAGE_DEFAULTS[i],file=$("platformImageFile"+i).files[0];let finalUrl=current[d.key].url||d.url;if(file){if(file.size>5*1024*1024)throw new Error(file.name+" exceeds 5 MB.");const up=await api("adminUploadMedia",{token:adminToken,fileName:file.name,folder:"site-images",dataUrl:await fileToDataUrl(file)});finalUrl=up.fileUrl}next[d.key]={url:finalUrl,alt:d.alt}}await api("adminSaveSetting",{token:adminToken,key:"siteImages",value:JSON.stringify(next)});const check=await api("publicSettings");if(!check.settings||!check.settings.siteImages)throw new Error("Backend did not return the saved image settings. Deploy Apps Script version 2.2.0, then retry.");const saved=parsePlatformImages(check.settings.siteImages);if(PLATFORM_IMAGE_DEFAULTS.some(d=>!saved[d.key]||saved[d.key].url!==next[d.key].url))throw new Error("Backend could not verify every saved image. Deploy Apps Script version 2.2.0 and retry.");siteSettingsCache=check.settings;applyPlatformImages(check.settings.siteImages);renderPlatformImageAdmin(check.settings.siteImages);status.textContent="Images saved and verified. Your selected photos are now published."}catch(e){status.textContent=e.message}}
+async function savePlatformImages(){
+ const status=$("platformImageStatus");status.textContent="Checking current image settings…";
+ try{
+  if(!adminToken)throw new Error("Your admin session has expired. Sign in again.");
+  const fresh=await api("publicSettings"),current=parsePlatformImages((fresh.settings||{}).siteImages),next={};
+  for(let i=0;i<PLATFORM_IMAGE_DEFAULTS.length;i++){
+   const d=PLATFORM_IMAGE_DEFAULTS[i],file=$("platformImageFile"+i).files[0];let finalUrl=current[d.key].url||d.url;
+   if(file){
+    if(!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type))throw new Error(file.name+": choose a JPG, PNG, WebP or GIF image.");
+    if(file.size>5*1024*1024)throw new Error(file.name+" exceeds the 5 MB limit.");
+    status.textContent="Uploading "+d.title+" ("+(i+1)+" of "+PLATFORM_IMAGE_DEFAULTS.length+")…";
+    const up=await api("adminUploadMedia",{token:adminToken,fileName:file.name,folder:"site-images",dataUrl:await fileToDataUrl(file)});
+    if(!up.fileUrl)throw new Error("The server uploaded "+file.name+" but did not return its saved image address.");
+    finalUrl=up.fileUrl;
+   }
+   next[d.key]={url:finalUrl,alt:d.alt};
+  }
+  status.textContent="Saving image settings…";
+  await api("adminSaveSetting",{token:adminToken,key:"siteImages",value:JSON.stringify(next)});
+  const check=await api("publicSettings");
+  if(!check.settings||!check.settings.siteImages)throw new Error("The server did not return the saved images. Check that the Apps Script backend is deployed with the latest Code.gs.");
+  const saved=parsePlatformImages(check.settings.siteImages);
+  const mismatch=PLATFORM_IMAGE_DEFAULTS.find(d=>!saved[d.key]||saved[d.key].url!==next[d.key].url);
+  if(mismatch)throw new Error("The server did not confirm the "+mismatch.title+". The upload may have completed, but the setting was not saved.");
+  siteSettingsCache=check.settings;applyPlatformImages(check.settings.siteImages);renderPlatformImageAdmin(check.settings.siteImages);
+  status.textContent="All selected images have been uploaded, saved and verified.";
+ }catch(e){status.textContent="Image save failed: "+(e&&e.message?e.message:String(e));}
+}
 
 /* ───────── HOMEPAGE SERVICE IMAGE GALLERY ───────── */
 const SERVICE_IMAGE_DEFAULTS=[
@@ -800,20 +827,32 @@ function renderServiceImageAdmin(raw){
  });
 }
 async function saveServiceImages(){
- const status=$("serviceImageStatus");status.textContent="Saving images…";
+ const status=$("serviceImageStatus");status.textContent="Checking current homepage images…";
  try{
-  const next=[];
+  if(!adminToken)throw new Error("Your admin session has expired. Sign in again.");
+  const fresh=await api("publicSettings"),current=parseServiceImages((fresh.settings||{}).serviceShowcaseImages),next=[];
   for(let i=0;i<SERVICE_IMAGE_DEFAULTS.length;i++){
-   const item={...SERVICE_IMAGE_DEFAULTS[i]};const file=$("serviceImageFile"+i).files[0];item.url=$("serviceImageFile"+i).dataset.currentUrl||item.url;
-   if(file){if(file.size>5*1024*1024)throw new Error(file.name+" exceeds 5 MB.");const uploaded=await api("adminUploadMedia",{token:adminToken,fileName:file.name,folder:"service-gallery",dataUrl:await fileToDataUrl(file)});item.url=uploaded.fileUrl}
+   const item={...SERVICE_IMAGE_DEFAULTS[i]},file=$("serviceImageFile"+i).files[0];
+   item.url=current.find(x=>x.key===item.key)?.url||item.url;
+   if(file){
+    if(!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type))throw new Error(file.name+": choose a JPG, PNG, WebP or GIF image.");
+    if(file.size>5*1024*1024)throw new Error(file.name+" exceeds the 5 MB limit.");
+    status.textContent="Uploading "+item.title+" ("+(i+1)+" of "+SERVICE_IMAGE_DEFAULTS.length+")…";
+    const uploaded=await api("adminUploadMedia",{token:adminToken,fileName:file.name,folder:"service-gallery",dataUrl:await fileToDataUrl(file)});
+    if(!uploaded.fileUrl)throw new Error("The server did not return a saved image address for "+file.name+".");
+    item.url=uploaded.fileUrl;
+   }
    next.push(item);
   }
+  status.textContent="Saving homepage image settings…";
   await api("adminSaveSetting",{token:adminToken,key:"serviceShowcaseImages",value:JSON.stringify(next)});
-  const verify=await api("publicSettings");if(!verify.settings||!verify.settings.serviceShowcaseImages)throw new Error("Images were submitted, but the backend did not return them. Deploy Apps Script version 2.2.0.");
-  const verified=parseServiceImages(verify.settings.serviceShowcaseImages);if(next.some(item=>verified.find(v=>v.key===item.key)?.url!==item.url))throw new Error("The backend could not verify every selected image. Please retry.");
+  const verify=await api("publicSettings");
+  if(!verify.settings||!verify.settings.serviceShowcaseImages)throw new Error("The server did not return the saved homepage images. Check the Apps Script deployment.");
+  const verified=parseServiceImages(verify.settings.serviceShowcaseImages),mismatch=next.find(item=>verified.find(v=>v.key===item.key)?.url!==item.url);
+  if(mismatch)throw new Error("The server did not confirm the image for "+mismatch.title+".");
   siteSettingsCache=verify.settings;serviceImageDraft=verified;renderServiceGallery(verified);renderServiceImageAdmin(verified);
-  status.textContent="Homepage images saved and verified.";
- }catch(e){status.textContent=e.message}
+  status.textContent="All homepage images have been uploaded, saved and verified.";
+ }catch(e){status.textContent="Image save failed: "+(e&&e.message?e.message:String(e));}
 }
 async function resetServiceImages(){
  try{await api("adminSaveSetting",{token:adminToken,key:"serviceShowcaseImages",value:JSON.stringify(SERVICE_IMAGE_DEFAULTS)});renderServiceGallery(SERVICE_IMAGE_DEFAULTS);renderServiceImageAdmin(SERVICE_IMAGE_DEFAULTS);$("serviceImageStatus").textContent="Default illustrations restored."}
@@ -976,7 +1015,7 @@ async function loadPortfolio(){
       const liveUrl=safeProjectUrl(p.projectUrl),githubUrl=safeProjectUrl(p.projectGithubUrl);
       if(liveUrl){const preview=document.createElement("button");preview.className="btn";preview.type="button";preview.textContent="Live preview";preview.onclick=()=>openProjectPreview(liveUrl,p.title);body.append(preview);const link=document.createElement("a");link.className="ghost";link.href=liveUrl;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Open project";body.append(link)}
       else {const note=document.createElement("small");note.textContent="Live preview coming soon";note.style.display="block";note.style.marginTop="10px";body.append(note)}
-      if(githubUrl){const source=document.createElement("a");source.className="ghost";source.href=githubUrl;source.target="_blank";source.rel="noopener noreferrer";source.textContent="Source code";body.append(source)}
+      /* Repository/source-code links are intentionally never displayed on the public website. */
       card.append(media,body);box.append(card);
     });
   }catch(err){console.warn("Portfolio unavailable",err.message)}
